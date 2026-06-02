@@ -55,16 +55,18 @@ class ProductController extends Controller
         ProductRequest $request,
         ProductService $service
     ) {
-        $service->store(
+        // Create the product
+        $product = $service->store(
             $request->validated()
         );
 
+        // Return with product data so React can capture the ID
         return redirect()
             ->route('products.index')
-            ->with(
-                'success',
-                'Product created successfully.'
-            );
+            ->with([
+                'success' => 'Product created successfully.',
+                'product' => $product, // Pass the product back
+            ]);
     }
 
     /**
@@ -88,7 +90,7 @@ class ProductController extends Controller
         return Inertia::render(
             'Admin/Products/Edit',
             [
-                'product' => $product->load(['category', 'brand']),
+                'product' => $product->load(['category', 'brand', 'images']),
                 'categories' => $categories,
                 'brands' => $brands,
             ]
