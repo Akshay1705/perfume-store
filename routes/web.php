@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Admin\CategoryController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -13,6 +14,23 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->group(function () {
+
+        Route::get('/dashboard', function () {
+
+            return Inertia::render(
+                'Admin/Dashboard'
+            );
+        })->name('admin.dashboard');
+
+        Route::resource(
+            'categories',
+            CategoryController::class
+        );
+    });
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

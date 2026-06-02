@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -33,7 +34,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+
+        if ($user instanceof User && $user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard');
     }
 
     /**
