@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->unsignedInteger('stock')->default(0);
-            $table->string('volume')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
+
+            $table->foreignId('product_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->string('image_path');
+
+            $table->boolean('is_primary')
+                ->default(false);
+
             $table->timestamps();
         });
     }

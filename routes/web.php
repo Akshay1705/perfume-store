@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\BrandController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -29,6 +30,11 @@ Route::middleware(['auth', 'admin'])
         Route::resource(
             'categories',
             CategoryController::class
+        );
+
+        Route::resource(
+            'brands',
+            BrandController::class
         );
     });
 
