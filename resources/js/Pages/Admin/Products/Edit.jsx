@@ -8,7 +8,14 @@ export default function Edit({ product, categories, brands }) {
     const [images, setImages] = useState(product.images || []);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState("");
+    
+    const predefinedVolumes = ["30ml", "50ml", "100ml", "200ml"];
+    
+    const [customVolume, setCustomVolume] = useState(
+        predefinedVolumes.includes(product.volume) ? "" : product.volume,
+    );
 
+    
     const { data, setData, put, processing, errors } = useForm({
         name: product.name,
         slug: product.slug,
@@ -20,11 +27,23 @@ export default function Edit({ product, categories, brands }) {
         brand_id: product.brand_id,
         is_active: product.is_active,
     });
+    const isCustomVolume = !predefinedVolumes.includes(data.volume);
 
+    
     function submit(e) {
         e.preventDefault();
         put(route("products.update", product.id));
     }
+
+    const generateSlug = (name, volume) => {
+        return [name, volume]
+            .filter(Boolean)
+            .join("-")
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, "-")
+            .replace(/[^\w-]/g, "");
+    };
 
     async function handleImageUpload(e) {
         const files = e.target.files;
@@ -152,9 +171,15 @@ export default function Edit({ product, categories, brands }) {
                             <input
                                 type="text"
                                 value={data.name}
-                                onChange={(e) =>
-                                    setData("name", e.target.value)
-                                }
+                                onChange={(e) => {
+                                    const name = e.target.value;
+
+                                    setData((data) => ({
+                                        ...data,
+                                        name,
+                                        slug: generateSlug(name, data.volume),
+                                    }));
+                                }}
                                 placeholder="e.g., Dior Sauvage"
                                 className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
                                     errors.name
@@ -273,18 +298,118 @@ export default function Edit({ product, categories, brands }) {
 
                         {/* Volume */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
+                            <label className="block text-sm font-semibold text-slate-200 mb-3">
                                 Volume
                             </label>
-                            <input
-                                type="text"
-                                value={data.volume}
-                                onChange={(e) =>
-                                    setData("volume", e.target.value)
-                                }
-                                placeholder="e.g., 100ml"
-                                className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500`}
-                            />
+
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {predefinedVolumes.map((volume) => (
+                                    <button
+                                        type="button"
+                                        key={volume}
+                                        onClick={() => {
+                                            setData((data) => ({
+                                                ...data,
+                                                volume,
+                                                slug: generateSlug(
+                                                    data.name,
+                                                    volume,
+                                                ),
+                                            }));
+
+                                            setCustomVolume("");
+                                        }}
+                                        className={`px-4 py-2 rounded-lg border transition-all ${
+                                            data.volume === volume
+                                                ? "bg-cyan-500 text-white border-cyan-500"
+                                                : "bg-slate-800 border-slate-700 text-slate-300"
+                                        }`}
+                                    >
+                                        {volume}
+                                    </button>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setCustomVolume(
+                                            predefinedVolumes.includes(
+                                                data.volume,
+                                            )
+                                                ? ""
+                                                : data.volume,
+                                        );
+
+                                        setData((data) => ({
+                                            ...data,
+                                            volume: "custom",
+                                        }));
+                                    }}
+                                    className={`px-4 py-2 rounded-lg border ${
+                                        !predefinedVolumes.includes(data.volume)
+                                            ? "bg-cyan-500 text-white border-cyan-500"
+                                            : "bg-slate-800 border-slate-700 text-slate-300"
+                                    }`}
+                                >
+                                    Custom
+                                </button>
+                            </div>
+
+                            {isCustomVolume && (
+                                <input
+                                    type="text"
+                                    value={customVolume}
+                                    onChange={(e) => {
+                                        const volume = e.target.value;
+
+                                        setCustomVolume(volume);
+
+                                        setData((data) => ({
+                                            ...data,
+                                            volume: volume,
+                                            slug: generateSlug(
+                                                data.name,
+                                                volume,
+                                            ),
+                                        }));
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+
+                                            const volume = customVolume.trim();
+
+                                            if (!volume) return;
+
+                                            setData((data) => ({
+                                                ...data,
+                                                volume,
+                                                slug: generateSlug(
+                                                    data.name,
+                                                    volume,
+                                                ),
+                                            }));
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        const volume = customVolume.trim();
+
+                                        if (!volume) return;
+
+                                        setData((data) => ({
+                                            ...data,
+                                            volume,
+                                            slug: generateSlug(
+                                                data.name,
+                                                volume,
+                                            ),
+                                        }));
+                                    }}
+                                    placeholder="e.g. 20ml x 4"
+                                    className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-700/50 text-slate-100"
+                                />
+                            )}
+
                             {errors.volume && (
                                 <p className="text-red-400 text-sm mt-2">
                                     {errors.volume}

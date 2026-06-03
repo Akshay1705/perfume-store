@@ -114,6 +114,9 @@ export default function Index({ products }) {
                                     <th className="text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Brand
                                     </th>
+                                    <th className="text-center px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
+                                        Volume
+                                    </th>
                                     <th className="text-right px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Price
                                     </th>
@@ -183,6 +186,13 @@ export default function Index({ products }) {
                                         {/* Brand Cell */}
                                         <td className="px-6 py-4 text-slate-300">
                                             {product.brand?.name || "-"}
+                                        </td>
+
+                                        {/* Volume Cell */}
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-sm font-medium">
+                                                {product.volume || "-"}
+                                            </span>
                                         </td>
 
                                         {/* Price Cell */}
