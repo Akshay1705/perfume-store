@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
+use App\Http\Controllers\Admin\DiscountController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -61,6 +62,11 @@ Route::middleware(['auth', 'admin'])
         Route::resource(
             'products',
             ProductController::class
+        );
+
+        Route::resource(
+            'discounts',
+            DiscountController::class
         );
 
         // Product Image Routes

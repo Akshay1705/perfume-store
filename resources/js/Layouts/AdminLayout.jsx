@@ -32,7 +32,7 @@ export default function AdminLayout({ children }) {
                         href="/dashboard"
                         className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 text-sm font-medium text-amber-400 hover:border-amber-500/60 hover:from-amber-500/20 hover:to-orange-500/20 transition-all duration-300"
                     >
-                        Customer Dashboard
+                        perfume.com
                         <span className="group-hover:translate-x-0.5 transition-transform">
                             →
                         </span>
@@ -93,7 +93,7 @@ export default function AdminLayout({ children }) {
                         <div className="my-4 h-px bg-slate-800/50" />
 
                         {/* Bottom Actions */}
-                        <div className="space-y-1 mt-auto">
+                        {/* <div className="space-y-1 mt-auto">
                             <button className="w-full group flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white transition-all duration-200 hover:bg-slate-800/50">
                                 <Settings size={18} />
                                 <span className="font-medium">Settings</span>
@@ -104,7 +104,7 @@ export default function AdminLayout({ children }) {
                                 <LogOut size={18} />
                                 <span className="font-medium">Logout</span>
                             </button>
-                        </div>
+                        </div> */}
                     </nav>
                 </aside>
 
