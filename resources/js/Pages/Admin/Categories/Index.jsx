@@ -98,9 +98,9 @@ export default function Index({ categories }) {
                                                     <p className="font-semibold text-slate-100">
                                                         {category.name}
                                                     </p>
-                                                    <p className="text-xs text-slate-500 mt-0.5">
+                                                    {/* <p className="text-xs text-slate-500 mt-0.5">
                                                         ID: {category.id}
-                                                    </p>
+                                                    </p> */}
                                                 </div>
                                             </div>
                                         </td>

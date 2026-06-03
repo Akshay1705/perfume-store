@@ -366,32 +366,48 @@ export default function Index({ products, filters, categories, brands }) {
                     </div>
 
                     {/* Table Footer */}
-                    <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        Showing {products.data.length} of {products.total}{" "}
-                        products
-                    </div>
-                    <div className="flex justify-center gap-2 py-4">
-                        {products.links.map((link, index) => (
-                            <button
-                                key={index}
-                                disabled={!link.url}
-                                onClick={() => {
-                                    if (link.url) {
-                                        router.visit(link.url, {
-                                            preserveState: true,
-                                        });
-                                    }
-                                }}
-                                className={`px-3 py-2 rounded border text-sm ${
-                                    link.active
-                                        ? "bg-cyan-500 text-white border-cyan-500"
-                                        : "bg-slate-800 text-slate-300 border-slate-700"
-                                }`}
-                                dangerouslySetInnerHTML={{
-                                    __html: link.label,
-                                }}
-                            />
-                        ))}
+                    <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            {/* Showing count */}
+                            <p className="text-sm text-slate-400">
+                                Showing{" "}
+                                <span className="text-slate-200 font-medium">
+                                    {products.data.length}
+                                </span>{" "}
+                                of{" "}
+                                <span className="text-slate-200 font-medium">
+                                    {products.total}
+                                </span>{" "}
+                                products
+                            </p>
+
+                            {/* Pagination */}
+                            <div className="flex items-center gap-1">
+                                {products.links.map((link, index) => (
+                                    <button
+                                        key={index}
+                                        disabled={!link.url}
+                                        onClick={() => {
+                                            if (link.url) {
+                                                router.visit(link.url, {
+                                                    preserveState: true,
+                                                });
+                                            }
+                                        }}
+                                        className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium border transition-all duration-200 ${
+                                            link.active
+                                                ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50"
+                                                : !link.url
+                                                  ? "bg-transparent text-slate-600 border-transparent cursor-not-allowed"
+                                                  : "bg-slate-800/60 text-slate-300 border-slate-700/50 hover:bg-slate-700/60 hover:text-white hover:border-slate-600"
+                                        }`}
+                                        dangerouslySetInnerHTML={{
+                                            __html: link.label,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

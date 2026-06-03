@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\Admin\DiscountIndexRequest;
 
 class DiscountController extends Controller
 {
@@ -27,16 +28,29 @@ class DiscountController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
-    {
-        $discounts = $this->service->getAll();
-        $stats = $this->service->getStats();
+    public function index(
+        DiscountIndexRequest $request
+    ): Response {
+        $filters = $request->validated();
+
+        $discounts = $this->service
+            ->getDiscounts($filters);
+
+        $stats = $this->service
+            ->getStats();
 
         return Inertia::render(
             'Admin/Discounts/Index',
             [
                 'discounts' => $discounts,
+
                 'stats' => $stats,
+
+                'filters' => [
+                    'search' => $filters['search'] ?? '',
+                    'type' => $filters['type'] ?? '',
+                    'status' => $filters['status'] ?? '',
+                ],
             ]
         );
     }

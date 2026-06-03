@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Discount;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DiscountService
 {
@@ -65,5 +66,70 @@ class DiscountService
                 'fixed' => Discount::where('type', 'fixed')->count(),
             ],
         ];
+    }
+
+    public function getDiscounts(
+        array $filters
+    ): LengthAwarePaginator {
+
+        return Discount::query()
+
+            ->with([
+                'user',
+                'brand',
+                'category'
+            ])
+
+            ->when(
+                $filters['search'] ?? null,
+                fn($query, $search) =>
+                $query->where(function ($q) use ($search) {
+                    $q->where(
+                        'name',
+                        'like',
+                        "%{$search}%"
+                    )
+                        ->orWhere(
+                            'code',
+                            'like',
+                            "%{$search}%"
+                        );
+                })
+            )
+
+            ->when(
+                $filters['type'] ?? null,
+                fn($query, $type) =>
+                $query->where(
+                    'type',
+                    $type
+                )
+            )
+
+            ->when(
+                $filters['status'] ?? null,
+                function ($query, $status) {
+
+                    if ($status === 'active') {
+                        $query->where(
+                            'is_active',
+                            true
+                        );
+                    }
+
+                    if ($status === 'inactive') {
+                        $query->where(
+                            'is_active',
+                            false
+                        );
+                    }
+                }
+            )
+
+            ->latest()
+            ->paginate(
+                $filters['per_page'] ?? 10
+            )
+            ->withQueryString();
     }
 }

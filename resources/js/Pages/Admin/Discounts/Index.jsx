@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 export default function Index() {
-    const { discounts, stats } = usePage().props;
+    const { discounts, stats, filters } = usePage().props;
     const [deleteId, setDeleteId] = useState(null);
 
     const handleDelete = (id) => {
@@ -125,8 +125,40 @@ export default function Index() {
                 </div>
             </div>
 
+            <div className="mb-6 flex items-center justify-between gap-4 bg-slate-800/20 border border-slate-700/50 rounded-lg p-4">
+                <input
+                    type="text"
+                    placeholder="Search discounts..."
+                    defaultValue={filters.search}
+                    onChange={(e) =>
+                        router.get(
+                            route("discounts.index"),
+                            { search: e.target.value, status: filters.status },
+                            { preserveState: true, replace: true },
+                        )
+                    }
+                    className="w-72 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-red-500/50 transition-colors"
+                />
+
+                <select
+                    defaultValue={filters.status}
+                    onChange={(e) =>
+                        router.get(
+                            route("discounts.index"),
+                            { search: filters.search, status: e.target.value },
+                            { preserveState: true, replace: true },
+                        )
+                    }
+                    className="px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 focus:outline-none focus:border-red-500/50 transition-colors"
+                >
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
             {/* Table Section */}
-            {!discounts || discounts.length === 0 ? (
+            {!discounts || discounts.data.length === 0 ? (
                 <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-12 text-center backdrop-blur-sm">
                     <div className="text-5xl mb-3">🎟️</div>
                     <h3 className="text-lg font-semibold text-slate-200 mb-2">
@@ -177,7 +209,7 @@ export default function Index() {
                             </thead>
 
                             <tbody className="divide-y divide-slate-700/30">
-                                {discounts.map((discount) => {
+                                {discounts.data.map((discount) => {
                                     const active = isDiscountActive(discount);
                                     return (
                                         <tr
@@ -202,9 +234,9 @@ export default function Index() {
                                                         <p className="font-semibold text-slate-100">
                                                             {discount.name}
                                                         </p>
-                                                        <p className="text-xs text-slate-500 mt-0.5">
+                                                        {/* <p className="text-xs text-slate-500 mt-0.5">
                                                             ID: {discount.id}
-                                                        </p>
+                                                        </p> */}
                                                     </div>
                                                 </div>
                                             </td>
@@ -318,8 +350,30 @@ export default function Index() {
                     </div>
 
                     <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        Showing {discounts.length} of {discounts.length}{" "}
-                        discounts
+                        <div className="flex justify-between items-center">
+                            <span>
+                                Showing {discounts.from} - {discounts.to}
+                                of {discounts.total} discounts
+                            </span>
+
+                            <div className="flex gap-2">
+                                {discounts.links.map((link, index) => (
+                                    <button
+                                        key={index}
+                                        disabled={!link.url}
+                                        onClick={() => router.visit(link.url)}
+                                        className={`px-3 py-1 rounded ${
+                                            link.active
+                                                ? "bg-red-500 text-white"
+                                                : "bg-slate-700 text-slate-300"
+                                        }`}
+                                        dangerouslySetInnerHTML={{
+                                            __html: link.label,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

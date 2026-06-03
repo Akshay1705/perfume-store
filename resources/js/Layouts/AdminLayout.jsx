@@ -1,9 +1,18 @@
-import { Link } from "@inertiajs/react";
-import { Menu, LogOut, Settings } from "lucide-react";
+import { Link, usePage } from "@inertiajs/react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
 
 export default function AdminLayout({ children }) {
     const [sidebarOpen, setIsOpen] = useState(true);
+    const { url } = usePage();
+
+    const navItems = [
+        { label: "Dashboard", href: "/admin/dashboard", icon: "📊" },
+        { label: "Categories", href: "/admin/categories", icon: "🏷️" },
+        { label: "Brands", href: "/admin/brands", icon: "🎨" },
+        { label: "Products", href: "/admin/products", icon: "📦" },
+        { label: "Discounts", href: "/admin/discounts", icon: "🏷️" },
+    ];
 
     return (
         <div className="min-h-screen bg-slate-950">
@@ -45,67 +54,40 @@ export default function AdminLayout({ children }) {
                 <aside
                     className={`${
                         sidebarOpen ? "w-64" : "w-0"
-                    } fixed lg:sticky left-0 top-[73px] h-[calc(100vh-73px)] bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 transition-all duration-300 overflow-hidden lg:overflow-visible`}
+                    } fixed lg:sticky left-0 top-[73px] h-[calc(100vh-73px)] bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 transition-all duration-300 overflow-hidden`}
                 >
-                    <nav className="flex flex-col gap-1 p-6">
-                        {/* Navigation Items */}
-                        {[
-                            {
-                                label: "Dashboard",
-                                href: "/admin/dashboard",
-                                icon: "📊",
-                            },
-                            {
-                                label: "Categories",
-                                href: "/admin/categories",
-                                icon: "🏷️",
-                            },
-                            {
-                                label: "Brands",
-                                href: "/admin/brands",
-                                icon: "🎨",
-                            },
-                            {
-                                label: "Products",
-                                href: "/admin/products",
-                                icon: "📦",
-                            },
-                            {
-                                label: "Discounts",
-                                href: "/admin/discounts",
-                                icon: "🏷️",
-                            },
-                        ].map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="group relative flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white transition-all duration-200 hover:bg-slate-800/50"
-                            >
-                                <span className="text-lg">{item.icon}</span>
-                                <span className="font-medium">
-                                    {item.label}
-                                </span>
-                                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/10 group-hover:to-orange-500/10 transition-all duration-300 -z-10" />
-                            </Link>
-                        ))}
+                    {/* This wrapper ensures content is clipped when sidebar collapses */}
+                    <div className="w-64">
+                        <nav className="flex flex-col gap-1 p-6">
+                            {navItems.map((item) => {
+                                const isActive = url.startsWith(item.href);
 
-                        {/* Divider */}
-                        <div className="my-4 h-px bg-slate-800/50" />
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`relative flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                                            isActive
+                                                ? "text-amber-400 bg-amber-500/10 border border-amber-500/30"
+                                                : "text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent"
+                                        }`}
+                                    >
+                                        <span className="text-lg">
+                                            {item.icon}
+                                        </span>
+                                        <span>{item.label}</span>
 
-                        {/* Bottom Actions */}
-                        {/* <div className="space-y-1 mt-auto">
-                            <button className="w-full group flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white transition-all duration-200 hover:bg-slate-800/50">
-                                <Settings size={18} />
-                                <span className="font-medium">Settings</span>
-                                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/10 group-hover:to-orange-500/10 transition-all duration-300 -z-10" />
-                            </button>
+                                        {/* Active left accent bar */}
+                                        {isActive && (
+                                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
+                                        )}
+                                    </Link>
+                                );
+                            })}
 
-                            <button className="w-full group flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-red-400 transition-all duration-200 hover:bg-red-950/20">
-                                <LogOut size={18} />
-                                <span className="font-medium">Logout</span>
-                            </button>
-                        </div> */}
-                    </nav>
+                            <div className="my-4 h-px bg-slate-800/50" />
+                        </nav>
+                    </div>
                 </aside>
 
                 {/* Overlay for mobile */}

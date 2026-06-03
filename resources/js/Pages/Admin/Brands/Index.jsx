@@ -98,9 +98,9 @@ export default function Index({ brands }) {
                                                     <p className="font-semibold text-slate-100">
                                                         {brand.name}
                                                     </p>
-                                                    <p className="text-xs text-slate-500 mt-0.5">
+                                                    {/* <p className="text-xs text-slate-500 mt-0.5">
                                                         ID: {brand.id}
-                                                    </p>
+                                                    </p> */}
                                                 </div>
                                             </div>
                                         </td>

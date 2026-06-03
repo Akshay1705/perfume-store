@@ -25,16 +25,22 @@ export default function Edit() {
         put(route("discounts.update", discount.id));
     };
 
-    // Shared styling classes to match the Category page input rules
     const inputClasses = (errorKey) => `
-        w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 
+        w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200
         text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0
         ${
             errorKey
                 ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                : "border-slate-700/50 focus:ring-amber-500/50 focus:border-amber-500"
+                : "border-slate-700/50 focus:ring-red-500/30 focus:border-red-500/50"
         }
     `;
+
+    const ErrorMsg = ({ field }) =>
+        errors[field] ? (
+            <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
+                <span>⚠️</span> {errors[field]}
+            </p>
+        ) : null;
 
     return (
         <AdminLayout>
@@ -42,39 +48,31 @@ export default function Edit() {
             <div className="mb-8">
                 <Link
                     href={route("discounts.index")}
-                    className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 text-sm font-medium mb-4 transition-colors"
+                    className="inline-flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium mb-4 transition-colors"
                 >
                     <ArrowLeft size={16} />
                     Back to Discounts
                 </Link>
-
-                <div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-2">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
                         Edit Discount
                     </h1>
-                    <p className="text-slate-400">
-                        Update discount rules, types, and targeting rules
-                    </p>
+                    <span className="px-3 py-1 rounded-full bg-slate-700/50 text-slate-400 text-sm font-mono border border-slate-600/50">
+                        ID #{discount.id}
+                    </span>
                 </div>
+                <p className="text-slate-400 mt-2">
+                    Update discount rules, types, and targeting rules
+                </p>
             </div>
 
-            {/* Form Container */}
-            <div className="max-w-2xl">
-                <form
-                    onSubmit={handleSubmit}
-                    className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-8 backdrop-blur-sm space-y-6"
-                >
-                    {/* Discount ID Info */}
-                    <div className="bg-slate-900/40 border border-slate-700/50 rounded-lg p-4">
-                        <p className="text-slate-400 text-sm">
-                            <span className="font-semibold text-slate-300">
-                                Discount ID:
-                            </span>{" "}
-                            {discount.id}
-                        </p>
-                    </div>
-
-                    {/* Name */}
+            {/* Form Container — wider, full available width */}
+            <form
+                onSubmit={handleSubmit}
+                className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-8 backdrop-blur-sm space-y-6"
+            >
+                {/* Row 1 — Name + Code */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
                             Discount Name *
@@ -86,17 +84,15 @@ export default function Edit() {
                             placeholder="e.g., Summer Sale, New User Discount"
                             className={inputClasses(errors.name)}
                         />
-                        {errors.name && (
-                            <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                <span>⚠️</span> {errors.name}
-                            </p>
-                        )}
+                        <ErrorMsg field="name" />
                     </div>
 
-                    {/* Code */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
-                            Discount Code (Optional)
+                            Discount Code{" "}
+                            <span className="text-slate-500 font-normal">
+                                (Optional)
+                            </span>
                         </label>
                         <input
                             type="text"
@@ -105,65 +101,63 @@ export default function Edit() {
                             placeholder="e.g., SUMMER2026, SAVE20"
                             className={`${inputClasses(errors.code)} font-mono uppercase text-sm`}
                         />
-                        {errors.code && (
-                            <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                <span>⚠️</span> {errors.code}
-                            </p>
-                        )}
+                        <ErrorMsg field="code" />
+                    </div>
+                </div>
+
+                {/* Row 2 — Type + Value + Min Order */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-200 mb-2">
+                            Discount Type *
+                        </label>
+                        <select
+                            value={data.type}
+                            onChange={(e) => setData("type", e.target.value)}
+                            className={`${inputClasses(errors.type)} appearance-none`}
+                            style={{ colorScheme: "dark" }}
+                        >
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (₹)</option>
+                        </select>
+                        <ErrorMsg field="type" />
                     </div>
 
-                    {/* Type & Value Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Type */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                Discount Type *
-                            </label>
-                            <select
-                                value={data.type}
-                                onChange={(e) =>
-                                    setData("type", e.target.value)
-                                }
-                                className={`${inputClasses(errors.type)} appearance-none`}
-                                style={{ colorScheme: "dark" }}
-                            >
-                                <option value="percentage">
-                                    Percentage (%)
-                                </option>
-                                <option value="fixed">Fixed Amount (₹)</option>
-                            </select>
-                            {errors.type && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.type}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Value */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                Value{" "}
-                                {data.type === "percentage" ? "(%)" : "(₹)"} *
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                value={data.value}
-                                onChange={(e) =>
-                                    setData("value", e.target.value)
-                                }
-                                placeholder="0.00"
-                                className={inputClasses(errors.value)}
-                            />
-                            {errors.value && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.value}
-                                </p>
-                            )}
-                        </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-200 mb-2">
+                            Value {data.type === "percentage" ? "(%)" : "(₹)"} *
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={data.value}
+                            onChange={(e) => setData("value", e.target.value)}
+                            placeholder="0.00"
+                            className={inputClasses(errors.value)}
+                        />
+                        <ErrorMsg field="value" />
                     </div>
 
-                    {/* Target Type */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-200 mb-2">
+                            Min Order Amount (₹)
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={data.min_order_amount}
+                            onChange={(e) =>
+                                setData("min_order_amount", e.target.value)
+                            }
+                            placeholder="0.00"
+                            className={inputClasses(errors.min_order_amount)}
+                        />
+                        <ErrorMsg field="min_order_amount" />
+                    </div>
+                </div>
+
+                {/* Row 3 — Target Type + Conditional Select */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
                             Apply To *
@@ -181,14 +175,10 @@ export default function Edit() {
                             <option value="brand">Specific Brand</option>
                             <option value="category">Specific Category</option>
                         </select>
-                        {errors.target_type && (
-                            <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                <span>⚠️</span> {errors.target_type}
-                            </p>
-                        )}
+                        <ErrorMsg field="target_type" />
                     </div>
 
-                    {/* Conditional Selects Based on Target Type */}
+                    {/* Conditional target select — sits in col 2 */}
                     {data.target_type === "user" && (
                         <div>
                             <label className="block text-sm font-semibold text-slate-200 mb-2">
@@ -209,11 +199,7 @@ export default function Edit() {
                                     </option>
                                 ))}
                             </select>
-                            {errors.user_id && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.user_id}
-                                </p>
-                            )}
+                            <ErrorMsg field="user_id" />
                         </div>
                     )}
 
@@ -237,11 +223,7 @@ export default function Edit() {
                                     </option>
                                 ))}
                             </select>
-                            {errors.brand_id && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.brand_id}
-                                </p>
-                            )}
+                            <ErrorMsg field="brand_id" />
                         </div>
                     )}
 
@@ -268,82 +250,49 @@ export default function Edit() {
                                     </option>
                                 ))}
                             </select>
-                            {errors.category_id && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.category_id}
-                                </p>
-                            )}
+                            <ErrorMsg field="category_id" />
                         </div>
                     )}
 
-                    {/* Min Order Amount */}
+                    {/* Empty placeholder when target is "all" to keep grid balanced */}
+                    {data.target_type === "all" && <div />}
+                </div>
+
+                {/* Row 4 — Start Date + End Date */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
-                            Minimum Order Amount (₹)
+                            Start Date
                         </label>
                         <input
-                            type="number"
-                            step="0.01"
-                            value={data.min_order_amount}
+                            type="datetime-local"
+                            value={data.starts_at}
                             onChange={(e) =>
-                                setData("min_order_amount", e.target.value)
+                                setData("starts_at", e.target.value)
                             }
-                            placeholder="0.00"
-                            className={inputClasses(errors.min_order_amount)}
+                            className={inputClasses(errors.starts_at)}
+                            style={{ colorScheme: "dark" }}
                         />
-                        {errors.min_order_amount && (
-                            <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                <span>⚠️</span> {errors.min_order_amount}
-                            </p>
-                        )}
+                        <ErrorMsg field="starts_at" />
                     </div>
 
-                    {/* Dates Grid Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Starts At */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                Start Date
-                            </label>
-                            <input
-                                type="datetime-local"
-                                value={data.starts_at}
-                                onChange={(e) =>
-                                    setData("starts_at", e.target.value)
-                                }
-                                className={inputClasses(errors.starts_at)}
-                                style={{ colorScheme: "dark" }}
-                            />
-                            {errors.starts_at && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.starts_at}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Ends At */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                End Date
-                            </label>
-                            <input
-                                type="datetime-local"
-                                value={data.ends_at}
-                                onChange={(e) =>
-                                    setData("ends_at", e.target.value)
-                                }
-                                className={inputClasses(errors.ends_at)}
-                                style={{ colorScheme: "dark" }}
-                            />
-                            {errors.ends_at && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.ends_at}
-                                </p>
-                            )}
-                        </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-200 mb-2">
+                            End Date
+                        </label>
+                        <input
+                            type="datetime-local"
+                            value={data.ends_at}
+                            onChange={(e) => setData("ends_at", e.target.value)}
+                            className={inputClasses(errors.ends_at)}
+                            style={{ colorScheme: "dark" }}
+                        />
+                        <ErrorMsg field="ends_at" />
                     </div>
+                </div>
 
-                    {/* Is Active Checkbox */}
+                {/* Row 5 — Active toggle + Info box side by side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex items-center gap-3 bg-slate-900/30 border border-slate-700/30 rounded-lg p-4">
                         <input
                             type="checkbox"
@@ -352,7 +301,7 @@ export default function Edit() {
                             onChange={(e) =>
                                 setData("is_active", e.target.checked)
                             }
-                            className="w-4 h-4 rounded text-amber-500 focus:ring-amber-500/50 bg-slate-950 border-slate-700 accent-amber-500 cursor-pointer"
+                            className="w-4 h-4 rounded text-red-500 focus:ring-red-500/50 bg-slate-950 border-slate-700 accent-red-500 cursor-pointer"
                         />
                         <label
                             htmlFor="is_active"
@@ -362,7 +311,6 @@ export default function Edit() {
                         </label>
                     </div>
 
-                    {/* Blue Info Box Warning */}
                     <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
                         <p className="text-sm text-blue-300">
                             <span className="font-semibold">ℹ️ Note:</span>{" "}
@@ -371,27 +319,27 @@ export default function Edit() {
                             checkouts using this ruleset.
                         </p>
                     </div>
+                </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 pt-4">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0"
-                        >
-                            <Save size={18} />
-                            {processing ? "Saving Changes..." : "Save Changes"}
-                        </button>
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-2">
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0"
+                    >
+                        <Save size={18} />
+                        {processing ? "Saving Changes..." : "Save Changes"}
+                    </button>
 
-                        <Link
-                            href={route("discounts.index")}
-                            className="px-6 py-3 rounded-lg bg-slate-800/40 text-slate-300 font-semibold hover:bg-slate-800/60 border border-slate-700/50 transition-all duration-200"
-                        >
-                            Cancel
-                        </Link>
-                    </div>
-                </form>
-            </div>
+                    <Link
+                        href={route("discounts.index")}
+                        className="px-8 py-3 rounded-lg bg-slate-800/40 text-slate-300 font-semibold hover:bg-slate-800/60 border border-slate-700/50 transition-all duration-200"
+                    >
+                        Cancel
+                    </Link>
+                </div>
+            </form>
         </AdminLayout>
     );
 }
