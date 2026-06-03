@@ -2,6 +2,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
 import { ArrowLeft, Plus, Upload, Trash2, Star } from "lucide-react";
+import AppSelect from "@/Components/ui/AppSelect";
 
 export default function Create({ categories, brands }) {
     const { csrf_token } = usePage().props;
@@ -28,34 +29,41 @@ export default function Create({ categories, brands }) {
         is_active: true,
     });
 
+    const inputClasses = (errorKey) => `
+        w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200
+        text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0
+        ${
+            errorKey
+                ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
+                : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
+        }
+    `;
+
+    const ErrorMsg = ({ field }) =>
+        errors[field] ? (
+            <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
+                <span>⚠️</span> {errors[field]}
+            </p>
+        ) : null;
+
     function submit(e) {
         e.preventDefault();
         post(route("products.store"), {
             onSuccess: (response) => {
-                // The controller returns the product in flash data
-                // Access it from the page props
                 const newProduct = response.props.flash?.product;
-
                 if (newProduct?.id) {
-                    console.log("✅ Product created with ID:", newProduct.id);
                     setProductId(newProduct.id);
                     setProductCreated(true);
                     setSuccessMessage(
                         `✅ ${newProduct.name} created successfully! Now add images.`,
                     );
-
-                    // Clear form for next product
                     reset();
                     setImages([]);
                     setCustomVolume("");
                     setIsCustomVolume(false);
-                } else {
-                    console.error("No product ID in response:", response);
                 }
             },
-            onError: (errors) => {
-                console.error("Creation failed:", errors);
-            },
+            onError: (errors) => console.error("Creation failed:", errors),
         });
     }
 
@@ -69,48 +77,29 @@ export default function Create({ categories, brands }) {
             .replace(/[^\w-]/g, "");
     };
 
-    const handleNameChange = (e) => {
-        const name = e.target.value;
-
-        setData((data) => ({
-            ...data,
-            name,
-            slug: generateSlug(name, data.volume),
-        }));
-    };
-
     async function handleImageUpload(e) {
         const files = e.target.files;
         if (!files || files.length === 0 || !productId) return;
-
         setUploading(true);
         setUploadError("");
-
         try {
             const file = files[0];
             const formData = new FormData();
             formData.append("image", file);
             formData.append("is_primary", images.length === 0 ? "1" : "0");
-
-            const uploadUrl = `/admin/products/${productId}/images`;
-            const response = await fetch(uploadUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRF-TOKEN": csrf_token,
+            const response = await fetch(
+                `/admin/products/${productId}/images`,
+                {
+                    method: "POST",
+                    body: formData,
+                    headers: { "X-CSRF-TOKEN": csrf_token },
                 },
-            });
-
+            );
             const responseData = await response.json();
-
-            if (!response.ok) {
-                throw new Error(responseData.error || `Upload failed`);
-            }
-
-            console.log("✅ Image uploaded:", responseData);
+            if (!response.ok)
+                throw new Error(responseData.error || "Upload failed");
             setImages([...images, responseData]);
         } catch (err) {
-            console.error("Upload error:", err);
             setUploadError(err.message || "Failed to upload image");
         } finally {
             setUploading(false);
@@ -120,19 +109,16 @@ export default function Create({ categories, brands }) {
 
     async function deleteImage(imageId) {
         if (!confirm("Delete this image?") || !productId) return;
-
         try {
-            const deleteUrl = `/admin/products/${productId}/images/${imageId}`;
-            const response = await fetch(deleteUrl, {
-                method: "DELETE",
-                headers: {
-                    "X-CSRF-TOKEN": csrf_token,
+            const response = await fetch(
+                `/admin/products/${productId}/images/${imageId}`,
+                {
+                    method: "DELETE",
+                    headers: { "X-CSRF-TOKEN": csrf_token },
                 },
-            });
-
-            if (response.ok) {
+            );
+            if (response.ok)
                 setImages(images.filter((img) => img.id !== imageId));
-            }
         } catch (err) {
             console.error("Failed to delete image:", err);
         }
@@ -140,16 +126,14 @@ export default function Create({ categories, brands }) {
 
     async function setPrimaryImage(imageId) {
         if (!productId) return;
-
         try {
-            const primaryUrl = `/admin/products/${productId}/images/${imageId}/primary`;
-            const response = await fetch(primaryUrl, {
-                method: "PUT",
-                headers: {
-                    "X-CSRF-TOKEN": csrf_token,
+            const response = await fetch(
+                `/admin/products/${productId}/images/${imageId}/primary`,
+                {
+                    method: "PUT",
+                    headers: { "X-CSRF-TOKEN": csrf_token },
                 },
-            });
-
+            );
             if (response.ok) {
                 setImages(
                     images.map((img) => ({
@@ -174,18 +158,14 @@ export default function Create({ categories, brands }) {
                     <ArrowLeft size={16} />
                     Back to Products
                 </Link>
-
-                <div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
-                        Create Product
-                    </h1>
-                    <p className="text-slate-400">
-                        Add a new product to your catalog
-                    </p>
-                </div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
+                    Create Product
+                </h1>
+                <p className="text-slate-400">
+                    Add a new product to your catalog
+                </p>
             </div>
 
-            {/* Success Message */}
             {productCreated && successMessage && (
                 <div className="mb-6 bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                     <p className="text-green-300 text-sm font-medium">
@@ -201,55 +181,50 @@ export default function Create({ categories, brands }) {
                         onSubmit={submit}
                         className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-8 backdrop-blur-sm space-y-6"
                     >
-                        {/* Product Name */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                Product Name *
-                            </label>
-                            <input
-                                type="text"
-                                value={data.name}
-                                onChange={handleNameChange}
-                                placeholder="e.g., Dior Sauvage"
-                                className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                    errors.name
-                                        ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                        : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                }`}
-                            />
-                            {errors.name && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.name}
-                                </p>
-                            )}
+                        {/* Row 1 — Name + Slug */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                                    Product Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.name}
+                                    onChange={(e) => {
+                                        const name = e.target.value;
+                                        setData((data) => ({
+                                            ...data,
+                                            name,
+                                            slug: generateSlug(
+                                                name,
+                                                data.volume,
+                                            ),
+                                        }));
+                                    }}
+                                    placeholder="e.g., Dior Sauvage"
+                                    className={inputClasses(errors.name)}
+                                />
+                                <ErrorMsg field="name" />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                                    Slug *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.slug}
+                                    onChange={(e) =>
+                                        setData("slug", e.target.value)
+                                    }
+                                    placeholder="e.g., dior-sauvage"
+                                    className={`${inputClasses(errors.slug)} font-mono text-sm`}
+                                />
+                                <ErrorMsg field="slug" />
+                            </div>
                         </div>
 
-                        {/* Slug */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                Slug *
-                            </label>
-                            <input
-                                type="text"
-                                value={data.slug}
-                                onChange={(e) =>
-                                    setData("slug", e.target.value)
-                                }
-                                placeholder="e.g., dior-sauvage"
-                                className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 font-mono text-sm ${
-                                    errors.slug
-                                        ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                        : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                }`}
-                            />
-                            {errors.slug && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.slug}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Description */}
+                        {/* Row 2 — Description */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-200 mb-2">
                                 Description *
@@ -260,22 +235,14 @@ export default function Create({ categories, brands }) {
                                     setData("description", e.target.value)
                                 }
                                 placeholder="Enter product description"
-                                rows="4"
-                                className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                    errors.description
-                                        ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                        : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                }`}
+                                rows="3"
+                                className={inputClasses(errors.description)}
                             />
-                            {errors.description && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.description}
-                                </p>
-                            )}
+                            <ErrorMsg field="description" />
                         </div>
 
-                        {/* Price & Stock */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* Row 3 — Price + Stock */}
+                        <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-200 mb-2">
                                     Price *
@@ -288,17 +255,9 @@ export default function Create({ categories, brands }) {
                                         setData("price", e.target.value)
                                     }
                                     placeholder="0.00"
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.price
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
+                                    className={inputClasses(errors.price)}
                                 />
-                                {errors.price && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.price}
-                                    </p>
-                                )}
+                                <ErrorMsg field="price" />
                             </div>
 
                             <div>
@@ -312,26 +271,17 @@ export default function Create({ categories, brands }) {
                                         setData("stock", e.target.value)
                                     }
                                     placeholder="0"
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.stock
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
+                                    className={inputClasses(errors.stock)}
                                 />
-                                {errors.stock && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.stock}
-                                    </p>
-                                )}
+                                <ErrorMsg field="stock" />
                             </div>
                         </div>
 
-                        {/* Volume */}
+                        {/* Row 4 — Volume */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-200 mb-3">
                                 Volume
                             </label>
-
                             <div className="flex flex-wrap gap-2 mb-3">
                                 {volumeOptions.map((volume) => (
                                     <button
@@ -340,7 +290,6 @@ export default function Create({ categories, brands }) {
                                         onClick={() => {
                                             setIsCustomVolume(false);
                                             setCustomVolume("");
-
                                             setData((data) => ({
                                                 ...data,
                                                 volume,
@@ -359,12 +308,10 @@ export default function Create({ categories, brands }) {
                                         {volume}
                                     </button>
                                 ))}
-
                                 <button
                                     type="button"
                                     onClick={() => {
                                         setIsCustomVolume(true);
-
                                         setData((data) => ({
                                             ...data,
                                             volume: customVolume,
@@ -383,16 +330,13 @@ export default function Create({ categories, brands }) {
                                     Custom
                                 </button>
                             </div>
-
                             {isCustomVolume && (
                                 <input
                                     type="text"
                                     value={customVolume}
                                     onChange={(e) => {
                                         const volume = e.target.value;
-
                                         setCustomVolume(volume);
-
                                         setData((data) => ({
                                             ...data,
                                             volume,
@@ -403,82 +347,50 @@ export default function Create({ categories, brands }) {
                                         }));
                                     }}
                                     placeholder="e.g. 20ml x 4"
-                                    className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-700/50 text-slate-100"
+                                    className={inputClasses(errors.volume)}
                                 />
                             )}
-
-                            {errors.volume && (
-                                <p className="text-red-400 text-sm mt-2">
-                                    {errors.volume}
-                                </p>
-                            )}
+                            <ErrorMsg field="volume" />
                         </div>
 
-                        {/* Category & Brand */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* Row 5 — Category + Brand */}
+                        <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-200 mb-2">
                                     Category *
                                 </label>
-                                <select
+                                <AppSelect
                                     value={data.category_id}
-                                    onChange={(e) =>
-                                        setData("category_id", e.target.value)
+                                    onChange={(val) =>
+                                        setData("category_id", val)
                                     }
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.category_id
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
-                                >
-                                    <option value="">Select a category</option>
-                                    {categories.map((category) => (
-                                        <option
-                                            key={category.id}
-                                            value={category.id}
-                                        >
-                                            {category.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.category_id && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.category_id}
-                                    </p>
-                                )}
+                                    placeholder="Select a category"
+                                    options={categories.map((c) => ({
+                                        value: String(c.id),
+                                        label: c.name,
+                                    }))}
+                                />
+                                <ErrorMsg field="category_id" />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-200 mb-2">
                                     Brand *
                                 </label>
-                                <select
+                                <AppSelect
                                     value={data.brand_id}
-                                    onChange={(e) =>
-                                        setData("brand_id", e.target.value)
-                                    }
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.brand_id
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
-                                >
-                                    <option value="">Select a brand</option>
-                                    {brands.map((brand) => (
-                                        <option key={brand.id} value={brand.id}>
-                                            {brand.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.brand_id && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.brand_id}
-                                    </p>
-                                )}
+                                    onChange={(val) => setData("brand_id", val)}
+                                    placeholder="Select a brand"
+                                    options={brands.map((b) => ({
+                                        value: String(b.id),
+                                        label: b.name,
+                                    }))}
+                                />
+                                <ErrorMsg field="brand_id" />
                             </div>
                         </div>
 
-                        {/* Active Status */}
+                        {/* Row 6 — Active Status */}
                         <div className="flex items-center gap-3 bg-slate-700/20 border border-slate-700/50 rounded-lg p-4">
                             <input
                                 type="checkbox"
@@ -487,7 +399,7 @@ export default function Create({ categories, brands }) {
                                 onChange={(e) =>
                                     setData("is_active", e.target.checked)
                                 }
-                                className="w-4 h-4 rounded"
+                                className="w-4 h-4 rounded accent-cyan-500 cursor-pointer"
                             />
                             <label
                                 htmlFor="is_active"
@@ -498,19 +410,18 @@ export default function Create({ categories, brands }) {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-3 pt-4">
+                        <div className="flex gap-3 pt-2">
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0"
+                                className="flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0"
                             >
                                 <Plus size={18} />
                                 {processing ? "Creating..." : "Create Product"}
                             </button>
-
                             <Link
                                 href={route("products.index")}
-                                className="px-6 py-3 rounded-lg bg-slate-800/40 text-slate-300 font-semibold hover:bg-slate-800/60 border border-slate-700/50 transition-all duration-200"
+                                className="px-8 py-3 rounded-lg bg-slate-800/40 text-slate-300 font-semibold hover:bg-slate-800/60 border border-slate-700/50 transition-all duration-200"
                             >
                                 Cancel
                             </Link>
@@ -582,7 +493,6 @@ export default function Create({ categories, brands }) {
                                     </div>
                                 </label>
 
-                                {/* Image List */}
                                 <div className="space-y-3 max-h-96 overflow-y-auto">
                                     {images.length > 0 ? (
                                         images.map((image) => (
@@ -603,14 +513,13 @@ export default function Create({ categories, brands }) {
                                                         }}
                                                     />
                                                 </div>
-
-                                                <div className="p-3 space-y-2">
+                                                <div className="p-3">
                                                     <div className="flex gap-2">
                                                         {image.is_primary ? (
                                                             <span className="flex items-center gap-1 bg-green-500/20 text-green-300 px-2 py-1 rounded text-xs font-medium">
                                                                 <Star
                                                                     size={12}
-                                                                />
+                                                                />{" "}
                                                                 Primary
                                                             </span>
                                                         ) : (
@@ -626,7 +535,6 @@ export default function Create({ categories, brands }) {
                                                                 Set Primary
                                                             </button>
                                                         )}
-
                                                         <button
                                                             type="button"
                                                             onClick={() =>
@@ -635,7 +543,6 @@ export default function Create({ categories, brands }) {
                                                                 )
                                                             }
                                                             className="ml-auto p-1 rounded text-red-400 hover:bg-red-500/20 transition-all"
-                                                            title="Delete"
                                                         >
                                                             <Trash2 size={14} />
                                                         </button>

@@ -10,6 +10,8 @@ import {
     ShieldCheck,
     ShieldAlert,
 } from "lucide-react";
+import AppSelect from "@/Components/ui/AppSelect";
+
 
 export default function Index() {
     const { discounts, stats, filters } = usePage().props;
@@ -140,21 +142,23 @@ export default function Index() {
                     className="w-72 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-red-500/50 transition-colors"
                 />
 
-                <select
-                    defaultValue={filters.status}
-                    onChange={(e) =>
+                <AppSelect
+                    value={filters.status || ""}
+                    onChange={(val) =>
                         router.get(
                             route("discounts.index"),
-                            { search: filters.search, status: e.target.value },
+                            { search: filters.search, status: val },
                             { preserveState: true, replace: true },
                         )
                     }
-                    className="px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 focus:outline-none focus:border-red-500/50 transition-colors"
-                >
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
+                    placeholder="All Status"
+                    className="w-48"
+                    options={[
+                        { value: "", label: "All Status" },
+                        { value: "active", label: "Active" },
+                        { value: "inactive", label: "Inactive" },
+                    ]}
+                />
             </div>
 
             {/* Table Section */}

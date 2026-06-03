@@ -2,20 +2,19 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
 import { ArrowLeft, Save, Upload, Trash2, Star } from "lucide-react";
+import AppSelect from "@/Components/ui/AppSelect";
 
 export default function Edit({ product, categories, brands }) {
     const { csrf_token } = usePage().props;
     const [images, setImages] = useState(product.images || []);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState("");
-    
+
     const predefinedVolumes = ["30ml", "50ml", "100ml", "200ml"];
-    
     const [customVolume, setCustomVolume] = useState(
         predefinedVolumes.includes(product.volume) ? "" : product.volume,
     );
 
-    
     const { data, setData, put, processing, errors } = useForm({
         name: product.name,
         slug: product.slug,
@@ -23,13 +22,13 @@ export default function Edit({ product, categories, brands }) {
         price: product.price,
         stock: product.stock,
         volume: product.volume,
-        category_id: product.category_id,
-        brand_id: product.brand_id,
+        category_id: String(product.category_id || ""),
+        brand_id: String(product.brand_id || ""),
         is_active: product.is_active,
     });
+
     const isCustomVolume = !predefinedVolumes.includes(data.volume);
 
-    
     function submit(e) {
         e.preventDefault();
         put(route("products.update", product.id));
@@ -45,37 +44,46 @@ export default function Edit({ product, categories, brands }) {
             .replace(/[^\w-]/g, "");
     };
 
+    const inputClasses = (errorKey) => `
+        w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200
+        text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0
+        ${
+            errorKey
+                ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
+                : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
+        }
+    `;
+
+    const ErrorMsg = ({ field }) =>
+        errors[field] ? (
+            <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
+                <span>⚠️</span> {errors[field]}
+            </p>
+        ) : null;
+
     async function handleImageUpload(e) {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-
         setUploading(true);
         setUploadError("");
-
         try {
             const file = files[0];
             const formData = new FormData();
             formData.append("image", file);
             formData.append("is_primary", images.length === 0 ? "1" : "0");
-
-            const uploadUrl = `/admin/products/${product.id}/images`;
-            const response = await fetch(uploadUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRF-TOKEN": csrf_token,
+            const response = await fetch(
+                `/admin/products/${product.id}/images`,
+                {
+                    method: "POST",
+                    body: formData,
+                    headers: { "X-CSRF-TOKEN": csrf_token },
                 },
-            });
-
+            );
             const responseData = await response.json();
-
-            if (!response.ok) {
-                throw new Error(responseData.error || `Upload failed`);
-            }
-
+            if (!response.ok)
+                throw new Error(responseData.error || "Upload failed");
             setImages([...images, responseData]);
         } catch (err) {
-            console.error("Upload error:", err);
             setUploadError(err.message || "Failed to upload image");
         } finally {
             setUploading(false);
@@ -85,19 +93,16 @@ export default function Edit({ product, categories, brands }) {
 
     async function deleteImage(imageId) {
         if (!confirm("Delete this image?")) return;
-
         try {
-            const deleteUrl = `/admin/products/${product.id}/images/${imageId}`;
-            const response = await fetch(deleteUrl, {
-                method: "DELETE",
-                headers: {
-                    "X-CSRF-TOKEN": csrf_token,
+            const response = await fetch(
+                `/admin/products/${product.id}/images/${imageId}`,
+                {
+                    method: "DELETE",
+                    headers: { "X-CSRF-TOKEN": csrf_token },
                 },
-            });
-
-            if (response.ok) {
+            );
+            if (response.ok)
                 setImages(images.filter((img) => img.id !== imageId));
-            }
         } catch (err) {
             console.error("Failed to delete image:", err);
         }
@@ -105,14 +110,13 @@ export default function Edit({ product, categories, brands }) {
 
     async function setPrimaryImage(imageId) {
         try {
-            const primaryUrl = `/admin/products/${product.id}/images/${imageId}/primary`;
-            const response = await fetch(primaryUrl, {
-                method: "PUT",
-                headers: {
-                    "X-CSRF-TOKEN": csrf_token,
+            const response = await fetch(
+                `/admin/products/${product.id}/images/${imageId}/primary`,
+                {
+                    method: "PUT",
+                    headers: { "X-CSRF-TOKEN": csrf_token },
                 },
-            });
-
+            );
             if (response.ok) {
                 setImages(
                     images.map((img) => ({
@@ -137,13 +141,15 @@ export default function Edit({ product, categories, brands }) {
                     <ArrowLeft size={16} />
                     Back to Products
                 </Link>
-
-                <div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
+                <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                         Edit Product
                     </h1>
-                    <p className="text-slate-400">Update product information</p>
+                    <span className="px-3 py-1 rounded-full bg-slate-700/50 text-slate-400 text-sm font-mono border border-slate-600/50">
+                        ID #{product.id}
+                    </span>
                 </div>
+                <p className="text-slate-400">Update product information</p>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
@@ -153,73 +159,50 @@ export default function Edit({ product, categories, brands }) {
                         onSubmit={submit}
                         className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-8 backdrop-blur-sm space-y-6"
                     >
-                        {/* Product ID Info */}
-                        <div className="bg-slate-900/40 border border-slate-700/50 rounded-lg p-4">
-                            <p className="text-slate-400 text-sm">
-                                <span className="font-semibold text-slate-300">
-                                    Product ID:
-                                </span>{" "}
-                                {product.id}
-                            </p>
+                        {/* Row 1 — Name + Slug */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                                    Product Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.name}
+                                    onChange={(e) => {
+                                        const name = e.target.value;
+                                        setData((data) => ({
+                                            ...data,
+                                            name,
+                                            slug: generateSlug(
+                                                name,
+                                                data.volume,
+                                            ),
+                                        }));
+                                    }}
+                                    placeholder="e.g., Dior Sauvage"
+                                    className={inputClasses(errors.name)}
+                                />
+                                <ErrorMsg field="name" />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                                    Slug *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.slug}
+                                    onChange={(e) =>
+                                        setData("slug", e.target.value)
+                                    }
+                                    placeholder="e.g., dior-sauvage"
+                                    className={`${inputClasses(errors.slug)} font-mono text-sm`}
+                                />
+                                <ErrorMsg field="slug" />
+                            </div>
                         </div>
 
-                        {/* Product Name */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                Product Name *
-                            </label>
-                            <input
-                                type="text"
-                                value={data.name}
-                                onChange={(e) => {
-                                    const name = e.target.value;
-
-                                    setData((data) => ({
-                                        ...data,
-                                        name,
-                                        slug: generateSlug(name, data.volume),
-                                    }));
-                                }}
-                                placeholder="e.g., Dior Sauvage"
-                                className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                    errors.name
-                                        ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                        : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                }`}
-                            />
-                            {errors.name && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.name}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Slug */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                Slug *
-                            </label>
-                            <input
-                                type="text"
-                                value={data.slug}
-                                onChange={(e) =>
-                                    setData("slug", e.target.value)
-                                }
-                                placeholder="e.g., dior-sauvage"
-                                className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 font-mono text-sm ${
-                                    errors.slug
-                                        ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                        : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                }`}
-                            />
-                            {errors.slug && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.slug}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Description */}
+                        {/* Row 2 — Description full width */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-200 mb-2">
                                 Description *
@@ -230,22 +213,14 @@ export default function Edit({ product, categories, brands }) {
                                     setData("description", e.target.value)
                                 }
                                 placeholder="Enter product description"
-                                rows="4"
-                                className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                    errors.description
-                                        ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                        : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                }`}
+                                rows="3"
+                                className={inputClasses(errors.description)}
                             />
-                            {errors.description && (
-                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                                    <span>⚠️</span> {errors.description}
-                                </p>
-                            )}
+                            <ErrorMsg field="description" />
                         </div>
 
-                        {/* Price & Stock */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* Row 3 — Price + Stock + Volume buttons */}
+                        <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-200 mb-2">
                                     Price *
@@ -258,17 +233,9 @@ export default function Edit({ product, categories, brands }) {
                                         setData("price", e.target.value)
                                     }
                                     placeholder="0.00"
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.price
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
+                                    className={inputClasses(errors.price)}
                                 />
-                                {errors.price && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.price}
-                                    </p>
-                                )}
+                                <ErrorMsg field="price" />
                             </div>
 
                             <div>
@@ -282,26 +249,17 @@ export default function Edit({ product, categories, brands }) {
                                         setData("stock", e.target.value)
                                     }
                                     placeholder="0"
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.stock
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
+                                    className={inputClasses(errors.stock)}
                                 />
-                                {errors.stock && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.stock}
-                                    </p>
-                                )}
+                                <ErrorMsg field="stock" />
                             </div>
                         </div>
 
-                        {/* Volume */}
+                        {/* Row 4 — Volume */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-200 mb-3">
                                 Volume
                             </label>
-
                             <div className="flex flex-wrap gap-2 mb-3">
                                 {predefinedVolumes.map((volume) => (
                                     <button
@@ -316,7 +274,6 @@ export default function Edit({ product, categories, brands }) {
                                                     volume,
                                                 ),
                                             }));
-
                                             setCustomVolume("");
                                         }}
                                         className={`px-4 py-2 rounded-lg border transition-all ${
@@ -328,7 +285,6 @@ export default function Edit({ product, categories, brands }) {
                                         {volume}
                                     </button>
                                 ))}
-
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -339,7 +295,6 @@ export default function Edit({ product, categories, brands }) {
                                                 ? ""
                                                 : data.volume,
                                         );
-
                                         setData((data) => ({
                                             ...data,
                                             volume: "custom",
@@ -354,48 +309,25 @@ export default function Edit({ product, categories, brands }) {
                                     Custom
                                 </button>
                             </div>
-
                             {isCustomVolume && (
                                 <input
                                     type="text"
                                     value={customVolume}
                                     onChange={(e) => {
                                         const volume = e.target.value;
-
                                         setCustomVolume(volume);
-
                                         setData((data) => ({
                                             ...data,
-                                            volume: volume,
+                                            volume,
                                             slug: generateSlug(
                                                 data.name,
                                                 volume,
                                             ),
                                         }));
                                     }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-
-                                            const volume = customVolume.trim();
-
-                                            if (!volume) return;
-
-                                            setData((data) => ({
-                                                ...data,
-                                                volume,
-                                                slug: generateSlug(
-                                                    data.name,
-                                                    volume,
-                                                ),
-                                            }));
-                                        }
-                                    }}
                                     onBlur={() => {
                                         const volume = customVolume.trim();
-
                                         if (!volume) return;
-
                                         setData((data) => ({
                                             ...data,
                                             volume,
@@ -406,82 +338,50 @@ export default function Edit({ product, categories, brands }) {
                                         }));
                                     }}
                                     placeholder="e.g. 20ml x 4"
-                                    className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-700/50 text-slate-100"
+                                    className={inputClasses(errors.volume)}
                                 />
                             )}
-
-                            {errors.volume && (
-                                <p className="text-red-400 text-sm mt-2">
-                                    {errors.volume}
-                                </p>
-                            )}
+                            <ErrorMsg field="volume" />
                         </div>
 
-                        {/* Category & Brand */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* Row 5 — Category + Brand */}
+                        <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-200 mb-2">
                                     Category *
                                 </label>
-                                <select
+                                <AppSelect
                                     value={data.category_id}
-                                    onChange={(e) =>
-                                        setData("category_id", e.target.value)
+                                    onChange={(val) =>
+                                        setData("category_id", val)
                                     }
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.category_id
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
-                                >
-                                    <option value="">Select a category</option>
-                                    {categories.map((category) => (
-                                        <option
-                                            key={category.id}
-                                            value={category.id}
-                                        >
-                                            {category.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.category_id && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.category_id}
-                                    </p>
-                                )}
+                                    placeholder="Select a category"
+                                    options={categories.map((c) => ({
+                                        value: String(c.id),
+                                        label: c.name,
+                                    }))}
+                                />
+                                <ErrorMsg field="category_id" />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-200 mb-2">
                                     Brand *
                                 </label>
-                                <select
+                                <AppSelect
                                     value={data.brand_id}
-                                    onChange={(e) =>
-                                        setData("brand_id", e.target.value)
-                                    }
-                                    className={`w-full px-4 py-3 rounded-lg bg-slate-900/50 border transition-all duration-200 text-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                                        errors.brand_id
-                                            ? "border-red-500/50 focus:ring-red-500/50 focus:border-red-500"
-                                            : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
-                                    }`}
-                                >
-                                    <option value="">Select a brand</option>
-                                    {brands.map((brand) => (
-                                        <option key={brand.id} value={brand.id}>
-                                            {brand.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.brand_id && (
-                                    <p className="text-red-400 text-sm mt-2">
-                                        {errors.brand_id}
-                                    </p>
-                                )}
+                                    onChange={(val) => setData("brand_id", val)}
+                                    placeholder="Select a brand"
+                                    options={brands.map((b) => ({
+                                        value: String(b.id),
+                                        label: b.name,
+                                    }))}
+                                />
+                                <ErrorMsg field="brand_id" />
                             </div>
                         </div>
 
-                        {/* Active Status */}
+                        {/* Row 6 — Active Status */}
                         <div className="flex items-center gap-3 bg-slate-700/20 border border-slate-700/50 rounded-lg p-4">
                             <input
                                 type="checkbox"
@@ -490,7 +390,7 @@ export default function Edit({ product, categories, brands }) {
                                 onChange={(e) =>
                                     setData("is_active", e.target.checked)
                                 }
-                                className="w-4 h-4 rounded"
+                                className="w-4 h-4 rounded accent-cyan-500 cursor-pointer"
                             />
                             <label
                                 htmlFor="is_active"
@@ -501,19 +401,18 @@ export default function Edit({ product, categories, brands }) {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-3 pt-4">
+                        <div className="flex gap-3 pt-2">
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0"
+                                className="flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:translate-y-0"
                             >
                                 <Save size={18} />
                                 {processing ? "Saving..." : "Save Changes"}
                             </button>
-
                             <Link
                                 href={route("products.index")}
-                                className="px-6 py-3 rounded-lg bg-slate-800/40 text-slate-300 font-semibold hover:bg-slate-800/60 border border-slate-700/50 transition-all duration-200"
+                                className="px-8 py-3 rounded-lg bg-slate-800/40 text-slate-300 font-semibold hover:bg-slate-800/60 border border-slate-700/50 transition-all duration-200"
                             >
                                 Cancel
                             </Link>
@@ -574,7 +473,6 @@ export default function Edit({ product, categories, brands }) {
                             </div>
                         </label>
 
-                        {/* Image List */}
                         <div className="space-y-3 max-h-96 overflow-y-auto">
                             {images.length > 0 ? (
                                 images.map((image) => (
@@ -595,12 +493,11 @@ export default function Edit({ product, categories, brands }) {
                                                 }}
                                             />
                                         </div>
-
-                                        <div className="p-3 space-y-2">
+                                        <div className="p-3">
                                             <div className="flex gap-2">
                                                 {image.is_primary ? (
                                                     <span className="flex items-center gap-1 bg-green-500/20 text-green-300 px-2 py-1 rounded text-xs font-medium">
-                                                        <Star size={12} />
+                                                        <Star size={12} />{" "}
                                                         Primary
                                                     </span>
                                                 ) : (
@@ -616,14 +513,12 @@ export default function Edit({ product, categories, brands }) {
                                                         Set Primary
                                                     </button>
                                                 )}
-
                                                 <button
                                                     type="button"
                                                     onClick={() =>
                                                         deleteImage(image.id)
                                                     }
                                                     className="ml-auto p-1 rounded text-red-400 hover:bg-red-500/20 transition-all"
-                                                    title="Delete"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>

@@ -2,6 +2,7 @@ import React from "react";
 import { useForm, Link, usePage } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { ArrowLeft, Save } from "lucide-react";
+import AppSelect from "@/Components/ui/AppSelect";
 
 export default function Edit() {
     const { discount, users, brands, categories } = usePage().props;
@@ -111,15 +112,17 @@ export default function Edit() {
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
                             Discount Type *
                         </label>
-                        <select
+                        <AppSelect
                             value={data.type}
-                            onChange={(e) => setData("type", e.target.value)}
-                            className={`${inputClasses(errors.type)} appearance-none`}
-                            style={{ colorScheme: "dark" }}
-                        >
-                            <option value="percentage">Percentage (%)</option>
-                            <option value="fixed">Fixed Amount (₹)</option>
-                        </select>
+                            onChange={(val) => setData("type", val)}
+                            options={[
+                                {
+                                    value: "percentage",
+                                    label: "Percentage (%)",
+                                },
+                                { value: "fixed", label: "Fixed Amount (₹)" },
+                            ]}
+                        />
                         <ErrorMsg field="type" />
                     </div>
 
@@ -162,19 +165,20 @@ export default function Edit() {
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
                             Apply To *
                         </label>
-                        <select
+                        <AppSelect
                             value={data.target_type}
-                            onChange={(e) =>
-                                setData("target_type", e.target.value)
-                            }
-                            className={`${inputClasses(errors.target_type)} appearance-none`}
-                            style={{ colorScheme: "dark" }}
-                        >
-                            <option value="all">All Products</option>
-                            <option value="user">Specific User</option>
-                            <option value="brand">Specific Brand</option>
-                            <option value="category">Specific Category</option>
-                        </select>
+                            onChange={(val) => setData("target_type", val)}
+                            className={inputClasses(errors.target_type)}
+                            options={[
+                                { value: "all", label: "All Products" },
+                                { value: "user", label: "Specific User" },
+                                { value: "brand", label: "Specific Brand" },
+                                {
+                                    value: "category",
+                                    label: "Specific Category",
+                                },
+                            ]}
+                        />
                         <ErrorMsg field="target_type" />
                     </div>
 
@@ -184,21 +188,15 @@ export default function Edit() {
                             <label className="block text-sm font-semibold text-slate-200 mb-2">
                                 Select User
                             </label>
-                            <select
-                                value={data.user_id}
-                                onChange={(e) =>
-                                    setData("user_id", e.target.value)
-                                }
-                                className={`${inputClasses(errors.user_id)} appearance-none`}
-                                style={{ colorScheme: "dark" }}
-                            >
-                                <option value="">Choose a user</option>
-                                {users.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.name} ({user.email})
-                                    </option>
-                                ))}
-                            </select>
+                            <AppSelect
+                                value={String(data.user_id)}
+                                onChange={(val) => setData("user_id", val)}
+                                placeholder="Choose a user"
+                                options={users.map((u) => ({
+                                    value: String(u.id),
+                                    label: `${u.name} (${u.email})`,
+                                }))}
+                            />
                             <ErrorMsg field="user_id" />
                         </div>
                     )}
@@ -208,21 +206,15 @@ export default function Edit() {
                             <label className="block text-sm font-semibold text-slate-200 mb-2">
                                 Select Brand
                             </label>
-                            <select
-                                value={data.brand_id}
-                                onChange={(e) =>
-                                    setData("brand_id", e.target.value)
-                                }
-                                className={`${inputClasses(errors.brand_id)} appearance-none`}
-                                style={{ colorScheme: "dark" }}
-                            >
-                                <option value="">Choose a brand</option>
-                                {brands.map((brand) => (
-                                    <option key={brand.id} value={brand.id}>
-                                        {brand.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <AppSelect
+                                value={String(data.brand_id)}
+                                onChange={(val) => setData("brand_id", val)}
+                                placeholder="Choose a brand"
+                                options={brands.map((b) => ({
+                                    value: String(b.id),
+                                    label: b.name,
+                                }))}
+                            />
                             <ErrorMsg field="brand_id" />
                         </div>
                     )}
@@ -232,24 +224,15 @@ export default function Edit() {
                             <label className="block text-sm font-semibold text-slate-200 mb-2">
                                 Select Category
                             </label>
-                            <select
-                                value={data.category_id}
-                                onChange={(e) =>
-                                    setData("category_id", e.target.value)
-                                }
-                                className={`${inputClasses(errors.category_id)} appearance-none`}
-                                style={{ colorScheme: "dark" }}
-                            >
-                                <option value="">Choose a category</option>
-                                {categories.map((category) => (
-                                    <option
-                                        key={category.id}
-                                        value={category.id}
-                                    >
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <AppSelect
+                                value={String(data.category_id)}
+                                onChange={(val) => setData("category_id", val)}
+                                placeholder="Choose a category"
+                                options={categories.map((c) => ({
+                                    value: String(c.id),
+                                    label: c.name,
+                                }))}
+                            />
                             <ErrorMsg field="category_id" />
                         </div>
                     )}

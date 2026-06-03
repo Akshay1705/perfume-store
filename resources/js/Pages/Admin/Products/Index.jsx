@@ -2,6 +2,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router } from "@inertiajs/react";
 import { Edit, Trash2, Plus } from "lucide-react";
 import { useState } from "react";
+import AppSelect from "@/Components/ui/AppSelect";
 
 export default function Index({ products, filters, categories, brands }) {
     const [deleteId, setDeleteId] = useState(null);
@@ -98,81 +99,63 @@ export default function Index({ products, filters, categories, brands }) {
                     />
 
                     {/* Category */}
-                    <select
+                    <AppSelect
                         value={filters.category || ""}
-                        onChange={(e) =>
+                        onChange={(val) =>
                             router.get(
                                 route("products.index"),
-                                {
-                                    ...filters,
-                                    category: e.target.value,
-                                },
-                                {
-                                    preserveState: true,
-                                    replace: true,
-                                },
+                                { ...filters, category: val },
+                                { preserveState: true, replace: true },
                             )
                         }
-                        className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
-                    >
-                        <option value="">All Categories</option>
-
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
+                        placeholder="All Categories"
+                        options={[
+                            { value: "", label: "All Categories" },
+                            ...categories.map((c) => ({
+                                value: String(c.id),
+                                label: c.name,
+                            })),
+                        ]}
+                    />
 
                     {/* Brand */}
-                    <select
+                    <AppSelect
                         value={filters.brand || ""}
-                        onChange={(e) =>
+                        onChange={(val) =>
                             router.get(
                                 route("products.index"),
-                                {
-                                    ...filters,
-                                    brand: e.target.value,
-                                },
-                                {
-                                    preserveState: true,
-                                    replace: true,
-                                },
+                                { ...filters, brand: val },
+                                { preserveState: true, replace: true },
                             )
                         }
-                        className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
-                    >
-                        <option value="">All Brands</option>
-
-                        {brands.map((brand) => (
-                            <option key={brand.id} value={brand.id}>
-                                {brand.name}
-                            </option>
-                        ))}
-                    </select>
+                        placeholder="All Brands"
+                        options={[
+                            { value: "", label: "All Brands" },
+                            ...brands.map((b) => ({
+                                value: String(b.id),
+                                label: b.name,
+                            })),
+                        ]}
+                    />
 
                     {/* Status */}
-                    <select
+                    <AppSelect
                         value={filters.status || ""}
-                        onChange={(e) =>
+                        onChange={(val) =>
                             router.get(
                                 route("products.index"),
-                                {
-                                    ...filters,
-                                    status: e.target.value,
-                                },
-                                {
-                                    preserveState: true,
-                                    replace: true,
-                                },
+                                { ...filters, status: val },
+                                { preserveState: true, replace: true },
                             )
                         }
-                        className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
-                    >
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
+                        placeholder="All Status"
+                        className="w-full"
+                        options={[
+                            { value: "", label: "All Status" },
+                            { value: "active", label: "Active" },
+                            { value: "inactive", label: "Inactive" },
+                        ]}
+                    />
                 </div>
             </div>
 
