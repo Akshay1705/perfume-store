@@ -73,9 +73,14 @@ export default function Index() {
             <div className="mb-8">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent mb-2">
-                            Discounts
-                        </h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
+                                Discounts
+                            </h1>
+                            <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30">
+                                {stats?.total || 0} total
+                            </span>
+                        </div>
                         <p className="text-slate-400 text-sm">
                             Manage promotional campaigns, codes, and target
                             allocations
@@ -92,18 +97,10 @@ export default function Index() {
                 </div>
 
                 {/* Stats Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
                         <p className="text-slate-400 text-sm font-medium">
-                            Total Discounts
-                        </p>
-                        <p className="text-3xl font-bold text-white mt-1">
-                            {stats?.total || 0}
-                        </p>
-                    </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
-                            Active campaigns
+                            Active Campaigns
                         </p>
                         <p className="text-3xl font-bold text-emerald-400 mt-1">
                             {stats?.active || 0}

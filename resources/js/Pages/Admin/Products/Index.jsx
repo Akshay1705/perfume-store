@@ -3,7 +3,7 @@ import { Link, router } from "@inertiajs/react";
 import { Edit, Trash2, Plus } from "lucide-react";
 import { useState } from "react";
 
-export default function Index({ products }) {
+export default function Index({ products, filters, categories, brands }) {
     const [deleteId, setDeleteId] = useState(null);
 
     const handleDelete = (id) => {
@@ -19,9 +19,14 @@ export default function Index({ products }) {
             <div className="mb-8">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
-                            Products
-                        </h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                                Products
+                            </h1>
+                            <span className="px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-400 text-sm font-semibold border border-cyan-500/30">
+                                {products.total} total
+                            </span>
+                        </div>
                         <p className="text-slate-400 text-sm">
                             Manage your product catalog
                         </p>
@@ -37,21 +42,13 @@ export default function Index({ products }) {
                 </div>
 
                 {/* Stats Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
-                            Total Products
-                        </p>
-                        <p className="text-3xl font-bold text-white mt-1">
-                            {products.length}
-                        </p>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
                         <p className="text-slate-400 text-sm font-medium">
                             In Stock
                         </p>
                         <p className="text-3xl font-bold text-green-400 mt-1">
-                            {products.filter((p) => p.stock > 0).length}
+                            {products.data.filter((p) => p.stock > 0).length}
                         </p>
                     </div>
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
@@ -60,7 +57,7 @@ export default function Index({ products }) {
                         </p>
                         <p className="text-3xl font-bold text-yellow-400 mt-1">
                             {
-                                products.filter(
+                                products.data.filter(
                                     (p) => p.stock > 0 && p.stock < 10,
                                 ).length
                             }
@@ -71,14 +68,116 @@ export default function Index({ products }) {
                             Out of Stock
                         </p>
                         <p className="text-3xl font-bold text-red-400 mt-1">
-                            {products.filter((p) => p.stock === 0).length}
+                            {products.data.filter((p) => p.stock === 0).length}
                         </p>
                     </div>
                 </div>
             </div>
 
+            <div className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Search */}
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        defaultValue={filters.search || ""}
+                        onChange={(e) =>
+                            router.get(
+                                route("products.index"),
+                                {
+                                    ...filters,
+                                    search: e.target.value,
+                                },
+                                {
+                                    preserveState: true,
+                                    replace: true,
+                                },
+                            )
+                        }
+                        className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
+                    />
+
+                    {/* Category */}
+                    <select
+                        value={filters.category || ""}
+                        onChange={(e) =>
+                            router.get(
+                                route("products.index"),
+                                {
+                                    ...filters,
+                                    category: e.target.value,
+                                },
+                                {
+                                    preserveState: true,
+                                    replace: true,
+                                },
+                            )
+                        }
+                        className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
+                    >
+                        <option value="">All Categories</option>
+
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Brand */}
+                    <select
+                        value={filters.brand || ""}
+                        onChange={(e) =>
+                            router.get(
+                                route("products.index"),
+                                {
+                                    ...filters,
+                                    brand: e.target.value,
+                                },
+                                {
+                                    preserveState: true,
+                                    replace: true,
+                                },
+                            )
+                        }
+                        className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
+                    >
+                        <option value="">All Brands</option>
+
+                        {brands.map((brand) => (
+                            <option key={brand.id} value={brand.id}>
+                                {brand.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Status */}
+                    <select
+                        value={filters.status || ""}
+                        onChange={(e) =>
+                            router.get(
+                                route("products.index"),
+                                {
+                                    ...filters,
+                                    status: e.target.value,
+                                },
+                                {
+                                    preserveState: true,
+                                    replace: true,
+                                },
+                            )
+                        }
+                        className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
+                    >
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
             {/* Table Section */}
-            {products.length === 0 ? (
+            {products.data.length === 0 ? (
                 <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-12 text-center backdrop-blur-sm">
                     <div className="text-5xl mb-3">📦</div>
                     <h3 className="text-lg font-semibold text-slate-200 mb-2">
@@ -134,7 +233,7 @@ export default function Index({ products }) {
 
                             {/* Table Body */}
                             <tbody>
-                                {products.map((product) => (
+                                {products.data.map((product) => (
                                     <tr
                                         key={product.id}
                                         className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group"
@@ -172,9 +271,9 @@ export default function Index({ products }) {
                                                 <p className="font-semibold text-slate-100">
                                                     {product.name}
                                                 </p>
-                                                <p className="text-xs text-slate-500 mt-0.5">
+                                                {/* <p className="text-xs text-slate-500 mt-0.5">
                                                     ID: {product.id}
-                                                </p>
+                                                </p> */}
                                             </div>
                                         </td>
 
@@ -268,7 +367,31 @@ export default function Index({ products }) {
 
                     {/* Table Footer */}
                     <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        Showing {products.length} of {products.length} products
+                        Showing {products.data.length} of {products.total}{" "}
+                        products
+                    </div>
+                    <div className="flex justify-center gap-2 py-4">
+                        {products.links.map((link, index) => (
+                            <button
+                                key={index}
+                                disabled={!link.url}
+                                onClick={() => {
+                                    if (link.url) {
+                                        router.visit(link.url, {
+                                            preserveState: true,
+                                        });
+                                    }
+                                }}
+                                className={`px-3 py-2 rounded border text-sm ${
+                                    link.active
+                                        ? "bg-cyan-500 text-white border-cyan-500"
+                                        : "bg-slate-800 text-slate-300 border-slate-700"
+                                }`}
+                                dangerouslySetInnerHTML={{
+                                    __html: link.label,
+                                }}
+                            />
+                        ))}
                     </div>
                 </div>
             )}

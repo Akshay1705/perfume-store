@@ -19,9 +19,14 @@ export default function Index({ brands }) {
             <div className="mb-8">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-2">
-                            Brands
-                        </h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                                Brands
+                            </h1>
+                            <span className="px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-sm font-semibold border border-purple-500/30">
+                                {brands.length} total
+                            </span>
+                        </div>
                         <p className="text-slate-400 text-sm">
                             Manage your product brands
                         </p>
@@ -34,32 +39,6 @@ export default function Index({ brands }) {
                         <Plus size={18} />
                         Create Brand
                     </Link>
-                </div>
-
-                {/* Stats Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
-                            Total Brands
-                        </p>
-                        <p className="text-3xl font-bold text-white mt-1">
-                            {brands.length}
-                        </p>
-                    </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
-                            Active
-                        </p>
-                        <p className="text-3xl font-bold text-purple-400 mt-1">
-                            {brands.length}
-                        </p>
-                    </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
-                            Last Updated
-                        </p>
-                        <p className="text-sm text-slate-300 mt-1">Just now</p>
-                    </div>
                 </div>
             </div>
 

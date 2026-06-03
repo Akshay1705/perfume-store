@@ -11,22 +11,43 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Services\ProductService;
+use App\Http\Requests\Admin\ProductIndexRequest;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
-    {
-        $products = Product::with(['category', 'brand', 'primaryImage'])
-            ->latest()
-            ->get();
+    public function index(
+        ProductIndexRequest $request,
+        ProductService $service
+    ): Response {
+
+        $filters = $request->validated();
+
+        $products = $service->getProducts($filters);
 
         return Inertia::render(
             'Admin/Products/Index',
             [
                 'products' => $products,
+
+                'filters' => [
+                    'search' => $filters['search'] ?? '',
+                    'category' => $filters['category'] ?? '',
+                    'brand' => $filters['brand'] ?? '',
+                    'status' => $filters['status'] ?? '',
+                ],
+
+                'categories' => Category::select(
+                    'id',
+                    'name'
+                )->orderBy('name')->get(),
+
+                'brands' => Brand::select(
+                    'id',
+                    'name'
+                )->orderBy('name')->get(),
             ]
         );
     }
