@@ -24,8 +24,8 @@ class Discount extends Model
 
     protected $casts = [
         'is_active'        => 'boolean',
-        'starts_at'        => 'datetime',
-        'ends_at'          => 'datetime',
+        'starts_at'        => 'immutable_datetime:Y-m-d\TH:i:sP',
+        'ends_at'          => 'immutable_datetime:Y-m-d\TH:i:sP',
         'value'            => 'decimal:2',
         'min_order_amount' => 'decimal:2',
     ];

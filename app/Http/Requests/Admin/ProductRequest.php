@@ -55,6 +55,11 @@ class ProductRequest extends FormRequest
                 'max:255',
             ],
 
+            'gender' => [
+                'required',
+                'in:men,women,unisex'
+            ],
+
             'category_id' => [
                 'required',
                 'exists:categories,id',

@@ -14,7 +14,7 @@ import AppSelect from "@/Components/ui/AppSelect";
 
 
 export default function Index() {
-    const { discounts, stats, filters } = usePage().props;
+    const { discounts, totalCount, stats, filters } = usePage().props;
     const [deleteId, setDeleteId] = useState(null);
 
     const handleDelete = (id) => {
@@ -46,27 +46,27 @@ export default function Index() {
             : `₹${Number(discount.value).toFixed(2)}`;
     };
 
-    const isDiscountActive = (discount) => {
-        // Force evaluation to check explicitly for 1 or true
-        if (discount.is_active !== 1 && discount.is_active !== true)
-            return false;
-
+    const getDiscountStatus = (discount) => {
         const now = new Date();
-        now.setHours(0, 0, 0, 0); // Clear out time variances
 
+        // is_active=0 means manually disabled
+        if (!discount.is_active) {
+            return "inactive";
+        }
+
+        // Has a start date that hasn't arrived yet
         if (discount.starts_at) {
             const startDate = new Date(discount.starts_at);
-            startDate.setHours(0, 0, 0, 0);
-            if (startDate > now) return false;
+            if (startDate > now) return "scheduled";
         }
 
+        // Has an end date that has passed
         if (discount.ends_at) {
             const endDate = new Date(discount.ends_at);
-            endDate.setHours(0, 0, 0, 0);
-            if (endDate < now) return false;
+            if (endDate < now) return "expired";
         }
 
-        return true;
+        return "active";
     };
 
     return (
@@ -80,7 +80,7 @@ export default function Index() {
                                 Discounts
                             </h1>
                             <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30">
-                                {stats?.total || 0} total
+                                {totalCount} total
                             </span>
                         </div>
                         <p className="text-slate-400 text-sm">
@@ -99,10 +99,10 @@ export default function Index() {
                 </div>
 
                 {/* Stats Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
                         <p className="text-slate-400 text-sm font-medium">
-                            Active Campaigns
+                            Active
                         </p>
                         <p className="text-3xl font-bold text-emerald-400 mt-1">
                             {stats?.active || 0}
@@ -110,7 +110,15 @@ export default function Index() {
                     </div>
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
                         <p className="text-slate-400 text-sm font-medium">
-                            Scheduled / Paused
+                            Scheduled
+                        </p>
+                        <p className="text-3xl font-bold text-blue-400 mt-1">
+                            {stats?.scheduled || 0}
+                        </p>
+                    </div>
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
+                        <p className="text-slate-400 text-sm font-medium">
+                            Inactive
                         </p>
                         <p className="text-3xl font-bold text-rose-400 mt-1">
                             {stats?.inactive || 0}
@@ -118,29 +126,48 @@ export default function Index() {
                     </div>
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
                         <p className="text-slate-400 text-sm font-medium">
-                            Percentage Types
+                            Expired
                         </p>
-                        <p className="text-3xl font-bold text-red-400 mt-1">
-                            {stats?.by_type?.percentage || 0}
+                        <p className="text-3xl font-bold text-slate-400 mt-1">
+                            {stats?.expired || 0}
                         </p>
                     </div>
                 </div>
             </div>
 
             <div className="mb-6 flex items-center justify-between gap-4 bg-slate-800/20 border border-slate-700/50 rounded-lg p-4">
-                <input
-                    type="text"
-                    placeholder="Search discounts..."
-                    defaultValue={filters.search}
-                    onChange={(e) =>
-                        router.get(
-                            route("discounts.index"),
-                            { search: e.target.value, status: filters.status },
-                            { preserveState: true, replace: true },
-                        )
-                    }
-                    className="w-72 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-red-500/50 transition-colors"
-                />
+                <div className="flex items-center gap-2">
+                    <input
+                        type="text"
+                        placeholder="Search discounts..."
+                        defaultValue={filters.search}
+                        onChange={(e) =>
+                            router.get(
+                                route("discounts.index"),
+                                {
+                                    search: e.target.value,
+                                    status: filters.status,
+                                },
+                                { preserveState: true, replace: true },
+                            )
+                        }
+                        className="w-72 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-red-500/50 transition-colors"
+                    />
+                    {(filters.search || filters.status) && (
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    route("discounts.index"),
+                                    {},
+                                    { preserveState: false },
+                                )
+                            }
+                            className="px-4 py-2.5 rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-400 hover:text-red-400 hover:border-red-500/30 text-sm font-medium transition-all duration-200 whitespace-nowrap"
+                        >
+                            Clear Filters
+                        </button>
+                    )}
+                </div>
 
                 <AppSelect
                     value={filters.status || ""}
@@ -157,6 +184,8 @@ export default function Index() {
                         { value: "", label: "All Status" },
                         { value: "active", label: "Active" },
                         { value: "inactive", label: "Inactive" },
+                        { value: "scheduled", label: "Scheduled" },
+                        { value: "expired", label: "Expired" },
                     ]}
                 />
             </div>
@@ -214,7 +243,7 @@ export default function Index() {
 
                             <tbody className="divide-y divide-slate-700/30">
                                 {discounts.data.map((discount) => {
-                                    const active = isDiscountActive(discount);
+                                    const active = discount.is_active;
                                     return (
                                         <tr
                                             key={discount.id}
@@ -295,29 +324,64 @@ export default function Index() {
                                             </td>
 
                                             <td className="px-6 py-4">
-                                                <span
-                                                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                                                        active
-                                                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                                            : "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                                                    }`}
-                                                >
-                                                    {active ? (
-                                                        <>
-                                                            <ShieldCheck
-                                                                size={12}
-                                                            />{" "}
-                                                            Active
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <ShieldAlert
-                                                                size={12}
-                                                            />{" "}
-                                                            Inactive
-                                                        </>
-                                                    )}
-                                                </span>
+                                                {(() => {
+                                                    const status =
+                                                        getDiscountStatus(
+                                                            discount,
+                                                        );
+                                                    const statusConfig = {
+                                                        active: {
+                                                            label: "Active",
+                                                            icon: (
+                                                                <ShieldCheck
+                                                                    size={12}
+                                                                />
+                                                            ),
+                                                            classes:
+                                                                "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                                                        },
+                                                        inactive: {
+                                                            label: "Inactive",
+                                                            icon: (
+                                                                <ShieldAlert
+                                                                    size={12}
+                                                                />
+                                                            ),
+                                                            classes:
+                                                                "bg-rose-500/10 text-rose-400 border-rose-500/20",
+                                                        },
+                                                        scheduled: {
+                                                            label: "Scheduled",
+                                                            icon: (
+                                                                <Calendar
+                                                                    size={12}
+                                                                />
+                                                            ),
+                                                            classes:
+                                                                "bg-blue-500/10 text-blue-400 border-blue-500/20",
+                                                        },
+                                                        expired: {
+                                                            label: "Expired",
+                                                            icon: (
+                                                                <ShieldAlert
+                                                                    size={12}
+                                                                />
+                                                            ),
+                                                            classes:
+                                                                "bg-slate-500/10 text-slate-400 border-slate-500/20",
+                                                        },
+                                                    };
+                                                    const config =
+                                                        statusConfig[status];
+                                                    return (
+                                                        <span
+                                                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${config.classes}`}
+                                                        >
+                                                            {config.icon}{" "}
+                                                            {config.label}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </td>
 
                                             <td className="px-6 py-4 text-right">
@@ -327,7 +391,7 @@ export default function Index() {
                                                             "discounts.edit",
                                                             discount.id,
                                                         )}
-                                                        className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
+                                                        className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-200"
                                                         title="Edit"
                                                     >
                                                         <Edit size={16} />
@@ -353,23 +417,45 @@ export default function Index() {
                         </table>
                     </div>
 
-                    <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        <div className="flex justify-between items-center">
-                            <span>
-                                Showing {discounts.from} - {discounts.to}
-                                of {discounts.total} discounts
-                            </span>
+                    {/* Table Footer */}
+                    <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            {/* Showing count */}
+                            <p className="text-sm text-slate-400">
+                                Showing{" "}
+                                <span className="text-slate-200 font-medium">
+                                    {discounts.from}
+                                </span>{" "}
+                                -{" "}
+                                <span className="text-slate-200 font-medium">
+                                    {discounts.to}
+                                </span>{" "}
+                                of{" "}
+                                <span className="text-slate-200 font-medium">
+                                    {discounts.total}
+                                </span>{" "}
+                                discounts
+                            </p>
 
-                            <div className="flex gap-2">
+                            {/* Pagination */}
+                            <div className="flex items-center gap-1">
                                 {discounts.links.map((link, index) => (
                                     <button
                                         key={index}
                                         disabled={!link.url}
-                                        onClick={() => router.visit(link.url)}
-                                        className={`px-3 py-1 rounded ${
+                                        onClick={() => {
+                                            if (link.url) {
+                                                router.visit(link.url, {
+                                                    preserveState: true,
+                                                });
+                                            }
+                                        }}
+                                        className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium border transition-all duration-200 ${
                                             link.active
-                                                ? "bg-red-500 text-white"
-                                                : "bg-slate-700 text-slate-300"
+                                                ? "bg-red-500/20 text-red-400 border-red-500/50"
+                                                : !link.url
+                                                  ? "bg-transparent text-slate-600 border-transparent cursor-not-allowed"
+                                                  : "bg-slate-800/60 text-slate-300 border-slate-700/50 hover:bg-slate-700/60 hover:text-white hover:border-slate-600"
                                         }`}
                                         dangerouslySetInnerHTML={{
                                             __html: link.label,

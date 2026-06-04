@@ -17,6 +17,7 @@ class ProductService
             'price' => $data['price'],
             'stock' => $data['stock'],
             'volume' => $data['volume'] ?? null,
+            'gender' => $data['gender'],
             'category_id' => $data['category_id'],
             'brand_id' => $data['brand_id'],
             'is_active' => $data['is_active'] ?? true,
@@ -35,6 +36,7 @@ class ProductService
             'price' => $data['price'],
             'stock' => $data['stock'],
             'volume' => $data['volume'] ?? null,
+            'gender' => $data['gender'],
             'category_id' => $data['category_id'],
             'brand_id' => $data['brand_id'],
             'is_active' => $data['is_active'] ?? true,
@@ -74,6 +76,12 @@ class ProductService
                 $query->where('brand_id', $brand)
             )
 
+            ->when(
+                $filters['gender'] ?? null,
+                fn($query, $gender) =>
+                $query->where('gender', $gender)
+            )
+            
             ->when(
                 $filters['status'] ?? null,
                 function ($query, $status) {

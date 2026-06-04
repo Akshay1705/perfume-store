@@ -3,6 +3,7 @@ import { useForm, Link, usePage } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { ArrowLeft, Plus } from "lucide-react";
 import AppSelect from "@/Components/ui/AppSelect";
+import AppDateTimePicker from "@/Components/ui/AppDateTimePicker";
 
 export default function Create() {
     const { users, brands, categories } = usePage().props;
@@ -244,14 +245,10 @@ export default function Create() {
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
                             Start Date
                         </label>
-                        <input
-                            type="datetime-local"
+                        <AppDateTimePicker
                             value={data.starts_at}
-                            onChange={(e) =>
-                                setData("starts_at", e.target.value)
-                            }
-                            className={inputClasses(errors.starts_at)}
-                            style={{ colorScheme: "dark" }}
+                            onChange={(val) => setData("starts_at", val)}
+                            placeholder="Start date"
                         />
                         <ErrorMsg field="starts_at" />
                     </div>
@@ -260,12 +257,10 @@ export default function Create() {
                         <label className="block text-sm font-semibold text-slate-200 mb-2">
                             End Date
                         </label>
-                        <input
-                            type="datetime-local"
+                        <AppDateTimePicker
                             value={data.ends_at}
-                            onChange={(e) => setData("ends_at", e.target.value)}
-                            className={inputClasses(errors.ends_at)}
-                            style={{ colorScheme: "dark" }}
+                            onChange={(val) => setData("ends_at", val)}
+                            placeholder="End date"
                         />
                         <ErrorMsg field="ends_at" />
                     </div>

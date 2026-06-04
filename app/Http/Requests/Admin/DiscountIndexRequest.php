@@ -16,7 +16,7 @@ class DiscountIndexRequest extends FormRequest
         return [
             'search' => ['nullable', 'string', 'max:255'],
             'type' => ['nullable', 'in:percentage,fixed'],
-            'status' => ['nullable', 'in:active,inactive'],
+            'status' => ['nullable', 'in:active,inactive,scheduled,expired'],
             'per_page' => ['nullable', 'integer', 'min:5', 'max:100'],
         ];
     }

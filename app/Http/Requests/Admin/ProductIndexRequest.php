@@ -18,6 +18,7 @@ class ProductIndexRequest extends FormRequest
             'category' => ['nullable', 'integer', 'exists:categories,id'],
             'brand' => ['nullable', 'integer', 'exists:brands,id'],
             'status' => ['nullable', 'in:active,inactive'],
+            'gender' => ['nullable', 'in:men,women,unisex'],
             'per_page' => ['nullable', 'integer', 'in:10,15,25,50'],
         ];
     }

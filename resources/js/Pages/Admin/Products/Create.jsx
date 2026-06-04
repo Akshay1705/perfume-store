@@ -24,6 +24,7 @@ export default function Create({ categories, brands }) {
         price: "",
         stock: "",
         volume: "",
+        gender: "unisex",
         category_id: "",
         brand_id: "",
         is_active: true,
@@ -351,6 +352,22 @@ export default function Create({ categories, brands }) {
                                 />
                             )}
                             <ErrorMsg field="volume" />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-200 mb-2">
+                                Gender
+                            </label>
+
+                            <AppSelect
+                                value={data.gender || ""}
+                                onChange={(val) => setData("gender", val)}
+                                options={[
+                                    { value: "men", label: "Men" },
+                                    { value: "women", label: "Women" },
+                                    { value: "unisex", label: "Unisex" },
+                                ]}
+                            />
                         </div>
 
                         {/* Row 5 — Category + Brand */}

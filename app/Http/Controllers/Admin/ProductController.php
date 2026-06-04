@@ -32,11 +32,14 @@ class ProductController extends Controller
             [
                 'products' => $products,
 
+                'totalCount' => \App\Models\Product::count(), // always unfiltered
+
                 'filters' => [
                     'search' => $filters['search'] ?? '',
                     'category' => $filters['category'] ?? '',
                     'brand' => $filters['brand'] ?? '',
                     'status' => $filters['status'] ?? '',
+                    'gender' => $filters['gender'] ?? '',
                 ],
 
                 'categories' => Category::select(
@@ -48,6 +51,7 @@ class ProductController extends Controller
                     'id',
                     'name'
                 )->orderBy('name')->get(),
+
             ]
         );
     }

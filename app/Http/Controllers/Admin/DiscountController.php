@@ -44,6 +44,8 @@ class DiscountController extends Controller
             [
                 'discounts' => $discounts,
 
+                'totalCount' => \App\Models\Discount::count(), // always unfiltered
+
                 'stats' => $stats,
 
                 'filters' => [

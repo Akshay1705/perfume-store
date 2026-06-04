@@ -4,7 +4,7 @@ import { Edit, Trash2, Plus } from "lucide-react";
 import { useState } from "react";
 import AppSelect from "@/Components/ui/AppSelect";
 
-export default function Index({ products, filters, categories, brands }) {
+export default function Index({ products, totalCount, filters, categories, brands }) {
     const [deleteId, setDeleteId] = useState(null);
 
     const handleDelete = (id) => {
@@ -25,7 +25,7 @@ export default function Index({ products, filters, categories, brands }) {
                                 Products
                             </h1>
                             <span className="px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-400 text-sm font-semibold border border-cyan-500/30">
-                                {products.total} total
+                                {totalCount} total
                             </span>
                         </div>
                         <p className="text-slate-400 text-sm">
@@ -76,7 +76,7 @@ export default function Index({ products, filters, categories, brands }) {
             </div>
 
             <div className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     {/* Search */}
                     <input
                         type="text"
@@ -138,6 +138,30 @@ export default function Index({ products, filters, categories, brands }) {
                         ]}
                     />
 
+                    <AppSelect
+                        value={filters.gender || ""}
+                        onChange={(val) =>
+                            router.get(
+                                route("products.index"),
+                                {
+                                    search: filters.search,
+                                    category: filters.category,
+                                    brand: filters.brand,
+                                    status: filters.status,
+                                    gender: val,
+                                },
+                                { preserveState: true, replace: true },
+                            )
+                        }
+                        placeholder="All Gender"
+                        options={[
+                            { value: "", label: "All Gender" },
+                            { value: "men", label: "Men" },
+                            { value: "women", label: "Women" },
+                            { value: "unisex", label: "Unisex" },
+                        ]}
+                    />
+
                     {/* Status */}
                     <AppSelect
                         value={filters.status || ""}
@@ -158,6 +182,25 @@ export default function Index({ products, filters, categories, brands }) {
                     />
                 </div>
             </div>
+
+            {(filters.search ||
+                filters.category ||
+                filters.brand ||
+                filters.status ||
+                filters.gender) && (
+                <button
+                    onClick={() =>
+                        router.get(
+                            route("products.index"),
+                            {},
+                            { preserveState: false },
+                        )
+                    }
+                    className="px-4 py-2.5 mb-4 rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-400 hover:text-red-400 hover:border-red-500/30 text-sm font-medium transition-all duration-200 whitespace-nowrap"
+                >
+                    Clear Filters
+                </button>
+            )}
 
             {/* Table Section */}
             {products.data.length === 0 ? (
@@ -198,6 +241,9 @@ export default function Index({ products, filters, categories, brands }) {
                                     </th>
                                     <th className="text-center px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Volume
+                                    </th>
+                                    <th className="text-center px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
+                                        Gender
                                     </th>
                                     <th className="text-right px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Price
@@ -272,8 +318,25 @@ export default function Index({ products, filters, categories, brands }) {
 
                                         {/* Volume Cell */}
                                         <td className="px-6 py-4 text-center">
-                                            <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-sm font-medium">
+                                            {/* ADDED: whitespace-nowrap to keep text on one line */}
+                                            <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium whitespace-nowrap">
                                                 {product.volume || "-"}
+                                            </span>
+                                        </td>
+
+                                        {/* Gender Cell */}
+                                        <td className="px-6 py-4 text-center">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                    product.gender === "men"
+                                                        ? "bg-blue-500/20 text-blue-400"
+                                                        : product.gender ===
+                                                            "women"
+                                                          ? "bg-pink-500/20 text-pink-400"
+                                                          : "bg-purple-500/20 text-purple-400"
+                                                }`}
+                                            >
+                                                {product.gender}
                                             </span>
                                         </td>
 

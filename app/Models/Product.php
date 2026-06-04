@@ -16,6 +16,7 @@ class Product extends Model
         'price',
         'stock',
         'volume',
+        'gender',
         'is_active',
         'category_id',
         'brand_id',

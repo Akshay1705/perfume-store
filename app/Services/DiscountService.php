@@ -57,10 +57,25 @@ class DiscountService
      */
     public function getStats(): array
     {
+        $now = now();
+
         return [
             'total' => Discount::count(),
-            'active' => Discount::where('is_active', true)->count(),
+            'active' => Discount::where('is_active', true)
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+                })
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+                })
+                ->count(),
+            'scheduled' => Discount::where('is_active', true)
+                ->where('starts_at', '>', $now)
+                ->count(),
             'inactive' => Discount::where('is_active', false)->count(),
+            'expired' => Discount::where('is_active', true)
+                ->where('ends_at', '<', $now)
+                ->count(),
             'by_type' => [
                 'percentage' => Discount::where('type', 'percentage')->count(),
                 'fixed' => Discount::where('type', 'fixed')->count(),
@@ -109,19 +124,23 @@ class DiscountService
             ->when(
                 $filters['status'] ?? null,
                 function ($query, $status) {
-
+                    $now = now();
                     if ($status === 'active') {
-                        $query->where(
-                            'is_active',
-                            true
-                        );
-                    }
-
-                    if ($status === 'inactive') {
-                        $query->where(
-                            'is_active',
-                            false
-                        );
+                        $query->where('is_active', true)
+                            ->where(function ($q) use ($now) {
+                                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+                            })
+                            ->where(function ($q) use ($now) {
+                                $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+                            });
+                    } elseif ($status === 'inactive') {
+                        $query->where('is_active', false);
+                    } elseif ($status === 'scheduled') {
+                        $query->where('is_active', true)
+                            ->where('starts_at', '>', $now);
+                    } elseif ($status === 'expired') {
+                        $query->where('is_active', true)
+                            ->where('ends_at', '<', $now);
                     }
                 }
             )

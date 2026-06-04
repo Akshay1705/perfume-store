@@ -22,6 +22,7 @@ export default function Edit({ product, categories, brands }) {
         price: product.price,
         stock: product.stock,
         volume: product.volume,
+        gender: product.gender,
         category_id: String(product.category_id || ""),
         brand_id: String(product.brand_id || ""),
         is_active: product.is_active,
@@ -342,6 +343,22 @@ export default function Edit({ product, categories, brands }) {
                                 />
                             )}
                             <ErrorMsg field="volume" />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-200 mb-2">
+                                Gender
+                            </label>
+
+                            <AppSelect
+                                value={data.gender || ""}
+                                onChange={(val) => setData("gender", val)}
+                                options={[
+                                    { value: "men", label: "Men" },
+                                    { value: "women", label: "Women" },
+                                    { value: "unisex", label: "Unisex" },
+                                ]}
+                            />
                         </div>
 
                         {/* Row 5 — Category + Brand */}
