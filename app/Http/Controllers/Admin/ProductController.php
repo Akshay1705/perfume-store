@@ -115,7 +115,7 @@ class ProductController extends Controller
         return Inertia::render(
             'Admin/Products/Edit',
             [
-                'product' => $product->load(['category', 'brand', 'images']),
+                'product' => $product->load(['category', 'brand', 'images', 'variants']),
                 'categories' => $categories,
                 'brands' => $brands,
             ]

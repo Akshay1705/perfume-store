@@ -13,9 +13,6 @@ class Product extends Model
         'name',
         'slug',
         'description',
-        'price',
-        'stock',
-        'volume',
         'gender',
         'is_active',
         'category_id',
@@ -24,7 +21,6 @@ class Product extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
-        'price'     => 'decimal:2',
     ];
 
     public function category(): BelongsTo
@@ -51,4 +47,9 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+     public function variants(): HasMany
+     {
+         return $this->hasMany(ProductVariant::class);
+     }
 }

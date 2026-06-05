@@ -37,24 +37,6 @@ class ProductRequest extends FormRequest
                 'string',
             ],
 
-            'price' => [
-                'required',
-                'numeric',
-                'min:0',
-            ],
-
-            'stock' => [
-                'required',
-                'integer',
-                'min:0',
-            ],
-
-            'volume' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
             'gender' => [
                 'required',
                 'in:men,women,unisex'
@@ -71,6 +53,16 @@ class ProductRequest extends FormRequest
             ],
 
             'is_active' => [
+                'boolean',
+            ],
+
+            'variants' => 'required|array|min:1',
+
+            'variants.*.volume' => 'required|string|max:100',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.stock' => 'required|integer|min:0',
+            'variants.*.is_active' => [
+                'required',
                 'boolean',
             ],
         ];

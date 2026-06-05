@@ -1,11 +1,18 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router } from "@inertiajs/react";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronRight, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import AppSelect from "@/Components/ui/AppSelect";
 
-export default function Index({ products, totalCount, filters, categories, brands }) {
+export default function Index({
+    products,
+    totalCount,
+    filters,
+    categories,
+    brands,
+}) {
     const [deleteId, setDeleteId] = useState(null);
+    const [expandedProducts, setExpandedProducts] = useState([]);
 
     const handleDelete = (id) => {
         if (confirm("Are you sure? This action cannot be undone.")) {
@@ -13,6 +20,33 @@ export default function Index({ products, totalCount, filters, categories, brand
             setDeleteId(null);
         }
     };
+
+    const toggleProduct = (productId) => {
+        setExpandedProducts((prev) =>
+            prev.includes(productId)
+                ? prev.filter((id) => id !== productId)
+                : [...prev, productId],
+        );
+    };
+
+    const allVariants = products.data.flatMap(
+        (product) => product.variants || [],
+    );
+
+    const inStockCount = allVariants.filter(
+        (variant) => variant.is_active && Number(variant.stock) > 0,
+    ).length;
+
+    const lowStockCount = allVariants.filter(
+        (variant) =>
+            variant.is_active &&
+            Number(variant.stock) > 0 &&
+            Number(variant.stock) < 10,
+    ).length;
+
+    const outOfStockCount = allVariants.filter(
+        (variant) => variant.is_active && Number(variant.stock) === 0,
+    ).length;
 
     return (
         <AdminLayout>
@@ -49,7 +83,7 @@ export default function Index({ products, totalCount, filters, categories, brand
                             In Stock
                         </p>
                         <p className="text-3xl font-bold text-green-400 mt-1">
-                            {products.data.filter((p) => p.stock > 0).length}
+                            {inStockCount}
                         </p>
                     </div>
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
@@ -57,11 +91,7 @@ export default function Index({ products, totalCount, filters, categories, brand
                             Low Stock
                         </p>
                         <p className="text-3xl font-bold text-yellow-400 mt-1">
-                            {
-                                products.data.filter(
-                                    (p) => p.stock > 0 && p.stock < 10,
-                                ).length
-                            }
+                            {lowStockCount}
                         </p>
                     </div>
                     <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
@@ -69,7 +99,7 @@ export default function Index({ products, totalCount, filters, categories, brand
                             Out of Stock
                         </p>
                         <p className="text-3xl font-bold text-red-400 mt-1">
-                            {products.data.filter((p) => p.stock === 0).length}
+                            {outOfStockCount}
                         </p>
                     </div>
                 </div>
@@ -227,6 +257,7 @@ export default function Index({ products, totalCount, filters, categories, brand
                             {/* Table Header */}
                             <thead>
                                 <tr className="border-b border-slate-700/50 bg-slate-800/40">
+                                    <th className="w-12 text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide"></th>
                                     <th className="text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Image
                                     </th>
@@ -262,151 +293,305 @@ export default function Index({ products, totalCount, filters, categories, brand
 
                             {/* Table Body */}
                             <tbody>
-                                {products.data.map((product) => (
-                                    <tr
-                                        key={product.id}
-                                        className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group"
-                                    >
-                                        {/* Image Cell */}
-                                        <td className="px-6 py-4">
-                                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-700/40 flex items-center justify-center border border-slate-700/50">
-                                                {product.primary_image?.url ? (
-                                                    <img
-                                                        src={
-                                                            product
-                                                                .primary_image
-                                                                .url
-                                                        }
-                                                        alt={product.name}
-                                                        className="w-full h-full object-cover"
-                                                        onError={(e) => {
-                                                            e.target.style.display =
-                                                                "none";
-                                                            e.target.parentElement.innerHTML =
-                                                                '<span class="text-xs text-slate-400">📸</span>';
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <span className="text-xs text-slate-400">
-                                                        📸
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
+                                {products.data.map((product) => {
+                                    const totalStock =
+                                        product.variants?.reduce(
+                                            (sum, variant) =>
+                                                sum + Number(variant.stock),
+                                            0,
+                                        ) || 0;
+                                    return (
+                                        <>
+                                            <tr
+                                                key={product.id}
+                                                className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group"
+                                            >
+                                                <td className="px-4 py-4">
+                                                    {product.variants?.length >
+                                                        1 && (
+                                                        <button
+                                                            onClick={() =>
+                                                                toggleProduct(
+                                                                    product.id,
+                                                                )
+                                                            }
+                                                            className="text-slate-400 hover:text-cyan-400"
+                                                        >
+                                                            {expandedProducts.includes(
+                                                                product.id,
+                                                            ) ? (
+                                                                <ChevronDown
+                                                                    size={18}
+                                                                />
+                                                            ) : (
+                                                                <ChevronRight
+                                                                    size={18}
+                                                                />
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                </td>
+                                                {/* Image Cell */}
+                                                <td className="px-6 py-4">
+                                                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-700/40 flex items-center justify-center border border-slate-700/50">
+                                                        {product.primary_image
+                                                            ?.url ? (
+                                                            <img
+                                                                src={
+                                                                    product
+                                                                        .primary_image
+                                                                        .url
+                                                                }
+                                                                alt={
+                                                                    product.name
+                                                                }
+                                                                className="w-full h-full object-cover"
+                                                                onError={(
+                                                                    e,
+                                                                ) => {
+                                                                    e.target.style.display =
+                                                                        "none";
+                                                                    e.target.parentElement.innerHTML =
+                                                                        '<span class="text-xs text-slate-400">📸</span>';
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <span className="text-xs text-slate-400">
+                                                                📸
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
 
-                                        {/* Product Name Cell */}
-                                        <td className="px-6 py-4">
-                                            <div>
-                                                <p className="font-semibold text-slate-100">
-                                                    {product.name}
-                                                </p>
-                                                {/* <p className="text-xs text-slate-500 mt-0.5">
+                                                {/* Product Name Cell */}
+                                                <td className="px-6 py-4">
+                                                    <div>
+                                                        <p className="font-semibold text-slate-100">
+                                                            {product.name}
+                                                        </p>
+                                                        {/* <p className="text-xs text-slate-500 mt-0.5">
                                                     ID: {product.id}
                                                 </p> */}
-                                            </div>
-                                        </td>
+                                                    </div>
+                                                </td>
 
-                                        {/* Category Cell */}
-                                        <td className="px-6 py-4 text-slate-300">
-                                            {product.category?.name || "-"}
-                                        </td>
+                                                {/* Category Cell */}
+                                                <td className="px-6 py-4 text-slate-300">
+                                                    {product.category?.name ||
+                                                        "-"}
+                                                </td>
 
-                                        {/* Brand Cell */}
-                                        <td className="px-6 py-4 text-slate-300">
-                                            {product.brand?.name || "-"}
-                                        </td>
+                                                {/* Brand Cell */}
+                                                <td className="px-6 py-4 text-slate-300">
+                                                    {product.brand?.name || "-"}
+                                                </td>
 
-                                        {/* Volume Cell */}
-                                        <td className="px-6 py-4 text-center">
-                                            {/* ADDED: whitespace-nowrap to keep text on one line */}
-                                            <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium whitespace-nowrap">
-                                                {product.volume || "-"}
-                                            </span>
-                                        </td>
+                                                {/* Volume Cell */}
+                                                <td className="px-6 py-4 text-center">
+                                                    {/* ADDED: whitespace-nowrap to keep text on one line */}
+                                                    <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium whitespace-nowrap">
+                                                        {product.variants
+                                                            ?.map(
+                                                                (v) => v.volume,
+                                                            )
+                                                            .join(", ")}
+                                                    </span>
+                                                </td>
 
-                                        {/* Gender Cell */}
-                                        <td className="px-6 py-4 text-center">
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                    product.gender === "men"
-                                                        ? "bg-blue-500/20 text-blue-400"
-                                                        : product.gender ===
-                                                            "women"
-                                                          ? "bg-pink-500/20 text-pink-400"
-                                                          : "bg-purple-500/20 text-purple-400"
-                                                }`}
-                                            >
-                                                {product.gender}
-                                            </span>
-                                        </td>
+                                                {/* Gender Cell */}
+                                                <td className="px-6 py-4 text-center">
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                            product.gender ===
+                                                            "men"
+                                                                ? "bg-blue-500/20 text-blue-400"
+                                                                : product.gender ===
+                                                                    "women"
+                                                                  ? "bg-pink-500/20 text-pink-400"
+                                                                  : "bg-purple-500/20 text-purple-400"
+                                                        }`}
+                                                    >
+                                                        {product.gender}
+                                                    </span>
+                                                </td>
 
-                                        {/* Price Cell */}
-                                        <td className="px-6 py-4 text-right">
-                                            <span className="font-semibold text-cyan-400">
-                                                ₹
-                                                {parseFloat(
-                                                    product.price,
-                                                ).toFixed(2)}
-                                            </span>
-                                        </td>
+                                                {/* Price Cell */}
+                                                <td className="px-6 py-4 text-right">
+                                                    <span className="font-semibold text-cyan-400">
+                                                        ₹
+                                                        {Math.min(
+                                                            ...product.variants.map(
+                                                                (v) =>
+                                                                    Number(
+                                                                        v.price,
+                                                                    ),
+                                                            ),
+                                                        )}
+                                                        +
+                                                    </span>
+                                                </td>
 
-                                        {/* Stock Cell */}
-                                        <td className="px-6 py-4 text-center">
-                                            <span
-                                                className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                                                    product.stock > 20
-                                                        ? "bg-green-500/20 text-green-400"
-                                                        : product.stock > 0
-                                                          ? "bg-yellow-500/20 text-yellow-400"
-                                                          : "bg-red-500/20 text-red-400"
-                                                }`}
-                                            >
-                                                {product.stock}
-                                            </span>
-                                        </td>
+                                                {/* Stock Cell */}
+                                                <td className="px-6 py-4 text-center">
+                                                    <span
+                                                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+                                                            totalStock > 20
+                                                                ? "bg-green-500/20 text-green-400"
+                                                                : totalStock > 0
+                                                                  ? "bg-yellow-500/20 text-yellow-400"
+                                                                  : "bg-red-500/20 text-red-400"
+                                                        }`}
+                                                    >
+                                                        {totalStock}
+                                                    </span>
+                                                </td>
 
-                                        {/* Status Cell */}
-                                        <td className="px-6 py-4 text-center">
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                    product.is_active
-                                                        ? "bg-green-500/20 text-green-400"
-                                                        : "bg-slate-600/30 text-slate-400"
-                                                }`}
-                                            >
-                                                {product.is_active
-                                                    ? "Active"
-                                                    : "Inactive"}
-                                            </span>
-                                        </td>
+                                                {/* Status Cell */}
+                                                <td className="px-6 py-4 text-center">
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                            product.is_active
+                                                                ? "bg-green-500/20 text-green-400"
+                                                                : "bg-slate-600/30 text-slate-400"
+                                                        }`}
+                                                    >
+                                                        {product.is_active
+                                                            ? "Active"
+                                                            : "Inactive"}
+                                                    </span>
+                                                </td>
 
-                                        {/* Actions Cell */}
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2 opacity-100 group-hover:opacity-100">
-                                                <Link
-                                                    href={route(
-                                                        "products.edit",
-                                                        product.id,
-                                                    )}
-                                                    className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-200"
-                                                    title="Edit"
-                                                >
-                                                    <Edit size={16} />
-                                                </Link>
+                                                {/* Actions Cell */}
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex justify-end gap-2 opacity-100 group-hover:opacity-100">
+                                                        <Link
+                                                            href={route(
+                                                                "products.edit",
+                                                                product.id,
+                                                            )}
+                                                            className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-200"
+                                                            title="Edit"
+                                                        >
+                                                            <Edit size={16} />
+                                                        </Link>
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(product.id)
-                                                    }
-                                                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    product.id,
+                                                                )
+                                                            }
+                                                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {/* Variants Row */}
+                                            {expandedProducts.includes(
+                                                product.id,
+                                            ) &&
+                                                product.variants?.length >
+                                                    1 && (
+                                                    <tr>
+                                                        <td colSpan="11">
+                                                            <div className="bg-slate-900/40 px-8 py-4">
+                                                                <table className="w-full">
+                                                                    <thead>
+                                                                        <tr className="text-slate-400 text-sm">
+                                                                            <th className="text-left py-2">
+                                                                                SKU
+                                                                            </th>
+                                                                            <th className="text-left py-2">
+                                                                                Volume
+                                                                            </th>
+                                                                            <th className="text-left py-2">
+                                                                                Price
+                                                                            </th>
+                                                                            <th className="text-left py-2">
+                                                                                Stock
+                                                                            </th>
+                                                                            <th className="text-left py-2">
+                                                                                Active
+                                                                            </th>
+                                                                        </tr>
+                                                                    </thead>
+
+                                                                    <tbody>
+                                                                        {product.variants.map(
+                                                                            (
+                                                                                variant,
+                                                                            ) => (
+                                                                                <tr
+                                                                                    key={
+                                                                                        variant.id
+                                                                                    }
+                                                                                    className="border-t border-slate-800"
+                                                                                >
+                                                                                    <td className="py-2 text-slate-300">
+                                                                                        {
+                                                                                            variant.sku
+                                                                                        }
+                                                                                    </td>
+
+                                                                                    <td className="py-2 text-cyan-400">
+                                                                                        {
+                                                                                            variant.volume
+                                                                                        }
+                                                                                    </td>
+
+                                                                                    <td className="py-2 text-slate-300">
+                                                                                        ₹
+                                                                                        {
+                                                                                            variant.price
+                                                                                        }
+                                                                                    </td>
+
+                                                                                    <td className="py-2">
+                                                                                        <span
+                                                                                            className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+                                                                                                variant.stock >
+                                                                                                20
+                                                                                                    ? "bg-green-500/20 text-green-400"
+                                                                                                    : variant.stock >
+                                                                                                        0
+                                                                                                      ? "bg-yellow-500/20 text-yellow-400"
+                                                                                                      : "bg-red-500/20 text-red-400"
+                                                                                            }`}
+                                                                                        >
+                                                                                            {
+                                                                                                variant.stock
+                                                                                            }
+                                                                                        </span>
+                                                                                    </td>
+
+                                                                                    <td className="py-2">
+                                                                                        <span
+                                                                                            className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+                                                                                                variant.is_active
+                                                                                                    ? "bg-green-500/20 text-green-400"
+                                                                                                    : "bg-gray-500/20 text-gray-400"
+                                                                                            }`}
+                                                                                        >
+                                                                                            {variant.is_active
+                                                                                                ? "Yes"
+                                                                                                : "No"}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ),
+                                                                        )}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                        </>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

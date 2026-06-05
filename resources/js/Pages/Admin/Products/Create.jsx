@@ -28,6 +28,14 @@ export default function Create({ categories, brands }) {
         category_id: "",
         brand_id: "",
         is_active: true,
+        variants: [
+            {
+                volume: "",
+                price: "",
+                stock: "",
+                is_active: true,
+            },
+        ],
     });
 
     const inputClasses = (errorKey) => `
@@ -39,6 +47,45 @@ export default function Create({ categories, brands }) {
                 : "border-slate-700/50 focus:ring-cyan-500/50 focus:border-cyan-500"
         }
     `;
+
+    const [variants, setVariants] = useState([
+        {
+            volume: "",
+            price: "",
+            stock: "",
+            is_active: true,
+        },
+    ]);
+
+    const addVariant = () => {
+        setVariants([
+            ...variants,
+            {
+                volume: "",
+                price: "",
+                stock: "",
+                is_active: true,
+            },
+        ]);
+    };
+
+    const removeVariant = (index) => {
+        setVariants(
+            variants.filter((_, i) => i !== index)
+        );
+    };
+
+    const updateVariant = (index, field, value) => {
+        const updated = [...variants];
+
+        updated[index][field] = value;
+
+        setVariants(updated);
+
+        setData("variants", updated);
+    };
+
+
 
     const ErrorMsg = ({ field }) =>
         errors[field] ? (
@@ -242,117 +289,83 @@ export default function Create({ categories, brands }) {
                             <ErrorMsg field="description" />
                         </div>
 
-                        {/* Row 3 — Price + Stock */}
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                    Price *
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    value={data.price}
-                                    onChange={(e) =>
-                                        setData("price", e.target.value)
-                                    }
-                                    placeholder="0.00"
-                                    className={inputClasses(errors.price)}
-                                />
-                                <ErrorMsg field="price" />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-200 mb-2">
-                                    Stock *
-                                </label>
-                                <input
-                                    type="number"
-                                    value={data.stock}
-                                    onChange={(e) =>
-                                        setData("stock", e.target.value)
-                                    }
-                                    placeholder="0"
-                                    className={inputClasses(errors.stock)}
-                                />
-                                <ErrorMsg field="stock" />
-                            </div>
-                        </div>
-
-                        {/* Row 4 — Volume */}
+                        {/* Row 3 — Variants */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-200 mb-3">
-                                Volume
-                            </label>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                {volumeOptions.map((volume) => (
-                                    <button
-                                        type="button"
-                                        key={volume}
-                                        onClick={() => {
-                                            setIsCustomVolume(false);
-                                            setCustomVolume("");
-                                            setData((data) => ({
-                                                ...data,
-                                                volume,
-                                                slug: generateSlug(
-                                                    data.name,
-                                                    volume,
-                                                ),
-                                            }));
-                                        }}
-                                        className={`px-4 py-2 rounded-lg border transition-all ${
-                                            data.volume === volume
-                                                ? "bg-cyan-500 text-white border-cyan-500"
-                                                : "bg-slate-800 border-slate-700 text-slate-300"
-                                        }`}
-                                    >
-                                        {volume}
-                                    </button>
-                                ))}
+                            <div className="flex items-center justify-between mb-4">
+                                <label className="block text-sm font-semibold text-slate-200">
+                                    Product Variants
+                                </label>
+
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setIsCustomVolume(true);
-                                        setData((data) => ({
-                                            ...data,
-                                            volume: customVolume,
-                                            slug: generateSlug(
-                                                data.name,
-                                                customVolume,
-                                            ),
-                                        }));
-                                    }}
-                                    className={`px-4 py-2 rounded-lg border ${
-                                        isCustomVolume
-                                            ? "bg-cyan-500 text-white border-cyan-500"
-                                            : "bg-slate-800 border-slate-700 text-slate-300"
-                                    }`}
+                                    onClick={addVariant}
+                                    className="px-3 py-2 bg-cyan-500 text-white rounded-lg text-sm"
                                 >
-                                    Custom
+                                    + Add Variant
                                 </button>
                             </div>
-                            {isCustomVolume && (
-                                <input
-                                    type="text"
-                                    value={customVolume}
-                                    onChange={(e) => {
-                                        const volume = e.target.value;
-                                        setCustomVolume(volume);
-                                        setData((data) => ({
-                                            ...data,
-                                            volume,
-                                            slug: generateSlug(
-                                                data.name,
-                                                volume,
-                                            ),
-                                        }));
-                                    }}
-                                    placeholder="e.g. 20ml x 4"
-                                    className={inputClasses(errors.volume)}
-                                />
-                            )}
-                            <ErrorMsg field="volume" />
+
+                            <div className="space-y-4">
+                                {variants.map((variant, index) => (
+                                    <div
+                                        key={index}
+                                        className="grid grid-cols-4 gap-4 p-4 rounded-lg border border-slate-700 bg-slate-900/30"
+                                    >
+                                        <input
+                                            type="text"
+                                            placeholder="Volume (50ml)"
+                                            value={variant.volume}
+                                            onChange={(e) =>
+                                                updateVariant(
+                                                    index,
+                                                    "volume",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={inputClasses()}
+                                        />
+
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="Price"
+                                            value={variant.price}
+                                            onChange={(e) =>
+                                                updateVariant(
+                                                    index,
+                                                    "price",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={inputClasses()}
+                                        />
+
+                                        <input
+                                            type="number"
+                                            placeholder="Stock"
+                                            value={variant.stock}
+                                            onChange={(e) =>
+                                                updateVariant(
+                                                    index,
+                                                    "stock",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={inputClasses()}
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => removeVariant(index)}
+                                            className="bg-red-500 text-white rounded-lg"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
+
 
                         <div>
                             <label className="block text-sm font-semibold text-slate-200 mb-2">

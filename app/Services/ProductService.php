@@ -10,18 +10,28 @@ class ProductService
 {
     public function store(array $data): Product
     {
-        return Product::create([
+        $product =  Product::create([
             'name' => $data['name'],
             'slug' => $data['slug'] ?: Str::slug($data['name']),
             'description' => $data['description'],
-            'price' => $data['price'],
-            'stock' => $data['stock'],
-            'volume' => $data['volume'] ?? null,
             'gender' => $data['gender'],
             'category_id' => $data['category_id'],
             'brand_id' => $data['brand_id'],
             'is_active' => $data['is_active'] ?? true,
         ]);
+        foreach ($data['variants'] as $variant) {
+
+            $product->variants()->create([
+                'volume' => $variant['volume'],
+                'price' => $variant['price'],
+                'stock' => $variant['stock'],
+                'sku' => strtoupper(
+                    str_replace(' ', '', $product->name)
+                ) . '-' . strtoupper($variant['volume']),
+                'is_active' => $variant['is_active'] ?? true,
+            ]);
+        }
+        return $product;
     }
 
     public function update(
@@ -33,14 +43,33 @@ class ProductService
             'name' => $data['name'],
             'slug' => $data['slug'] ?: Str::slug($data['name']),
             'description' => $data['description'],
-            'price' => $data['price'],
-            'stock' => $data['stock'],
-            'volume' => $data['volume'] ?? null,
             'gender' => $data['gender'],
             'category_id' => $data['category_id'],
             'brand_id' => $data['brand_id'],
             'is_active' => $data['is_active'] ?? true,
         ]);
+
+        // if (!$product->is_active) {
+
+        //     foreach ($data['variants'] as &$variant) {
+        //         $variant['is_active'] = false;
+        //     }
+        // }
+
+        $product->variants()->delete();
+
+        foreach ($data['variants'] as $variant) {
+
+            $product->variants()->create([
+                'volume' => $variant['volume'],
+                'price' => $variant['price'],
+                'stock' => $variant['stock'],
+                'sku' => strtoupper(
+                    str_replace(' ', '', $product->name)
+                ) . '-' . strtoupper($variant['volume']),
+                'is_active' => $variant['is_active'] ?? true,
+            ]);
+        }
 
         return $product;
     }
@@ -53,7 +82,7 @@ class ProductService
     public function getProducts(array $filters): LengthAwarePaginator
     {
         return Product::query()
-            ->with(['category', 'brand', 'primaryImage'])
+            ->with(['category', 'brand', 'primaryImage', 'variants'])
 
             ->when(
                 $filters['search'] ?? null,
@@ -81,7 +110,7 @@ class ProductService
                 fn($query, $gender) =>
                 $query->where('gender', $gender)
             )
-            
+
             ->when(
                 $filters['status'] ?? null,
                 function ($query, $status) {
