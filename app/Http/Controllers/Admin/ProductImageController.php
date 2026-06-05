@@ -75,7 +75,19 @@ class ProductImageController extends Controller
                 'image_id' => $image->id,
             ]);
 
-            return response()->json(['message' => 'Image deleted successfully']);
+            return response()->json([
+                'message' => 'Image deleted successfully',
+                'images' => ProductImage::where(
+                    'product_id',
+                    $product->id
+                )->get()->map(function ($image) use ($service) {
+                    return [
+                        'id' => $image->id,
+                        'url' => $service->getImageUrl($image),
+                        'is_primary' => $image->is_primary,
+                    ];
+                }),
+            ]);
         } catch (\Exception $e) {
             Log::error('Image delete failed: ' . $e->getMessage());
             return response()->json([

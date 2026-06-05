@@ -32,13 +32,49 @@ class ProductImageService
 
     public function delete(ProductImage $image): void
     {
-        // Delete file from storage
-        if (Storage::disk('public')->exists($image->image_path)) {
-            Storage::disk('public')->delete($image->image_path);
+        $productId = $image->product_id;
+        $wasPrimary = $image->is_primary;
+
+        // Prevent deleting last image
+        $imageCount = ProductImage::where(
+            'product_id',
+            $productId
+        )->count();
+
+        if ($imageCount <= 1) {
+            throw new \Exception(
+                'Product must have at least one image.'
+            );
+        }
+
+        // Delete file
+        if (
+            Storage::disk('public')->exists(
+                $image->image_path
+            )
+        ) {
+            Storage::disk('public')->delete(
+                $image->image_path
+            );
         }
 
         // Delete record
         $image->delete();
+
+        // Auto assign new primary
+        if ($wasPrimary) {
+
+            $newPrimary = ProductImage::where(
+                'product_id',
+                $productId
+            )->first();
+
+            if ($newPrimary) {
+                $newPrimary->update([
+                    'is_primary' => true,
+                ]);
+            }
+        }
     }
 
     public function setPrimary(ProductImage $image): void

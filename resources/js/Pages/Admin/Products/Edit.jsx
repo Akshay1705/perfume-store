@@ -134,18 +134,38 @@ export default function Edit({ product, categories, brands }) {
 
     async function deleteImage(imageId) {
         if (!confirm("Delete this image?")) return;
+
         try {
             const response = await fetch(
                 `/admin/products/${product.id}/images/${imageId}`,
                 {
                     method: "DELETE",
-                    headers: { "X-CSRF-TOKEN": csrf_token },
+                    headers: {
+                        "X-CSRF-TOKEN": csrf_token,
+                    },
                 },
             );
-            if (response.ok)
-                setImages(images.filter((img) => img.id !== imageId));
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                setUploadError(responseData.error || "Failed to delete image");
+
+                setTimeout(() => {
+                    setUploadError("");
+                }, 3000);
+
+                return;
+            }
+
+            setUploadError("");
+            setImages(responseData.images);
         } catch (err) {
-            console.error("Failed to delete image:", err);
+            setUploadError("Failed to delete image");
+
+            setTimeout(() => {
+                setUploadError("");
+            }, 3000);
         }
     }
 
