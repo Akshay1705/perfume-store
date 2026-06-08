@@ -19,9 +19,9 @@ class ProductController extends Controller
      * Display a listing of the resource.
      */
     public function index(
-        ProductIndexRequest $request,
-        ProductService $service
-    ): Response {
+            ProductIndexRequest $request,
+            ProductService $service
+        ): Response {
 
         $filters = $request->validated();
 
@@ -115,7 +115,16 @@ class ProductController extends Controller
         return Inertia::render(
             'Admin/Products/Edit',
             [
-                'product' => $product->load(['category', 'brand', 'images', 'variants']),
+                'product' => $product->load([
+                    'category', 
+                    'brand',
+                    'variants' => function ($q) {
+                            $q->with([
+                                'images',
+                                'primaryImage'
+                            ]);
+                        },
+                    ]),
                 'categories' => $categories,
                 'brands' => $brands,
             ]

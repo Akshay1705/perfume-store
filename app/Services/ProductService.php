@@ -35,10 +35,11 @@ class ProductService
     }
 
     public function update(
-        Product $product,
-        array $data
-    ): Product {
+            Product $product,
+            array $data
+        ): Product {
 
+        // dd($data['variants']);
         $product->update([
             'name' => $data['name'],
             'slug' => $data['slug'] ?: Str::slug($data['name']),
@@ -56,20 +57,46 @@ class ProductService
         //     }
         // }
 
-        $product->variants()->delete();
+        $existingIds = [];
 
-        foreach ($data['variants'] as $variant) {
+        foreach ($data['variants'] as $variantData) {
 
-            $product->variants()->create([
-                'volume' => $variant['volume'],
-                'price' => $variant['price'],
-                'stock' => $variant['stock'],
-                'sku' => strtoupper(
-                    str_replace(' ', '', $product->name)
-                ) . '-' . strtoupper($variant['volume']),
-                'is_active' => $variant['is_active'] ?? true,
-            ]);
+            if (!empty($variantData['id'])) {
+
+                $variant = $product->variants()
+                    ->find($variantData['id']);
+
+                if ($variant) {
+
+                    $variant->update([
+                        'volume' => $variantData['volume'],
+                        'price' => $variantData['price'],
+                        'stock' => $variantData['stock'],
+                        'is_active' => $variantData['is_active'],
+                    ]);
+
+                    $existingIds[] = $variant->id;
+                }
+            } else {
+
+                $newVariant = $product->variants()->create([
+                    'volume' => $variantData['volume'],
+                    'price' => $variantData['price'],
+                    'stock' => $variantData['stock'],
+                    'sku' => strtoupper(
+                        str_replace(' ', '', $product->name)
+                    ) . '-' . strtoupper($variantData['volume']),
+                    'is_active' => $variantData['is_active'],
+                ]);
+
+                $existingIds[] = $newVariant->id;
+            }
         }
+
+        // Delete variants removed from UI
+        $product->variants()
+            ->whereNotIn('id', $existingIds)
+            ->delete();
 
         return $product;
     }
@@ -82,7 +109,11 @@ class ProductService
     public function getProducts(array $filters): LengthAwarePaginator
     {
         return Product::query()
-            ->with(['category', 'brand', 'primaryImage', 'variants'])
+            ->with([
+                'category',
+                'brand',
+                'variants' => fn($q) => $q->with('images')->orderBy('id'),
+            ])
 
             ->when(
                 $filters['search'] ?? null,

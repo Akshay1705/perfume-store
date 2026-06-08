@@ -57,7 +57,7 @@ class ProductRequest extends FormRequest
             ],
 
             'variants' => 'required|array|min:1',
-
+            'variants.*.id' => 'sometimes|exists:product_variants,id',
             'variants.*.volume' => 'required|string|max:100',
             'variants.*.price' => 'required|numeric|min:0',
             'variants.*.stock' => 'required|integer|min:0',

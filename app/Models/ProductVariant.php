@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\VariantImage;
 
 class ProductVariant extends Model
 {
@@ -22,5 +23,17 @@ class ProductVariant extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+
+    public function images()
+    {
+        return $this->hasMany(VariantImage::class);
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(VariantImage::class)
+            ->where('is_primary', true);
     }
 }

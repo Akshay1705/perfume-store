@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\ProductController as StoreProductController;
+use App\Http\Controllers\Admin\VariantImageController;
 
 
 // Route::get('/', function () {
@@ -27,6 +28,7 @@ Route::get('/', [HomeController::class, 'index'])
 
 Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
     ->name('products.show');
+
 
 // Serve product images - must be before the storage symlink
 Route::get('/storage/products/{filename}', function ($filename) {
@@ -89,7 +91,24 @@ Route::middleware(['auth', 'admin'])
         // Debug: Check image status
         Route::get('/products/{product}/images-debug', [ProductImageController::class, 'debug'])
             ->name('product-images.debug');
+
+    // Variant Image Routes
+    Route::post(
+        '/variants/{variant}/images',
+        [VariantImageController::class, 'store']
+    );
+
+    Route::delete(
+        '/variants/{variant}/images/{image}',
+        [VariantImageController::class, 'destroy']
+    );
+
+    Route::put(
+        '/variants/{variant}/images/{image}/primary',
+        [VariantImageController::class, 'setPrimary']
+    );
     });
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

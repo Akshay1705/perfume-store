@@ -334,32 +334,43 @@ export default function Index({
                                                 {/* Image Cell */}
                                                 <td className="px-6 py-4">
                                                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-700/40 flex items-center justify-center border border-slate-700/50">
-                                                        {product.primary_image
-                                                            ?.url ? (
-                                                            <img
-                                                                src={
-                                                                    product
-                                                                        .primary_image
-                                                                        .url
-                                                                }
-                                                                alt={
-                                                                    product.name
-                                                                }
-                                                                className="w-full h-full object-cover"
-                                                                onError={(
-                                                                    e,
-                                                                ) => {
-                                                                    e.target.style.display =
-                                                                        "none";
-                                                                    e.target.parentElement.innerHTML =
-                                                                        '<span class="text-xs text-slate-400">📸</span>';
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <span className="text-xs text-slate-400">
-                                                                📸
-                                                            </span>
-                                                        )}
+                                                        {(() => {
+                                                            // Try first variant's primary image, then any image, then fallback
+                                                            const firstVariant =
+                                                                product
+                                                                    .variants?.[0];
+                                                            const primaryImg =
+                                                                firstVariant?.images?.find(
+                                                                    (img) =>
+                                                                        !!img.is_primary,
+                                                                ) ??
+                                                                firstVariant
+                                                                    ?.images?.[0];
+
+                                                            return primaryImg?.url ? (
+                                                                <img
+                                                                    src={
+                                                                        primaryImg.url
+                                                                    }
+                                                                    alt={
+                                                                        product.name
+                                                                    }
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.target.style.display =
+                                                                            "none";
+                                                                        e.target.parentElement.innerHTML =
+                                                                            '<span class="text-xs text-slate-400">📸</span>';
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <span className="text-xs text-slate-400">
+                                                                    📸
+                                                                </span>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </td>
 
