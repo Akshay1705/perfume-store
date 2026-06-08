@@ -27,20 +27,22 @@ export default function Navbar({ categories = [], brands = [] }) {
                             Shop
                         </button>
 
-                        <div className="absolute left-0 top-full mt-3 w-56 bg-white border border-stone-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                            <div className="py-2">
+                        <div className="absolute left-0 top-full mt-3 w-56 bg-white border border-stone-200/80 shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 rounded-none z-50">
+                            <div className="py-1.5 text-xs font-medium tracking-wide text-stone-600">
+                                {/* All Products Link */}
                                 <Link
                                     href="/products"
-                                    className="block px-4 py-2 hover:bg-stone-100"
+                                    className="block px-4 py-2.5 text-stone-900 hover:bg-stone-50 hover:text-amber-800 transition-colors uppercase tracking-widest text-[10px]"
                                 >
                                     All Products
                                 </Link>
 
+                                {/* Dynamic Filtered Category Links */}
                                 {categories.map((category) => (
                                     <Link
                                         key={category.id}
-                                        href={`/categories/${category.id}`}
-                                        className="block px-4 py-2 hover:bg-stone-100"
+                                        href={`/products?category=${category.slug}`}
+                                        className="block px-4 py-2.5 hover:bg-stone-50 hover:text-amber-800 transition-colors"
                                     >
                                         {category.name}
                                     </Link>
@@ -59,7 +61,7 @@ export default function Navbar({ categories = [], brands = [] }) {
                                 {brands.map((brand) => (
                                     <Link
                                         key={brand.id}
-                                        href={`/brands/${brand.id}`}
+                                        href={`/products?brand=${brand.slug}`}
                                         className="block px-4 py-2 hover:bg-stone-100"
                                     >
                                         {brand.name}
@@ -69,7 +71,7 @@ export default function Navbar({ categories = [], brands = [] }) {
                         </div>
                     </div>
                     <Link
-                        href="#"
+                        href="/our-story"
                         className="hover:text-stone-950 transition-colors"
                     >
                         Our Story

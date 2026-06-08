@@ -31,6 +31,10 @@ Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
 
 Route::get('/products', [StoreProductController::class, 'index'])->name('store.products');
 
+Route::get('/our-story', function () {
+    return Inertia::render('Store/OurStory');
+})->name('store.story');
+
 
 // Serve product images - must be before the storage symlink
 Route::get('/storage/products/{filename}', function ($filename) {

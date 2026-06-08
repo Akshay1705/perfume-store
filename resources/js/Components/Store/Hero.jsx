@@ -1,3 +1,5 @@
+import { Link } from "@inertiajs/react";
+
 export default function Hero() {
     return (
         <section className="relative overflow-hidden bg-gradient-to-r from-stone-100 to-amber-50/40 py-24 md:py-32 px-4 text-center rounded-2xl my-4">
@@ -12,9 +14,12 @@ export default function Hero() {
                     Discover exquisite Perfumes, traditional Attars, and curated
                     Discovery Sets.
                 </p>
-                <button className="mt-8 px-8 py-3 bg-stone-950 text-white text-sm font-medium tracking-wider uppercase rounded-full hover:bg-stone-800 transition-colors shadow-sm">
+                <Link
+                    href="/products"
+                    className="inline-block mt-8 px-8 py-4 border border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white text-xs tracking-[0.2em] font-semibold uppercase rounded-none transition-all duration-300"
+                >
                     Explore Collection
-                </button>
+                </Link>
             </div>
         </section>
     );

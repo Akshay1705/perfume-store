@@ -1,16 +1,31 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StoreLayout from "@/Layouts/StoreLayout";
-import { Link, usePage } from "@inertiajs/react";
-import { Search, Sparkles, ArrowRight } from "lucide-react";
+import { Link, usePage, router } from "@inertiajs/react";
+import { Search, Sparkles, ArrowRight, X } from "lucide-react";
 
 export default function Index() {
-    const { products = [], categories = [], brands = [] } = usePage().props;
+    // 1. Destructure incoming data directly from our updated Laravel Controller props
+    const {
+        products = [],
+        categories = [],
+        brands = [],
+        currentFilters = {},
+    } = usePage().props;
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("all");
-    const [selectedBrand, setSelectedBrand] = useState("all");
-    const [selectedGender, setSelectedGender] = useState("all");
-    const [selectedVolumes, setSelectedVolumes] = useState([]);
+    // 2. Initialize state values directly from current backend query strings
+    const [searchQuery, setSearchQuery] = useState(currentFilters.search || "");
+    const [selectedCategory, setSelectedCategory] = useState(
+        currentFilters.category || "all",
+    );
+    const [selectedBrand, setSelectedBrand] = useState(
+        currentFilters.brand || "all",
+    );
+    const [selectedGender, setSelectedGender] = useState(
+        currentFilters.gender || "all",
+    );
+    const [selectedVolumes, setSelectedVolumes] = useState(
+        currentFilters.volumes || [],
+    );
 
     const genderOptions = [
         { label: "Pour Homme (Men)", value: "men" },
@@ -20,81 +35,96 @@ export default function Index() {
 
     const volumeOptions = ["30ml", "50ml", "100ml", "200ml"];
 
+    // ── MASTER ROUTER VISIT SYNC ENGINE ──
+    // Sends the payload straight to Laravel while keeping scroll positions intact
+    const applyFilters = (updated) => {
+        router.get(
+            "/products",
+            {
+                search:
+                    updated.search !== undefined ? updated.search : searchQuery,
+                category:
+                    updated.category !== undefined
+                        ? updated.category
+                        : selectedCategory,
+                brand:
+                    updated.brand !== undefined ? updated.brand : selectedBrand,
+                gender:
+                    updated.gender !== undefined
+                        ? updated.gender
+                        : selectedGender,
+                volumes:
+                    updated.volumes !== undefined
+                        ? updated.volumes
+                        : selectedVolumes,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                only: ["products", "currentFilters"], // High-performance option: only update data partitions
+            },
+        );
+    };
+
+    // ── DEBOUNCE EFFECT FOR THE SEARCH FIELD ──
+    // Delays sending a database request until 400ms after the user stops typing
+    useEffect(() => {
+        if (searchQuery === (currentFilters.search || "")) return;
+
+        const delayDebounceFn = setTimeout(() => {
+            applyFilters({ search: searchQuery });
+        }, 400);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery]);
+
+    // ── DYNAMIC CATALOG PARSER ──
+    // Unpacks the validated database records into individual variant display cards
     const catalogItems = useMemo(() => {
         const items = [];
         products.forEach((product) => {
-            if (product.is_active !== false && product.variants?.length > 0) {
+            if (product.variants && product.variants.length > 0) {
                 product.variants.forEach((variant) => {
-                    if (variant.is_active) {
-                        const primaryImage =
-                            variant.images?.find((img) => img.is_primary) ||
-                            variant.images?.[0];
-                        items.push({
-                            id: `${product.id}-${variant.id}`,
-                            name: product.name,
-                            slug: product.slug,
-                            gender: product.gender?.toLowerCase() || "unisex",
-                            brand: product.brand,
-                            brandId: product.brand_id,
-                            categoryId: product.category_id,
-                            volume: variant.volume,
-                            price: variant.price,
-                            imageUrl: primaryImage?.url || null,
-                        });
-                    }
+                    const primaryImage =
+                        variant.images?.find((img) => img.is_primary) ||
+                        variant.images?.[0];
+                    items.push({
+                        id: `${product.id}-${variant.id}`,
+                        name: product.name,
+                        slug: product.slug,
+                        brand: product.brand,
+                        volume: variant.volume,
+                        price: variant.price,
+                        imageUrl: primaryImage?.url || null,
+                    });
                 });
             }
         });
         return items;
     }, [products]);
 
-    const filteredItems = useMemo(() => {
-        return catalogItems.filter((item) => {
-            const matchesSearch = item.name
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
-            const matchesCategory =
-                selectedCategory === "all" ||
-                String(item.categoryId) === String(selectedCategory);
-            const matchesBrand =
-                selectedBrand === "all" ||
-                String(item.brandId) === String(selectedBrand);
-            const matchesGender =
-                selectedGender === "all" || item.gender === selectedGender;
-            const matchesVolume =
-                selectedVolumes.length === 0 ||
-                selectedVolumes.includes(item.volume.toLowerCase().trim());
-            return (
-                matchesSearch &&
-                matchesCategory &&
-                matchesBrand &&
-                matchesGender &&
-                matchesVolume
-            );
-        });
-    }, [
-        catalogItems,
-        searchQuery,
-        selectedCategory,
-        selectedBrand,
-        selectedGender,
-        selectedVolumes,
-    ]);
-
+    // Volume selection array toggle handler
     const handleVolumeToggle = (volume) => {
         const val = volume.toLowerCase().trim();
-        setSelectedVolumes((prev) =>
-            prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val],
-        );
+        let nextVolumes = [...selectedVolumes];
+
+        if (nextVolumes.includes(val)) {
+            nextVolumes = nextVolumes.filter((v) => v !== val);
+        } else {
+            nextVolumes.push(val);
+        }
+
+        setSelectedVolumes(nextVolumes);
+        applyFilters({ volumes: nextVolumes });
     };
 
     return (
         <StoreLayout>
-            {/* Soft, clean warm background */}
             <div className="bg-[#FAF9F6] min-h-screen text-stone-900 pt-12 pb-24">
                 <div className="max-w-7xl mx-auto px-6">
+                    {/* Header */}
                     <div className="mb-12">
-                        <p className="text-xs tracking-[0.3em] uppercase text-amber-700 font-medium mb-2">
+                        <p className="text-xs tracking-[0.3em] uppercase text-amber-800 font-medium mb-2">
                             The Collection
                         </p>
                         <h1 className="font-serif text-3xl md:text-5xl tracking-wide text-stone-900">
@@ -106,8 +136,9 @@ export default function Index() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
-                        {/* ── SIDEBAR FILTERS (LIGHT MODE FIXED) ── */}
+                        {/* ── SIDEBAR FILTERS ── */}
                         <aside className="space-y-8 bg-white p-6 border border-stone-200 rounded-none shadow-sm">
+                            {/* Filter: Live Text Search Input */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Search
@@ -126,18 +157,33 @@ export default function Index() {
                                         size={14}
                                         className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
                                     />
+                                    {searchQuery && (
+                                        <button
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                applyFilters({ search: "" });
+                                            }}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-900"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
                             <hr className="border-stone-100" />
 
+                            {/* Filter: Gender Profiles */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Fragrance Profile
                                 </h3>
                                 <div className="space-y-2">
                                     <button
-                                        onClick={() => setSelectedGender("all")}
+                                        onClick={() => {
+                                            setSelectedGender("all");
+                                            applyFilters({ gender: "all" });
+                                        }}
                                         className={`w-full text-left text-xs uppercase tracking-wider py-1.5 transition-colors ${selectedGender === "all" ? "text-amber-700 font-bold" : "text-stone-500 hover:text-stone-900"}`}
                                     >
                                         All Collections
@@ -145,9 +191,12 @@ export default function Index() {
                                     {genderOptions.map((opt) => (
                                         <button
                                             key={opt.value}
-                                            onClick={() =>
-                                                setSelectedGender(opt.value)
-                                            }
+                                            onClick={() => {
+                                                setSelectedGender(opt.value);
+                                                applyFilters({
+                                                    gender: opt.value,
+                                                });
+                                            }}
                                             className={`w-full text-left text-xs uppercase tracking-wider py-1.5 flex items-center justify-between transition-colors ${selectedGender === opt.value ? "text-amber-700 font-bold" : "text-stone-500 hover:text-stone-900"}`}
                                         >
                                             {opt.label}
@@ -161,6 +210,7 @@ export default function Index() {
 
                             <hr className="border-stone-100" />
 
+                            {/* Filter: Multi-Select Sizes Available */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Sizes Available
@@ -192,22 +242,50 @@ export default function Index() {
 
                             <hr className="border-stone-100" />
 
+                            {/* Filter: Brand Lookups */}
+                            <div>
+                                <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
+                                    Fragrance House
+                                </h3>
+                                <select
+                                    value={selectedBrand}
+                                    onChange={(e) => {
+                                        setSelectedBrand(e.target.value);
+                                        applyFilters({ brand: e.target.value });
+                                    }}
+                                    className="w-full bg-stone-50 border border-stone-200 text-xs text-stone-700 p-3 rounded-none focus:outline-none focus:border-stone-900"
+                                >
+                                    <option value="all">All Houses</option>
+                                    {brands.map((b) => (
+                                        <option key={b.id} value={b.slug}>
+                                            {b.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <hr className="border-stone-100" />
+
+                            {/* Filter: Olfactory Categories */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Categories
                                 </h3>
                                 <select
                                     value={selectedCategory}
-                                    onChange={(e) =>
-                                        setSelectedCategory(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        setSelectedCategory(e.target.value);
+                                        applyFilters({
+                                            category: e.target.value,
+                                        });
+                                    }}
                                     className="w-full bg-stone-50 border border-stone-200 text-xs text-stone-700 p-3 rounded-none focus:outline-none focus:border-stone-900"
                                 >
                                     <option value="all">
                                         All Olfactory Families
                                     </option>
                                     {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
+                                        <option key={cat.id} value={cat.slug}>
                                             {cat.name}
                                         </option>
                                     ))}
@@ -217,9 +295,9 @@ export default function Index() {
 
                         {/* ── PRODUCTS CATALOG GRID ── */}
                         <main className="lg:col-span-3">
-                            {filteredItems.length > 0 ? (
+                            {catalogItems.length > 0 ? (
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-12">
-                                    {filteredItems.map((item) => (
+                                    {catalogItems.map((item) => (
                                         <Link
                                             key={item.id}
                                             href={`/products/${item.slug}`}
@@ -281,6 +359,10 @@ export default function Index() {
                                     <h3 className="font-serif text-lg text-stone-900 mb-1">
                                         No Fragrances Found
                                     </h3>
+                                    <p className="text-stone-400 text-xs mb-6">
+                                        No matching inventory aligned with these
+                                        parameters.
+                                    </p>
                                     <button
                                         onClick={() => {
                                             setSearchQuery("");
@@ -288,6 +370,7 @@ export default function Index() {
                                             setSelectedBrand("all");
                                             setSelectedGender("all");
                                             setSelectedVolumes([]);
+                                            router.get("/products"); // Clean wipe reset
                                         }}
                                         className="text-xs font-semibold uppercase tracking-widest text-amber-700 underline underline-offset-4"
                                     >

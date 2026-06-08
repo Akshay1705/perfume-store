@@ -1,3 +1,5 @@
+import { Link } from "@inertiajs/react";
+
 export default function CategoryGrid({ categories = [] }) {
     if (!categories.length) return null;
 
@@ -12,14 +14,15 @@ export default function CategoryGrid({ categories = [] }) {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 max-w-6xl mx-auto">
                 {categories.map((category) => (
-                    <div
+                    <Link
                         key={category.id}
+                        href={`/products?category=${category.slug}`}
                         className="group cursor-pointer border border-stone-200 rounded-xl p-6 text-center bg-white shadow-sm hover:shadow-md hover:border-stone-400 hover:-translate-y-0.5 transition-all duration-300"
                     >
                         <span className="text-stone-800 font-medium text-sm tracking-wide group-hover:text-amber-800 transition-colors">
                             {category.name}
                         </span>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </section>

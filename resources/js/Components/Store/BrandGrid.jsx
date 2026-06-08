@@ -1,3 +1,5 @@
+import { Link } from "@inertiajs/react";
+
 export default function BrandGrid({ brands = [] }) {
     if (!brands.length) return null;
 
@@ -12,14 +14,15 @@ export default function BrandGrid({ brands = [] }) {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
                 {brands.map((brand) => (
-                    <div
+                    <Link
                         key={brand.id}
+                        href={`/products?brand=${brand.slug}`}
                         className="flex items-center justify-center border border-stone-200 rounded-xl p-8 text-center bg-white hover:border-stone-900 cursor-pointer transition-colors duration-200 group"
                     >
                         <span className="font-serif tracking-widest text-stone-500 uppercase text-xs group-hover:text-stone-900 transition-colors">
                             {brand.name}
                         </span>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </section>
