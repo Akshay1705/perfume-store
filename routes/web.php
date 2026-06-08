@@ -29,6 +29,8 @@ Route::get('/', [HomeController::class, 'index'])
 Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
     ->name('products.show');
 
+Route::get('/products', [StoreProductController::class, 'index'])->name('store.products');
+
 
 // Serve product images - must be before the storage symlink
 Route::get('/storage/products/{filename}', function ($filename) {
@@ -79,18 +81,6 @@ Route::middleware(['auth', 'admin'])
             'discounts',
             DiscountController::class
         );
-
-        // Product Image Routes
-        Route::post('/products/{product}/images', [ProductImageController::class, 'store'])
-            ->name('product-images.store');
-        Route::delete('/products/{product}/images/{image}', [ProductImageController::class, 'destroy'])
-            ->name('product-images.destroy');
-        Route::put('/products/{product}/images/{image}/primary', [ProductImageController::class, 'setPrimary'])
-            ->name('product-images.set-primary');
-        
-        // Debug: Check image status
-        Route::get('/products/{product}/images-debug', [ProductImageController::class, 'debug'])
-            ->name('product-images.debug');
 
     // Variant Image Routes
     Route::post(

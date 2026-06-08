@@ -13,22 +13,41 @@ class HomeController extends Controller
     public function index()
     {
         $products = Product::with([
-            'primaryImage',
             'brand',
-            'variants' => fn($q) =>
-            $q->where('is_active', true)
+            'variants' => fn($q) => $q
+                ->where('is_active', true)
+                ->with('images')
+                ->orderBy('id'),
         ])
             ->where('is_active', true)
             ->latest()
             ->get();
 
-        return Inertia::render(
-            'Store/Home',
-            [
-                'products' => $products,
-                'categories' => Category::orderBy('name')->get(),
-                'brands' => Brand::orderBy('name')->get(),
-            ]
-        );
+        // Flatten to one entry per variant for the frontend
+        $variants = $products->flatMap(function ($product) {
+            return $product->variants->map(function ($variant) use ($product) {
+                return [
+                    'id'          => $variant->id,
+                    'product_id'  => $product->id,
+                    'slug'        => $product->slug,
+                    'name'        => $product->name,
+                    'brand'       => $product->brand?->name,
+                    'volume'      => $variant->volume,
+                    'price'       => $variant->price,
+                    'stock'       => $variant->stock,
+                    'is_active'   => $variant->is_active,
+                    'image'       => $variant->images
+                        ->firstWhere('is_primary', true)
+                        ?->url
+                        ?? $variant->images->first()?->url,
+                ];
+            });
+        })->values();
+
+        return Inertia::render('Store/Home', [
+            'variants'   => $variants,
+            'categories' => Category::orderBy('name')->get(),
+            'brands'     => Brand::orderBy('name')->get(),
+        ]);
     }
 }

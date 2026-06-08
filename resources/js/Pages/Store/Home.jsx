@@ -4,10 +4,9 @@ import CategoryGrid from "@/Components/Store/CategoryGrid";
 import FeaturedProducts from "@/Components/Store/FeaturedProducts";
 import BrandGrid from "@/Components/Store/BrandGrid";
 
-export default function Home({ products = [], categories = [], brands = [] }) {
+export default function Home({ variants = [], categories = [], brands = [] }) {
     return (
         <StoreLayout>
-
             {/* Core Content Framework */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 {/* Promo Display Header */}
@@ -17,12 +16,11 @@ export default function Home({ products = [], categories = [], brands = [] }) {
                 <CategoryGrid categories={categories} />
 
                 {/* Primary Showcases */}
-                <FeaturedProducts products={products} />
+                <FeaturedProducts variants={variants} />
 
                 {/* Curated Partnerships */}
                 <BrandGrid brands={brands} />
             </div>
-
         </StoreLayout>
     );
 }
