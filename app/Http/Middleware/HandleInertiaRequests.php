@@ -32,7 +32,13 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => fn() => auth()->user()
+                    ? [
+                        'id' => auth()->id(),
+                        'name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                    ]
+                    : null,
             ],
             'csrf_token' => csrf_token(),
             'flash' => [

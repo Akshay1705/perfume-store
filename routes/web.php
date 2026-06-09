@@ -101,9 +101,9 @@ Route::middleware(['auth', 'admin'])
     });
 
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/account', function () {
+    return Inertia::render('Store/Account');
+})->middleware('auth')->name('account');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

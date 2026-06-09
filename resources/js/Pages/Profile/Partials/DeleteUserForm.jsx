@@ -1,13 +1,13 @@
-import DangerButton from '@/Components/DangerButton';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import TextInput from '@/Components/TextInput';
-import { useForm } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import DangerButton from "@/Components/DangerButton";
+import InputError from "@/Components/InputError";
+import InputLabel from "@/Components/InputLabel";
+import Modal from "@/Components/Modal";
+import SecondaryButton from "@/Components/SecondaryButton";
+import TextInput from "@/Components/TextInput";
+import { useForm } from "@inertiajs/react";
+import { useRef, useState } from "react";
 
-export default function DeleteUserForm({ className = '' }) {
+export default function DeleteUserForm({ className = "" }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
     const passwordInput = useRef();
 
@@ -20,7 +20,7 @@ export default function DeleteUserForm({ className = '' }) {
         errors,
         clearErrors,
     } = useForm({
-        password: '',
+        password: "",
     });
 
     const confirmUserDeletion = () => {
@@ -30,7 +30,7 @@ export default function DeleteUserForm({ className = '' }) {
     const deleteUser = (e) => {
         e.preventDefault();
 
-        destroy(route('profile.destroy'), {
+        destroy(route("profile.destroy"), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
             onError: () => passwordInput.current.focus(),
@@ -40,7 +40,6 @@ export default function DeleteUserForm({ className = '' }) {
 
     const closeModal = () => {
         setConfirmingUserDeletion(false);
-
         clearErrors();
         reset();
     };
@@ -48,33 +47,34 @@ export default function DeleteUserForm({ className = '' }) {
     return (
         <section className={`space-y-6 ${className}`}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Delete Account
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-600">
-                    Once your account is deleted, all of its resources and data
-                    will be permanently deleted. Before deleting your account,
-                    please download any data or information that you wish to
-                    retain.
+                <p className="text-xs text-stone-500 font-light tracking-wide leading-relaxed">
+                    Executing this configuration command runs a destructive
+                    permanent scrub block sequence. All history, transaction
+                    footprints, and custom vaults will be wiped forever.
                 </p>
             </header>
 
-            <DangerButton onClick={confirmUserDeletion}>
-                Delete Account
+            <DangerButton
+                onClick={confirmUserDeletion}
+                className="bg-rose-950 text-rose-100 hover:bg-rose-900 border border-rose-800 text-[10px] tracking-[0.2em] uppercase font-medium px-5 py-2.5 rounded-none transition-colors shadow-none"
+            >
+                Decommission Vault Profile
             </DangerButton>
 
+            {/* Modal Overlay explicitly restyled inside custom class configurations */}
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-lg font-medium text-gray-900">
-                        Are you sure you want to delete your account?
+                <form
+                    onSubmit={deleteUser}
+                    className="p-8 bg-white rounded-none border border-stone-200"
+                >
+                    <h2 className="text-sm font-serif tracking-widest text-stone-900 uppercase font-medium">
+                        Confirm Profile Decommissioning
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-600">
-                        Once your account is deleted, all of its resources and
-                        data will be permanently deleted. Please enter your
-                        password to confirm you would like to permanently delete
-                        your account.
+                    <p className="mt-2 text-xs text-stone-400 font-light tracking-wide leading-relaxed">
+                        This action cannot be undone. Please authenticate your
+                        identity by providing your password token to execute the
+                        purge loop block.
                     </p>
 
                     <div className="mt-6">
@@ -91,26 +91,32 @@ export default function DeleteUserForm({ className = '' }) {
                             ref={passwordInput}
                             value={data.password}
                             onChange={(e) =>
-                                setData('password', e.target.value)
+                                setData("password", e.target.value)
                             }
-                            className="mt-1 block w-3/4"
+                            className="block w-full rounded-none border-stone-200 bg-stone-50/50 px-3 py-2 text-xs font-light tracking-wide focus:border-stone-900 focus:ring-0 shadow-none transition-colors"
                             isFocused
-                            placeholder="Password"
+                            placeholder="Aura Security Password"
                         />
 
                         <InputError
                             message={errors.password}
-                            className="mt-2"
+                            className="mt-2 text-xs text-rose-600 font-light"
                         />
                     </div>
 
-                    <div className="mt-6 flex justify-end">
-                        <SecondaryButton onClick={closeModal}>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <SecondaryButton
+                            onClick={closeModal}
+                            className="border border-stone-200 bg-white text-stone-600 text-[10px] tracking-widest uppercase rounded-none px-4 py-2 hover:bg-stone-50 hover:text-stone-900 font-medium transition-colors"
+                        >
                             Cancel
                         </SecondaryButton>
 
-                        <DangerButton className="ms-3" disabled={processing}>
-                            Delete Account
+                        <DangerButton
+                            className="bg-rose-950 text-white text-[10px] tracking-widest uppercase rounded-none px-4 py-2 hover:bg-rose-900 font-medium transition-colors"
+                            disabled={processing}
+                        >
+                            Confirm Purge
                         </DangerButton>
                     </div>
                 </form>

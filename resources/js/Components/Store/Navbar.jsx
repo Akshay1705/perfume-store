@@ -1,6 +1,12 @@
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 
 export default function Navbar({ categories = [], brands = [] }) {
+    const { auth } = usePage().props;
+
+    const user = auth?.user;
+
+    console.log("AUTH:", auth);
+    console.log("USER:", user);
     return (
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100 px-6 py-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -94,6 +100,43 @@ export default function Navbar({ categories = [], brands = [] }) {
                             <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </button>
+                    {user ? (
+                        <div className="relative group">
+                            <button className="text-sm font-medium text-stone-700">
+                                {user.name}
+                            </button>
+
+                            <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-stone-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                                <Link
+                                    href="/profile"
+                                    className="block px-4 py-3 hover:bg-stone-50"
+                                >
+                                    My Profile
+                                </Link>
+
+                                <Link
+                                    href="/orders"
+                                    className="block px-4 py-3 hover:bg-stone-50"
+                                >
+                                    My Orders
+                                </Link>
+
+                                <Link
+                                    href="/logout"
+                                    method="post"
+                                    as="button"
+                                    className="block w-full text-left px-4 py-3 hover:bg-stone-50"
+                                >
+                                    Logout
+                                </Link>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <Link href="/login">Login</Link>
+                            <Link href="/register">Register</Link>
+                        </>
+                    )}
                     <button
                         className="p-2 hover:text-stone-950 transition-colors relative"
                         aria-label="Cart"
