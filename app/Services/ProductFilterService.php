@@ -7,20 +7,26 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ProductFilterService
 {
-    /**
-     * Build the filtered Eloquent query based on incoming parameters.
-     */
     public function getFilteredProductsQuery(array $filters): Builder
     {
-        // Start with products that have at least one active variant
+        $search   = $filters['search']   ?? null;
+        $category = $filters['category'] ?? null;
+        $brand    = $filters['brand']    ?? null;
+        $gender   = $filters['gender']   ?? null;
+        $volumes  = $filters['volumes']  ?? [];
+
+        // Start with active products that have at least one active variant
         $query = Product::where('is_active', true)
-            ->whereHas('variants', function ($q) {
+            ->whereHas('variants', function ($q) use ($volumes) {
                 $q->where('is_active', true);
+
+                if (!empty($volumes)) {
+                    $q->whereIn('volume', $volumes);
+                }
             });
 
-        // 1. Text Search Filter (Matches product name or brand name)
-        if (!empty($filters['search'])) {
-            $search = $filters['search'];
+        // 1. Text Search Filter
+        if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhereHas('brand', function ($bQ) use ($search) {
@@ -29,43 +35,42 @@ class ProductFilterService
             });
         }
 
-        // 2. Category Slug Filter
-        if (!empty($filters['category'])) {
-            $query->whereHas('category', function ($q) use ($filters) {
-                $q->where('slug', $filters['category']);
+        // 2. Category Slug Filter — ignore 'all' sentinel value
+        if (!empty($category) && $category !== 'all') {
+            $query->whereHas('category', function ($q) use ($category) {
+                $q->where('slug', $category);
             });
         }
 
-        // 3. Brand Slug Filter
-        if (!empty($filters['brand'])) {
-            $query->whereHas('brand', function ($q) use ($filters) {
-                $q->where('slug', $filters['brand']);
+        // 3. Brand Slug Filter — ignore 'all' sentinel value
+        if (!empty($brand) && $brand !== 'all') {
+            $query->whereHas('brand', function ($q) use ($brand) {
+                $q->where('slug', $brand);
             });
         }
 
-        // 4. Gender Filter
-        if (!empty($filters['gender'])) {
-            $query->where('gender', $filters['gender']);
+        // 4. Gender Filter — ignore 'all' sentinel value
+        if (!empty($gender) && $gender !== 'all') {
+            $query->where('gender', $gender);
         }
 
-        // 5. Variant Volume Multi-Select Filter
-        if (!empty($filters['volumes'])) {
-            $query->whereHas('variants', function ($q) use ($filters) {
+        // 5. Volume Multi-Select Filter
+        if (!empty($volumes)) {
+            $query->whereHas('variants', function ($q) use ($volumes) {
                 $q->where('is_active', true)
-                    ->whereIn('volume', $filters['volumes']);
+                    ->whereIn('volume', $volumes);
             });
         }
 
-        // Always eager load relational data cleanly with sorted variants
+        // Eager load with volume-filtered variants
         return $query->with([
             'brand',
             'category',
-            'variants' => function ($q) use ($filters) {
+            'variants' => function ($q) use ($volumes) {
                 $q->where('is_active', true);
 
-                // If specific volumes are selected, filter the loaded sub-variants too
-                if (!empty($filters['volumes'])) {
-                    $q->whereIn('volume', $filters['volumes']);
+                if (!empty($volumes)) {
+                    $q->whereIn('volume', $volumes);
                 }
 
                 $q->with('images')->orderBy('price', 'asc');

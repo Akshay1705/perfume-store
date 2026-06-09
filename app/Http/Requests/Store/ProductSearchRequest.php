@@ -8,18 +8,18 @@ class ProductSearchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Allow public store customers to use filters
+        return true;
     }
 
     public function rules(): array
     {
         return [
-            'search'   => 'nullable|string|max:100',
-            'category' => 'nullable|string|exists:categories,slug', // Filtering by slug makes URLs look clean!
-            'brand'    => 'nullable|string|exists:brands,slug',
-            'gender'   => 'nullable|string|in:men,women,unisex',
-            'volumes'  => 'nullable|array',
-            'volumes.*' => 'string'
+            'search'    => 'nullable|string|max:100',
+            'category'  => 'nullable|string',   // 'all' or a real slug — existence checked in service
+            'brand'     => 'nullable|string',    // 'all' or a real slug — existence checked in service
+            'gender'    => 'nullable|string|in:men,women,unisex,all',
+            'volumes'   => 'nullable|array',
+            'volumes.*' => 'string',
         ];
     }
 }

@@ -23,8 +23,7 @@ use App\Http\Controllers\Admin\VariantImageController;
 //     ]);
 // });
 
-Route::get('/', [HomeController::class, 'index'])
-    ->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
     ->name('products.show');
