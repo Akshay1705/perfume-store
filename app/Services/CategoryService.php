@@ -32,10 +32,19 @@ class CategoryService
         return $category;
     }
 
-    public function delete(
-        Category $category
-    ): void {
-
+    public function delete(Category $category): void
+    {
         $category->delete();
     }
+
+    public function restore(int $id): void
+    {
+        Category::withTrashed()->findOrFail($id)->restore();
+    }
+
+    public function forceDelete(int $id): void
+    {
+        Category::withTrashed()->findOrFail($id)->forceDelete();
+    }
+
 }

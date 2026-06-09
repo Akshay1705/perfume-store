@@ -1,8 +1,12 @@
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Link, router } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import { Edit, Trash2, Plus, ChevronRight, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import AppSelect from "@/Components/ui/AppSelect";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+
 
 export default function Index({
     products,
@@ -14,11 +18,29 @@ export default function Index({
     const [deleteId, setDeleteId] = useState(null);
     const [expandedProducts, setExpandedProducts] = useState([]);
 
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
+
     const handleDelete = (id) => {
-        if (confirm("Are you sure? This action cannot be undone.")) {
-            router.delete(route("products.destroy", id));
-            setDeleteId(null);
-        }
+        Swal.fire({
+            title: "Delete this product?",
+            text: "This action cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete it!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("products.destroy", id));
+            }
+        });
     };
 
     const toggleProduct = (productId) => {
@@ -427,18 +449,10 @@ export default function Index({
                                                 </td>
 
                                                 {/* Price Cell */}
-                                                <td className="px-6 py-4 text-right">
+                                                <td className="px-6 py-4 text-right whitespace-nowrap">
                                                     <span className="font-semibold text-cyan-400">
-                                                        ₹
-                                                        {Math.min(
-                                                            ...product.variants.map(
-                                                                (v) =>
-                                                                    Number(
-                                                                        v.price,
-                                                                    ),
-                                                            ),
-                                                        )}
-                                                        +
+                                                        ₹{Math.min(...product.variants.map((v) => Number(v.price)))}
+                                                        {product.variants.length > 1 && " +"}
                                                     </span>
                                                 </td>
 

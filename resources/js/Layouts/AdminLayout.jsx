@@ -1,6 +1,8 @@
 import { Link, usePage } from "@inertiajs/react";
 import { Menu } from "lucide-react";
 import { useState } from "react";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 export default function AdminLayout({ children }) {
     const [sidebarOpen, setIsOpen] = useState(true);
@@ -38,7 +40,7 @@ export default function AdminLayout({ children }) {
                     </div>
 
                     <Link
-                        href="/dashboard"
+                        href="/"
                         className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 text-sm font-medium text-amber-400 hover:border-amber-500/60 hover:from-amber-500/20 hover:to-orange-500/20 transition-all duration-300"
                     >
                         perfume.com
@@ -105,6 +107,15 @@ export default function AdminLayout({ children }) {
                     </div>
                 </main>
             </div>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnHover
+                theme="dark"
+            />
         </div>
     );
 }

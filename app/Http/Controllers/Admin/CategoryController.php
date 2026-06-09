@@ -17,7 +17,7 @@ class CategoryController extends Controller
      */
     public function index(): Response
     {
-        $categories = Category::latest()->get();
+        $categories = Category::withTrashed()->latest()->get();
 
         return Inertia::render(
             'Admin/Categories/Index',
@@ -67,10 +67,7 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(
-        Category $category
-    ): Response {
-
+    public function edit(Category $category): Response {
         return Inertia::render(
             'Admin/Categories/Edit',
             [
@@ -82,17 +79,8 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(
-        CategoryRequest $request,
-        Category $category,
-        CategoryService $service
-    ) {
-
-        $service->update(
-            $category,
-            $request->validated()
-        );
-
+    public function update(CategoryRequest $request,Category $category,CategoryService $service) {
+        $service->update($category,$request->validated());
         return redirect()
             ->route('categories.index')
             ->with(
@@ -101,16 +89,8 @@ class CategoryController extends Controller
             );
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(
-        Category $category,
-        CategoryService $service
-    ) {
-
+    public function destroy(Category $category,CategoryService $service) {
         $service->delete($category);
-
         return redirect()
             ->route('categories.index')
             ->with(
@@ -118,4 +98,26 @@ class CategoryController extends Controller
                 'Category deleted successfully.'
             );
     }
+
+    /**
+     * restore the specified resource from soft deletion.
+     */
+    public function restore(int $id, CategoryService $service){
+        $service->restore($id);
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Category restored successfully.');
+    }
+
+    /**
+     * Permanently delete the specified resource from storage.
+     */
+    public function forceDelete(int $id, CategoryService $service)
+    {
+        $service->forceDelete($id);
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Category permanently deleted.');
+    }
+
 }

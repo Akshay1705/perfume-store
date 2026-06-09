@@ -92,7 +92,7 @@ class DiscountController extends Controller
             // 🌟 FIXED: Removed 'admin.' to match category/brand behavior
             return redirect()
                 ->route('discounts.index')
-                ->with('message', 'Discount created successfully');
+                ->with('success', 'Discount created successfully');
         } catch (\Exception $e) {
             Log::error('Failed to create discount: ' . $e->getMessage());
             return redirect()
@@ -139,7 +139,7 @@ class DiscountController extends Controller
             // 🌟 FIXED: Removed 'admin.' to match category/brand behavior
             return redirect()
                 ->route('discounts.index')
-                ->with('message', 'Discount updated successfully');
+                ->with('success', 'Discount updated successfully');
         } catch (\Exception $e) {
             Log::error('Failed to update discount: ' . $e->getMessage());
             return redirect()
@@ -165,7 +165,7 @@ class DiscountController extends Controller
             // 🌟 FIXED: Removed 'admin.' to match category/brand behavior
             return redirect()
                 ->route('discounts.index')
-                ->with('message', 'Discount deleted successfully');
+                ->with('success', 'Discount deleted successfully');
         } catch (\Exception $e) {
             Log::error('Failed to delete discount: ' . $e->getMessage());
             return redirect()

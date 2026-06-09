@@ -1,17 +1,74 @@
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Link, router } from "@inertiajs/react";
-import { Edit, Trash2, Plus } from "lucide-react";
-import { useState } from "react";
+import { Link, router, usePage } from "@inertiajs/react";
+import { Edit, Trash2, Plus, RotateCcw, Flame } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 export default function Index({ brands }) {
-    const [deleteId, setDeleteId] = useState(null);
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
 
     const handleDelete = (id) => {
-        if (confirm("Are you sure? This action cannot be undone.")) {
-            router.delete(route("brands.destroy", id));
-            setDeleteId(null);
-        }
+        Swal.fire({
+            title: "Delete this brand?",
+            text: "Don't worry, it can be restored later.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete it!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("brands.destroy", id));
+            }
+        });
     };
+
+    const handleRestore = (id) => {
+        Swal.fire({
+            title: "Restore this brand?",
+            text: "It will be active again.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#38c172",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, restore it!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.post(route("brands.restore", id));
+            }
+        });
+    };
+
+    const handleForceDelete = (id) => {
+        Swal.fire({
+            title: "Permanently delete?",
+            text: "This cannot be undone at all!",
+            icon: "error",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete forever!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("brands.forceDelete", id));
+            }
+        });
+    };
+
+    const activeBrands = brands.filter((b) => !b.deleted_at);
+    const trashedBrands = brands.filter((b) => b.deleted_at);
 
     return (
         <AdminLayout>
@@ -24,8 +81,13 @@ export default function Index({ brands }) {
                                 Brands
                             </h1>
                             <span className="px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-sm font-semibold border border-purple-500/30">
-                                {brands.length} total
+                                {activeBrands.length} active
                             </span>
+                            {trashedBrands.length > 0 && (
+                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30">
+                                    {trashedBrands.length} trashed
+                                </span>
+                            )}
                         </div>
                         <p className="text-slate-400 text-sm">
                             Manage your product brands
@@ -73,6 +135,9 @@ export default function Index({ brands }) {
                                     <th className="text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Slug
                                     </th>
+                                    <th className="text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
+                                        Status
+                                    </th>
                                     <th className="text-right px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Actions
                                     </th>
@@ -81,10 +146,14 @@ export default function Index({ brands }) {
 
                             {/* Table Body */}
                             <tbody>
-                                {brands.map((brand, index) => (
+                                {brands.map((brand) => (
                                     <tr
                                         key={brand.id}
-                                        className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group"
+                                        className={`border-b border-slate-700/30 transition-colors duration-200 group ${
+                                            brand.deleted_at
+                                                ? "opacity-60 bg-red-950/10"
+                                                : "hover:bg-slate-800/40"
+                                        }`}
                                     >
                                         {/* Name Cell */}
                                         <td className="px-6 py-4">
@@ -94,14 +163,9 @@ export default function Index({ brands }) {
                                                         .charAt(0)
                                                         .toUpperCase()}
                                                 </div>
-                                                <div>
-                                                    <p className="font-semibold text-slate-100">
-                                                        {brand.name}
-                                                    </p>
-                                                    {/* <p className="text-xs text-slate-500 mt-0.5">
-                                                        ID: {brand.id}
-                                                    </p> */}
-                                                </div>
+                                                <p className="font-semibold text-slate-100">
+                                                    {brand.name}
+                                                </p>
                                             </div>
                                         </td>
 
@@ -112,29 +176,74 @@ export default function Index({ brands }) {
                                             </span>
                                         </td>
 
+                                        {/* Status Cell */}
+                                        <td className="px-6 py-4">
+                                            {brand.deleted_at ? (
+                                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-xs font-semibold border border-red-500/30">
+                                                    Trashed
+                                                </span>
+                                            ) : (
+                                                <span className="px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
+                                                    Active
+                                                </span>
+                                            )}
+                                        </td>
+
                                         {/* Actions Cell */}
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2 opacity-100 group-hover:opacity-100">
-                                                <Link
-                                                    href={route(
-                                                        "brands.edit",
-                                                        brand.id,
-                                                    )}
-                                                    className="p-2 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 transition-all duration-200"
-                                                    title="Edit"
-                                                >
-                                                    <Edit size={16} />
-                                                </Link>
-
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(brand.id)
-                                                    }
-                                                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
+                                            <div className="flex justify-end gap-2">
+                                                {brand.deleted_at ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleRestore(
+                                                                    brand.id,
+                                                                )
+                                                            }
+                                                            className="p-2 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 transition-all duration-200"
+                                                            title="Restore"
+                                                        >
+                                                            <RotateCcw
+                                                                size={16}
+                                                            />
+                                                        </button>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleForceDelete(
+                                                                    brand.id,
+                                                                )
+                                                            }
+                                                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
+                                                            title="Delete Forever"
+                                                        >
+                                                            <Flame size={16} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Link
+                                                            href={route(
+                                                                "brands.edit",
+                                                                brand.id,
+                                                            )}
+                                                            className="p-2 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 transition-all duration-200"
+                                                            title="Edit"
+                                                        >
+                                                            <Edit size={16} />
+                                                        </Link>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    brand.id,
+                                                                )
+                                                            }
+                                                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -145,7 +254,8 @@ export default function Index({ brands }) {
 
                     {/* Table Footer */}
                     <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        Showing {brands.length} of {brands.length} brands
+                        Showing {activeBrands.length} active,{" "}
+                        {trashedBrands.length} trashed — {brands.length} total
                     </div>
                 </div>
             )}

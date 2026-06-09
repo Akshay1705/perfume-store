@@ -65,15 +65,13 @@ Route::middleware(['auth', 'admin'])
             );
         })->name('admin.dashboard');
 
-        Route::resource(
-            'categories',
-            CategoryController::class
-        );
+        Route::resource('categories',CategoryController::class);
+        Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+        Route::delete('categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
 
-        Route::resource(
-            'brands',
-            BrandController::class
-        );
+        Route::resource('brands',BrandController::class);
+        Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
+        Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.forceDelete');
 
         Route::resource(
             'products',
@@ -85,21 +83,21 @@ Route::middleware(['auth', 'admin'])
             DiscountController::class
         );
 
-    // Variant Image Routes
-    Route::post(
-        '/variants/{variant}/images',
-        [VariantImageController::class, 'store']
-    );
+        // Variant Image Routes
+        Route::post(
+            '/variants/{variant}/images',
+            [VariantImageController::class, 'store']
+        );
 
-    Route::delete(
-        '/variants/{variant}/images/{image}',
-        [VariantImageController::class, 'destroy']
-    );
+        Route::delete(
+            '/variants/{variant}/images/{image}',
+            [VariantImageController::class, 'destroy']
+        );
 
-    Route::put(
-        '/variants/{variant}/images/{image}/primary',
-        [VariantImageController::class, 'setPrimary']
-    );
+        Route::put(
+            '/variants/{variant}/images/{image}/primary',
+            [VariantImageController::class, 'setPrimary']
+        );
     });
 
 

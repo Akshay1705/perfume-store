@@ -1,8 +1,19 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link } from "@inertiajs/react";
 import { ArrowLeft, Save } from "lucide-react";
+import { useEffect } from "react";
+import { usePage } from "@inertiajs/react";
+import { toast } from "react-toastify";
 
 export default function Edit({ brand }) {
+
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error)   toast.error(flash.error);
+    }, [flash]);
+
     const { data, setData, put, processing, errors } = useForm({
         name: brand.name,
         slug: brand.slug,

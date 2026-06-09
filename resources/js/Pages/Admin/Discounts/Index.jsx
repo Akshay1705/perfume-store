@@ -11,18 +11,37 @@ import {
     ShieldAlert,
 } from "lucide-react";
 import AppSelect from "@/Components/ui/AppSelect";
-
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 export default function Index() {
+    const { flash } = usePage().props;
+    
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
     const { discounts, totalCount, stats, filters } = usePage().props;
     const [deleteId, setDeleteId] = useState(null);
 
+
     const handleDelete = (id) => {
-        if (confirm("Are you sure? This action cannot be undone.")) {
-            router.delete(route("discounts.destroy", id), {
-                onSuccess: () => setDeleteId(null),
-            });
-        }
+        Swal.fire({
+            title: "Delete this discount?",
+            text: "This action cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete it!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("discounts.destroy", id));
+            }
+        });
     };
 
     const getTargetLabel = (discount) => {

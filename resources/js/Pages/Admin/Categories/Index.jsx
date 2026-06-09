@@ -1,17 +1,76 @@
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Link, router } from "@inertiajs/react";
-import { Edit, Trash2, Plus } from "lucide-react";
-import { useState } from "react";
+import { Link, router, usePage } from "@inertiajs/react";
+import { Edit, Trash2, Plus, RotateCcw, Flame } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 export default function Index({ categories }) {
-    const [deleteId, setDeleteId] = useState(null);
+    const { flash } = usePage().props;
+
+    // Show toast from flash message after redirect
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
 
     const handleDelete = (id) => {
-        if (confirm("Are you sure? This action cannot be undone.")) {
-            router.delete(route("categories.destroy", id));
-            setDeleteId(null);
-        }
+        Swal.fire({
+            title: "Delete this category?",
+            text: "Don't worry, it can be restored later.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete it!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("categories.destroy", id));
+            }
+        });
     };
+
+    const handleRestore = (id) => {
+        Swal.fire({
+            title: "Restore this category?",
+            text: "It will be active again.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#38c172",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, restore it!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.post(route("categories.restore", id));
+            }
+        });
+    };
+
+    const handleForceDelete = (id) => {
+        Swal.fire({
+            title: "Permanently delete?",
+            text: "This cannot be undone at all!",
+            icon: "error",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete forever!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("categories.forceDelete", id));
+            }
+        });
+    };
+
+    // Separate active and trashed for count display
+    const activeCategories = categories.filter((c) => !c.deleted_at);
+    const trashedCategories = categories.filter((c) => c.deleted_at);
 
     return (
         <AdminLayout>
@@ -24,8 +83,13 @@ export default function Index({ categories }) {
                                 Categories
                             </h1>
                             <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-sm font-semibold border border-amber-500/30">
-                                {categories.length} total
+                                {activeCategories.length} active
                             </span>
+                            {trashedCategories.length > 0 && (
+                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30">
+                                    {trashedCategories.length} trashed
+                                </span>
+                            )}
                         </div>
                         <p className="text-slate-400 text-sm">
                             Manage your product categories
@@ -73,6 +137,9 @@ export default function Index({ categories }) {
                                     <th className="text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Slug
                                     </th>
+                                    <th className="text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
+                                        Status
+                                    </th>
                                     <th className="text-right px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide">
                                         Actions
                                     </th>
@@ -81,10 +148,14 @@ export default function Index({ categories }) {
 
                             {/* Table Body */}
                             <tbody>
-                                {categories.map((category, index) => (
+                                {categories.map((category) => (
                                     <tr
                                         key={category.id}
-                                        className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group"
+                                        className={`border-b border-slate-700/30 transition-colors duration-200 group ${
+                                            category.deleted_at
+                                                ? "opacity-60 bg-red-950/10"
+                                                : "hover:bg-slate-800/40"
+                                        }`}
                                     >
                                         {/* Name Cell */}
                                         <td className="px-6 py-4">
@@ -94,14 +165,9 @@ export default function Index({ categories }) {
                                                         .charAt(0)
                                                         .toUpperCase()}
                                                 </div>
-                                                <div>
-                                                    <p className="font-semibold text-slate-100">
-                                                        {category.name}
-                                                    </p>
-                                                    {/* <p className="text-xs text-slate-500 mt-0.5">
-                                                        ID: {category.id}
-                                                    </p> */}
-                                                </div>
+                                                <p className="font-semibold text-slate-100">
+                                                    {category.name}
+                                                </p>
                                             </div>
                                         </td>
 
@@ -112,31 +178,80 @@ export default function Index({ categories }) {
                                             </span>
                                         </td>
 
+                                        {/* Status Cell */}
+                                        <td className="px-6 py-4">
+                                            {category.deleted_at ? (
+                                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-xs font-semibold border border-red-500/30">
+                                                    Trashed
+                                                </span>
+                                            ) : (
+                                                <span className="px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold border border-green-500/30">
+                                                    Active
+                                                </span>
+                                            )}
+                                        </td>
+
                                         {/* Actions Cell */}
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2 opacity-100 group-hover:opacity-100">
-                                                <Link
-                                                    href={route(
-                                                        "categories.edit",
-                                                        category.id,
-                                                    )}
-                                                    className="p-2 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 transition-all duration-200"
-                                                    title="Edit"
-                                                >
-                                                    <Edit size={16} />
-                                                </Link>
+                                            <div className="flex justify-end gap-2">
+                                                {category.deleted_at ? (
+                                                    <>
+                                                        {/* Restore Button */}
+                                                        <button
+                                                            onClick={() =>
+                                                                handleRestore(
+                                                                    category.id,
+                                                                )
+                                                            }
+                                                            className="p-2 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 transition-all duration-200"
+                                                            title="Restore"
+                                                        >
+                                                            <RotateCcw
+                                                                size={16}
+                                                            />
+                                                        </button>
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            category.id,
-                                                        )
-                                                    }
-                                                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
+                                                        {/* Force Delete Button */}
+                                                        <button
+                                                            onClick={() =>
+                                                                handleForceDelete(
+                                                                    category.id,
+                                                                )
+                                                            }
+                                                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
+                                                            title="Delete Forever"
+                                                        >
+                                                            <Flame size={16} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {/* Edit Button */}
+                                                        <Link
+                                                            href={route(
+                                                                "categories.edit",
+                                                                category.id,
+                                                            )}
+                                                            className="p-2 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 transition-all duration-200"
+                                                            title="Edit"
+                                                        >
+                                                            <Edit size={16} />
+                                                        </Link>
+
+                                                        {/* Soft Delete Button */}
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    category.id,
+                                                                )
+                                                            }
+                                                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -147,8 +262,9 @@ export default function Index({ categories }) {
 
                     {/* Table Footer */}
                     <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        Showing {categories.length} of {categories.length}{" "}
-                        categories
+                        Showing {activeCategories.length} active,{" "}
+                        {trashedCategories.length} trashed — {categories.length}{" "}
+                        total
                     </div>
                 </div>
             )}

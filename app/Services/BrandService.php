@@ -38,4 +38,17 @@ class BrandService
 
         $Brand->delete();
     }
+
+    public function restore(
+        int $id
+    ): void {
+        Brand::withTrashed()->findOrFail($id)->restore();
+    }
+
+    public function forceDelete(
+        int $id
+    ): void {
+
+        Brand::withTrashed()->findOrFail($id)->forceDelete();
+    }
 }

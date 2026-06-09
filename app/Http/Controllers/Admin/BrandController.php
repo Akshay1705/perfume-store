@@ -13,7 +13,7 @@ class BrandController extends Controller
 {
     public function index(): Response
     {
-        $brands = Brand::latest()->get();
+        $brands = Brand::withTrashed()->latest()->get();
 
         return Inertia::render(
             'Admin/Brands/Index',
@@ -89,6 +89,34 @@ class BrandController extends Controller
             ->with(
                 'success',
                 'Brand deleted successfully.'
+            );
+    }
+
+    public function restore(
+        int $id,
+        BrandService $service
+    ) {
+        $service->restore($id);
+
+        return redirect()
+            ->route('brands.index')
+            ->with(
+                'success',
+                'Brand restored successfully.'
+            );
+    }
+
+    public function forceDelete(
+        int $id,
+        BrandService $service
+    ) {
+        $service->forceDelete($id);
+
+        return redirect()
+            ->route('brands.index')
+            ->with(
+                'success',
+                'Brand permanently deleted successfully.'
             );
     }
 }
