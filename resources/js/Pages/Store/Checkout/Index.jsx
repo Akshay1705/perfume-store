@@ -1,5 +1,5 @@
 import StoreLayout from "@/Layouts/StoreLayout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
 
 export default function Index({ cart, addresses = [] }) {
@@ -10,7 +10,16 @@ export default function Index({ cart, addresses = [] }) {
             null,
     );
 
-    console.log(selectedAddress);
+    const { post, processing } = useForm();
+    const form = useForm({
+        address_id: selectedAddress,
+    });
+    const placeOrder = () => {
+        form.setData("address_id", selectedAddress);
+
+        form.post(route("checkout.place-order"));
+    };
+
     const items = cart?.items || [];
 
     return (
@@ -231,9 +240,8 @@ export default function Index({ cart, addresses = [] }) {
                             {/* Primary Action Button Loop Terminal */}
                             <button
                                 type="button"
-                                disabled={
-                                    addresses.length === 0 || !selectedAddress
-                                }
+                                onClick={placeOrder}
+                                disabled={!selectedAddress || form.processing}
                                 className="mt-4 w-full bg-stone-950 text-white text-[11px] tracking-[0.25em] font-medium uppercase py-4 rounded-none hover:bg-stone-800 active:bg-stone-900 transition-colors shadow-none text-center duration-300 disabled:opacity-40 disabled:pointer-events-none"
                             >
                                 Place Order

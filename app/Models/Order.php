@@ -35,6 +35,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
+    }
+
     public function scopeCart(Builder $query): Builder
     {
         return $query->where('status', 'cart');

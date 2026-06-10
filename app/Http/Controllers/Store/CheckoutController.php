@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Services\CheckoutService;
+use App\Http\Requests\Store\PlaceOrderRequest;
+use App\Models\User;
 
 class CheckoutController extends Controller
 {
@@ -27,6 +30,35 @@ class CheckoutController extends Controller
             [
                 'cart' => $cart,
                 'addresses' => $addresses,
+            ]
+        );
+    }
+
+    public function placeOrder(
+        PlaceOrderRequest $request,
+        CheckoutService $service
+    ) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $order = $service->placeOrder(
+            $user,
+            $request->address_id
+        );
+
+        return redirect()
+            ->route(
+                'checkout.success',
+                $order->id
+            );
+    }
+
+    public function success($order)
+    {
+        return Inertia::render(
+            'Store/Checkout/Success',
+            [
+                'orderId' => $order,
             ]
         );
     }

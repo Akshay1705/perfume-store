@@ -92,6 +92,16 @@ Route::middleware('auth')->group(function () {
         '/checkout/place-order',
         [CheckoutController::class, 'placeOrder']
     )->name('checkout.place-order');
+
+    Route::post(
+        '/checkout/place-order',
+        [CheckoutController::class, 'placeOrder']
+    )->name('checkout.place-order');
+
+    Route::get(
+        '/checkout/success/{order}',
+        [CheckoutController::class, 'success']
+    )->name('checkout.success');
 });
 
 require __DIR__ . '/auth.php';
