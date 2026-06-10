@@ -1,83 +1,87 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
 use Inertia\Inertia;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\DiscountController;
-use App\Http\Controllers\Store\HomeController;
-use App\Http\Controllers\Store\AccountController;
-use App\Http\Controllers\Store\AddressController;
-use App\Http\Controllers\Store\ProductController as StoreProductController;
-use App\Http\Controllers\Admin\VariantImageController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController};
+use App\Http\Controllers\Store\{HomeController, AccountController, AddressController, CartController, ProductController as StoreProductController};
 
-
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
+/*
+|--------------------------------------------------------------------------
+| Public Store Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])->name('products.show');
 Route::get('/products', [StoreProductController::class, 'index'])->name('store.products');
-Route::get('/our-story', function () {return Inertia::render('Store/OurStory');})->name('store.story');
+Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])->name('products.show');
+Route::get('/our-story', function () {
+    return Inertia::render('Store/OurStory');
+})->name('store.story');
 
-
-// Serve product images - must be before the storage symlink
+// Securely serve product images (prevents directory traversal)
 Route::get('/storage/products/{filename}', function ($filename) {
     $path = storage_path('app/public/products/' . $filename);
-    
-    if (!file_exists($path)) {abort(404);}
-    
-    // Validate filename to prevent directory traversal
-    if (basename($path) !== $filename) {abort(403);}
-    
-    return response()->file($path, [
-        'Content-Type' => mime_content_type($path) ?: 'application/octet-stream',
-        'Cache-Control' => 'public, max-age=31536000',
-    ]);})->name('storage.product-image');
+    if (!file_exists($path) || basename($path) !== $filename) {
+        abort(file_exists($path) ? 403 : 404);
+    }
+    return response()->file($path, ['Content-Type' => mime_content_type($path) ?: 'application/octet-stream', 'Cache-Control' => 'public, max-age=31536000']);
+})->name('storage.product-image');
 
+/*
+|--------------------------------------------------------------------------
+| Admin Area Routes (Protected)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Admin/Dashboard');
+    })->name('admin.dashboard');
 
-        Route::get('/dashboard', function () {return Inertia::render('Admin/Dashboard');})->name('admin.dashboard');
+    // Categories Management
+    Route::resource('categories', CategoryController::class);
+    Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+    Route::delete('categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
 
-        Route::resource('categories',CategoryController::class);
-        Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
-        Route::delete('categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
+    // Brands Management
+    Route::resource('brands', BrandController::class);
+    Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
+    Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.forceDelete');
 
-        Route::resource('brands',BrandController::class);
-        Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
-        Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.forceDelete');
+    // Products & Discounts
+    Route::resource('products', ProductController::class);
+    Route::resource('discounts', DiscountController::class);
 
-        Route::resource('products',ProductController::class);
-
-        Route::resource('discounts',DiscountController::class);
-
-        // Variant Image Routes
-        Route::post( '/variants/{variant}/images',[VariantImageController::class, 'store']);
-        Route::delete('/variants/{variant}/images/{image}',[VariantImageController::class, 'destroy']);
-        Route::put('/variants/{variant}/images/{image}/primary',[VariantImageController::class, 'setPrimary']);
-    });
-
-Route::middleware('auth')->prefix('account')->group(function () {
-
-    Route::get('/profile',[ProfileController::class, 'edit'])->name('account.profile');
-    Route::resource('addresses',AddressController::class);
-    // Route::get('/orders',[OrderController::class, 'index'])->name('orders.index');
-    Route::post('/addresses/{address}/default',[AddressController::class, 'setDefault'])->name('addresses.default');
+    // Variant Images
+    Route::post('/variants/{variant}/images', [VariantImageController::class, 'store']);
+    Route::delete('/variants/{variant}/images/{image}', [VariantImageController::class, 'destroy']);
+    Route::put('/variants/{variant}/images/{image}/primary', [VariantImageController::class, 'setPrimary']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| Customer Account & Shopping Routes (Protected)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
+    // Personal Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Sub-scoped Customer Account Details
+    Route::prefix('account')->group(function () {
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('account.profile');
+        Route::resource('addresses', AddressController::class);
+        Route::post('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
+    });
+
+    // Shopping Cart System
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::patch('/cart/items/{item}', [CartController::class, 'updateQuantity'])->name('cart.items.update');
+    Route::delete('/cart/items/{item}', [CartController::class, 'destroy'])->name('cart.items.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

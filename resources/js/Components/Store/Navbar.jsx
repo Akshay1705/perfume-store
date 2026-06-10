@@ -2,7 +2,8 @@ import { Link, usePage } from "@inertiajs/react";
 
 export default function Navbar({ categories = [], brands = [] }) {
     const { auth } = usePage().props;
-
+    const { props } = usePage();
+    const cartItemCount = props.cart?.items?.length || 0;
     const user = auth?.user;
 
     console.log("AUTH:", auth);
@@ -137,23 +138,32 @@ export default function Navbar({ categories = [], brands = [] }) {
                             <Link href="/register">Register</Link>
                         </>
                     )}
-                    <button
-                        className="p-2 hover:text-stone-950 transition-colors relative"
-                        aria-label="Cart"
+                    <Link
+                        href={route("cart.index")}
+                        className="p-2 text-stone-600 hover:text-stone-950 transition-colors relative inline-flex items-center justify-center group"
+                        aria-label={`Shopping Bag containing ${cartItemCount} items`}
                     >
+                        {/* Clean Minimalist Vector Bag Icon */}
                         <svg
-                            className="w-5 h-5"
+                            className="w-[19px] h-[19px] stroke-[1.5]"
                             fill="none"
                             stroke="currentColor"
-                            strokeWidth="2"
                             viewBox="0 0 24 24"
                         >
-                            <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                            ></path>
                         </svg>
-                        <span className="absolute top-1 right-1 bg-amber-700 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                            0
-                        </span>
-                    </button>
+
+                        {/* Dynamic Notification Badge Overlay */}
+                        {cartItemCount > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 bg-stone-950 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-mono font-bold tracking-tighter animate-fade-in">
+                                {cartItemCount}
+                            </span>
+                        )}
+                    </Link>
                 </div>
             </div>
         </nav>

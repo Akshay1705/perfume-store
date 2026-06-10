@@ -1,11 +1,15 @@
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Head } from "@inertiajs/react";
 import { useState } from "react";
+import { useForm } from "@inertiajs/react";
 
 export default function ProductShow({ product }) {
     const firstVariant = product.variants?.[0] || null;
-
     const [selectedVariant, setSelectedVariant] = useState(firstVariant);
+    const { data, setData, post } = useForm({
+        variant_id: null,
+        quantity: 1,
+    });
 
     // Active image comes from selected variant's images
     const getVariantPrimaryImage = (variant) =>
@@ -25,6 +29,17 @@ export default function ProductShow({ product }) {
 
     // Current images to show in gallery = selected variant's images
     const galleryImages = selectedVariant?.images || [];
+
+    const handleAddToCart = () => {
+        if (!selectedVariant) return;
+
+        setData({
+            variant_id: selectedVariant.id,
+            quantity: 1,
+        });
+
+        post(route("cart.add"));
+    };
 
     return (
         <StoreLayout>
@@ -187,6 +202,7 @@ export default function ProductShow({ product }) {
                         {/* CTA */}
                         <div className="mt-10 pt-6 border-t border-stone-100 space-y-6">
                             <button
+                                onClick={handleAddToCart}
                                 disabled={
                                     !selectedVariant ||
                                     selectedVariant?.stock <= 0

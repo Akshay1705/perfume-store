@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VariantImage extends Model
 {
@@ -20,7 +20,7 @@ class VariantImage extends Model
         return asset('storage/' . $this->image_path);
     }
 
-    public function variant()
+    public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
     }
