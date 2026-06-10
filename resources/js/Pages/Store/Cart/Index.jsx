@@ -243,12 +243,13 @@ export default function Index({ cart }) {
                                         </div>
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        className="mt-4 w-full bg-stone-950 text-white text-[11px] tracking-[0.25em] font-medium uppercase py-4 rounded-none hover:bg-stone-800 active:bg-stone-900 transition-colors shadow-none text-center duration-300"
+                                    <Link
+                                        href={route("checkout.index")}
+                                        as="button"
+                                        className="mt-4 w-full bg-stone-950 text-white text-[11px] tracking-[0.25em] font-medium uppercase py-4 rounded-none hover:bg-stone-800 active:bg-stone-900 transition-colors shadow-none text-center duration-300 block select-none focus:outline-none"
                                     >
                                         Proceed to Checkout
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         )}

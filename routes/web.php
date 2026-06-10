@@ -5,7 +5,7 @@ use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController};
-use App\Http\Controllers\Store\{HomeController, AccountController, AddressController, CartController, ProductController as StoreProductController};
+use App\Http\Controllers\Store\{HomeController, AccountController, AddressController, CartController, ProductController as StoreProductController, CheckoutController};
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +82,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::patch('/cart/items/{item}', [CartController::class, 'updateQuantity'])->name('cart.items.update');
     Route::delete('/cart/items/{item}', [CartController::class, 'destroy'])->name('cart.items.destroy');
+
+    Route::get(
+        '/checkout',
+        [CheckoutController::class, 'index']
+    )->name('checkout.index');
+
+    Route::post(
+        '/checkout/place-order',
+        [CheckoutController::class, 'placeOrder']
+    )->name('checkout.place-order');
 });
 
 require __DIR__ . '/auth.php';
