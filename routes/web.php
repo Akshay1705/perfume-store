@@ -7,9 +7,10 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Store\HomeController;
+use App\Http\Controllers\Store\AccountController;
+use App\Http\Controllers\Store\AddressController;
 use App\Http\Controllers\Store\ProductController as StoreProductController;
 use App\Http\Controllers\Admin\VariantImageController;
 
@@ -24,46 +25,28 @@ use App\Http\Controllers\Admin\VariantImageController;
 // });
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
-    ->name('products.show');
-
+Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])->name('products.show');
 Route::get('/products', [StoreProductController::class, 'index'])->name('store.products');
-
-Route::get('/our-story', function () {
-    return Inertia::render('Store/OurStory');
-})->name('store.story');
+Route::get('/our-story', function () {return Inertia::render('Store/OurStory');})->name('store.story');
 
 
 // Serve product images - must be before the storage symlink
 Route::get('/storage/products/{filename}', function ($filename) {
     $path = storage_path('app/public/products/' . $filename);
     
-    if (!file_exists($path)) {
-        abort(404);
-    }
+    if (!file_exists($path)) {abort(404);}
     
     // Validate filename to prevent directory traversal
-    if (basename($path) !== $filename) {
-        abort(403);
-    }
+    if (basename($path) !== $filename) {abort(403);}
     
     return response()->file($path, [
         'Content-Type' => mime_content_type($path) ?: 'application/octet-stream',
         'Cache-Control' => 'public, max-age=31536000',
-    ]);
-})->name('storage.product-image');
+    ]);})->name('storage.product-image');
 
-Route::middleware(['auth', 'admin'])
-    ->prefix('admin')
-    ->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
-        Route::get('/dashboard', function () {
-
-            return Inertia::render(
-                'Admin/Dashboard'
-            );
-        })->name('admin.dashboard');
+        Route::get('/dashboard', function () {return Inertia::render('Admin/Dashboard');})->name('admin.dashboard');
 
         Route::resource('categories',CategoryController::class);
         Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
@@ -73,37 +56,23 @@ Route::middleware(['auth', 'admin'])
         Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
         Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.forceDelete');
 
-        Route::resource(
-            'products',
-            ProductController::class
-        );
+        Route::resource('products',ProductController::class);
 
-        Route::resource(
-            'discounts',
-            DiscountController::class
-        );
+        Route::resource('discounts',DiscountController::class);
 
         // Variant Image Routes
-        Route::post(
-            '/variants/{variant}/images',
-            [VariantImageController::class, 'store']
-        );
-
-        Route::delete(
-            '/variants/{variant}/images/{image}',
-            [VariantImageController::class, 'destroy']
-        );
-
-        Route::put(
-            '/variants/{variant}/images/{image}/primary',
-            [VariantImageController::class, 'setPrimary']
-        );
+        Route::post( '/variants/{variant}/images',[VariantImageController::class, 'store']);
+        Route::delete('/variants/{variant}/images/{image}',[VariantImageController::class, 'destroy']);
+        Route::put('/variants/{variant}/images/{image}/primary',[VariantImageController::class, 'setPrimary']);
     });
 
+Route::middleware('auth')->prefix('account')->group(function () {
 
-Route::get('/account', function () {
-    return Inertia::render('Store/Account');
-})->middleware('auth')->name('account');
+    Route::get('/profile',[ProfileController::class, 'edit'])->name('account.profile');
+    Route::resource('addresses',AddressController::class);
+    // Route::get('/orders',[OrderController::class, 'index'])->name('orders.index');
+    Route::post('/addresses/{address}/default',[AddressController::class, 'setDefault'])->name('addresses.default');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

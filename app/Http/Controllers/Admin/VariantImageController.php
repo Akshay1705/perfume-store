@@ -11,11 +11,8 @@ use Illuminate\Http\JsonResponse;
 
 class VariantImageController extends Controller
 {
-    public function store(
-        Request $request,
-        ProductVariant $variant
-    ): JsonResponse {
-
+    public function store(Request $request,ProductVariant $variant): JsonResponse 
+    {
         $validated = $request->validate([
             'image' => 'required|image|max:5120',
             'is_primary' => 'boolean',
@@ -38,23 +35,16 @@ class VariantImageController extends Controller
         ]);
     }
 
-    public function destroy(
-        ProductVariant $variant,
-        VariantImage $image
-    ): JsonResponse {
-
-        if (
-            $image->product_variant_id !== $variant->id
-        ) {
+    public function destroy(ProductVariant $variant,VariantImage $image): JsonResponse 
+    {
+        if ($image->product_variant_id !== $variant->id){
             return response()->json([
                 'error' => 'Image not found'
             ], 404);
         }
 
         $service = new VariantImageService();
-
         $service->delete($image);
-
         $variant->load('images');
 
         return response()->json([
@@ -66,23 +56,16 @@ class VariantImageController extends Controller
         ]);
     }
 
-    public function setPrimary(
-        ProductVariant $variant,
-        VariantImage $image
-    ): JsonResponse {
-
-        if (
-            $image->product_variant_id !== $variant->id
-        ) {
+    public function setPrimary(ProductVariant $variant,VariantImage $image): JsonResponse 
+    {
+        if ($image->product_variant_id !== $variant->id){
             return response()->json([
                 'error' => 'Image not found'
             ], 404);
         }
 
         $service = new VariantImageService();
-
         $service->setPrimary($image);
-
         $variant->load('images');
 
         return response()->json([

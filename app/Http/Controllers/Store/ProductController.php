@@ -12,9 +12,7 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
-    public function __construct(
-        protected ProductFilterService $filterService
-    ) {}
+    public function __construct(protected ProductFilterService $filterService) {}
 
     /**
      * Display a listing of all product variants matching query filter strings.

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Address;
+
 
 class User extends Authenticatable
 {
@@ -44,6 +46,11 @@ class User extends Authenticatable
     public function discounts(): HasMany
     {
         return $this->hasMany(Discount::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
     }
 
     public function activeCart()

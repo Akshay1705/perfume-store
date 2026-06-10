@@ -7,7 +7,7 @@ export default function StoreLayout({ children}) {
     const { categories = [], brands = [] } = usePage().props;
 
     return (
-        <div className="min-h-screen bg-store-bg text-white">
+        <div className="min-h-screen bg-store-bg text-stone-900">
             <Navbar categories={categories} brands={brands} />
 
             {children}

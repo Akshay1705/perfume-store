@@ -11,44 +11,33 @@ class BrandService
     {
         return Brand::create([
             'name' => $data['name'],
-
             'slug' => $data['slug']
                 ?: Str::slug($data['name']),
         ]);
     }
 
-    public function update(
-        Brand $Brand,
-        array $data
-    ): Brand {
-
+    public function update(Brand $Brand,array $data): Brand 
+    {
         $Brand->update([
             'name' => $data['name'],
-
             'slug' => $data['slug']
                 ?: Str::slug($data['name']),
         ]);
-
         return $Brand;
     }
 
-    public function delete(
-        Brand $Brand
-    ): void {
-
+    public function delete(Brand $Brand): void 
+    {
         $Brand->delete();
     }
 
-    public function restore(
-        int $id
-    ): void {
+    public function restore(int $id): void 
+    {
         Brand::withTrashed()->findOrFail($id)->restore();
     }
 
-    public function forceDelete(
-        int $id
-    ): void {
-
+    public function forceDelete(int $id): void 
+    {
         Brand::withTrashed()->findOrFail($id)->forceDelete();
     }
 }

@@ -17,18 +17,13 @@ class CategoryService
         ]);
     }
 
-    public function update(
-        Category $category,
-        array $data
-    ): Category {
-
+    public function update(Category $category,array $data): Category 
+    {
         $category->update([
             'name' => $data['name'],
-
             'slug' => $data['slug']
                 ?: Str::slug($data['name']),
         ]);
-
         return $category;
     }
 

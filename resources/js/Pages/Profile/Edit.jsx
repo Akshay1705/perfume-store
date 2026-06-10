@@ -1,4 +1,4 @@
-import StoreLayout from "@/Layouts/StoreLayout";
+import AccountLayout from "@/Layouts/AccountLayout";
 import { Head } from "@inertiajs/react";
 import DeleteUserForm from "./Partials/DeleteUserForm";
 import UpdatePasswordForm from "./Partials/UpdatePasswordForm";
@@ -6,7 +6,7 @@ import UpdateProfileInformationForm from "./Partials/UpdateProfileInformationFor
 
 export default function Edit({ mustVerifyEmail, status }) {
     return (
-        <StoreLayout>
+        <AccountLayout>
             <Head title="Account Settings" />
 
             <div className="bg-white min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -57,6 +57,6 @@ export default function Edit({ mustVerifyEmail, status }) {
                     </div>
                 </div>
             </div>
-        </StoreLayout>
+        </AccountLayout>
     );
 }

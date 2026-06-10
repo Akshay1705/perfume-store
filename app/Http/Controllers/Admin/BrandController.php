@@ -30,14 +30,9 @@ class BrandController extends Controller
         );
     }
 
-    public function store(
-        BrandRequest $request,
-        BrandService $service
-    ) {
-        $service->store(
-            $request->validated()
-        );
-
+    public function store(BrandRequest $request,BrandService $service) 
+    {
+        $service->store($request->validated());
         return redirect()
             ->route('brands.index')
             ->with(
@@ -46,10 +41,8 @@ class BrandController extends Controller
             );
     }
 
-    public function edit(
-        Brand $brand
-    ): Response {
-
+    public function edit(Brand $brand): Response 
+    {
         return Inertia::render(
             'Admin/Brands/Edit',
             [
@@ -58,16 +51,9 @@ class BrandController extends Controller
         );
     }
 
-    public function update(
-        BrandRequest $request,
-        Brand $brand,
-        BrandService $service
-    ) {
-
-        $service->update(
-            $brand,
-            $request->validated()
-        );
+    public function update(BrandRequest $request,Brand $brand,BrandService $service) 
+    {
+        $service->update($brand,$request->validated());
 
         return redirect()
             ->route('brands.index')
@@ -77,11 +63,8 @@ class BrandController extends Controller
             );
     }
 
-    public function destroy(
-        Brand $brand,
-        BrandService $service
-    ) {
-
+    public function destroy(Brand $brand,BrandService $service) 
+    {
         $service->delete($brand);
 
         return redirect()
@@ -92,10 +75,8 @@ class BrandController extends Controller
             );
     }
 
-    public function restore(
-        int $id,
-        BrandService $service
-    ) {
+    public function restore(int $id,BrandService $service) 
+    {
         $service->restore($id);
 
         return redirect()
@@ -106,10 +87,8 @@ class BrandController extends Controller
             );
     }
 
-    public function forceDelete(
-        int $id,
-        BrandService $service
-    ) {
+    public function forceDelete(int $id,BrandService $service) 
+    {
         $service->forceDelete($id);
 
         return redirect()

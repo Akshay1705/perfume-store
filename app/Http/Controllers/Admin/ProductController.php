@@ -18,22 +18,16 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(
-            ProductIndexRequest $request,
-            ProductService $service
-        ): Response {
-
+    public function index(ProductIndexRequest $request,ProductService $service): Response 
+    {
         $filters = $request->validated();
-
         $products = $service->getProducts($filters);
 
         return Inertia::render(
             'Admin/Products/Index',
             [
                 'products' => $products,
-
                 'totalCount' => \App\Models\Product::count(), // always unfiltered
-
                 'filters' => [
                     'search' => $filters['search'] ?? '',
                     'category' => $filters['category'] ?? '',
@@ -41,17 +35,8 @@ class ProductController extends Controller
                     'status' => $filters['status'] ?? '',
                     'gender' => $filters['gender'] ?? '',
                 ],
-
-                'categories' => Category::select(
-                    'id',
-                    'name'
-                )->orderBy('name')->get(),
-
-                'brands' => Brand::select(
-                    'id',
-                    'name'
-                )->orderBy('name')->get(),
-
+                'categories' => Category::select('id','name')->orderBy('name')->get(),
+                'brands' => Brand::select('id','name')->orderBy('name')->get(),
             ]
         );
     }
@@ -81,9 +66,7 @@ class ProductController extends Controller
         ProductService $service
     ) {
         // Create the product
-        $product = $service->store(
-            $request->validated()
-        );
+        $product = $service->store($request->validated());
 
         // Return with product data so React can capture the ID
         return redirect()
@@ -105,10 +88,8 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(
-        Product $product
-    ): Response {
-
+    public function edit(Product $product): Response 
+    {
         $categories = Category::all();
         $brands = Brand::all();
 
@@ -134,16 +115,9 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(
-        ProductRequest $request,
-        Product $product,
-        ProductService $service
-    ) {
-
-        $service->update(
-            $product,
-            $request->validated()
-        );
+    public function update(ProductRequest $request,Product $product,ProductService $service) 
+    {
+        $service->update($product,$request->validated());
 
         return redirect()
             ->route('products.index')
@@ -156,11 +130,8 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(
-        Product $product,
-        ProductService $service
-    ) {
-
+    public function destroy(Product $product,ProductService $service) 
+    {
         $service->delete($product);
 
         return redirect()

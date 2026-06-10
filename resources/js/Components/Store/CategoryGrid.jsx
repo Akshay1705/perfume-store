@@ -12,7 +12,7 @@ export default function CategoryGrid({ categories = [] }) {
                 <div className="h-0.5 w-12 bg-amber-600 mt-3"></div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 max-w-6xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
                 {categories.map((category) => (
                     <Link
                         key={category.id}

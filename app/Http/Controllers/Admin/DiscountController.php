@@ -28,26 +28,18 @@ class DiscountController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(
-        DiscountIndexRequest $request
-    ): Response {
+    public function index(DiscountIndexRequest $request): Response 
+    {
         $filters = $request->validated();
-
-        $discounts = $this->service
-            ->getDiscounts($filters);
-
-        $stats = $this->service
-            ->getStats();
+        $discounts = $this->service->getDiscounts($filters);
+        $stats = $this->service->getStats();
 
         return Inertia::render(
             'Admin/Discounts/Index',
             [
                 'discounts' => $discounts,
-
                 'totalCount' => \App\Models\Discount::count(), // always unfiltered
-
                 'stats' => $stats,
-
                 'filters' => [
                     'search' => $filters['search'] ?? '',
                     'type' => $filters['type'] ?? '',

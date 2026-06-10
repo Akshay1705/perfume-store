@@ -108,14 +108,14 @@ export default function Navbar({ categories = [], brands = [] }) {
 
                             <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-stone-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                                 <Link
-                                    href="/profile"
+                                    href={route("account.profile")}
                                     className="block px-4 py-3 hover:bg-stone-50"
                                 >
                                     My Profile
                                 </Link>
 
                                 <Link
-                                    href="/orders"
+                                    href="account/orders"
                                     className="block px-4 py-3 hover:bg-stone-50"
                                 >
                                     My Orders

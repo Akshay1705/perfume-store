@@ -8,18 +8,12 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
 
-export default function Index({
-    products,
-    totalCount,
-    filters,
-    categories,
-    brands,
-}) {
+export default function Index({products,totalCount,filters,categories,brands,}) 
+{
     const [deleteId, setDeleteId] = useState(null);
     const [expandedProducts, setExpandedProducts] = useState([]);
-
+    
     const { flash } = usePage().props;
-
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
@@ -63,7 +57,7 @@ export default function Index({
         (variant) =>
             variant.is_active &&
             Number(variant.stock) > 0 &&
-            Number(variant.stock) < 10,
+            Number(variant.stock) < 20,
     ).length;
 
     const outOfStockCount = allVariants.filter(
