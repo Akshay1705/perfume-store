@@ -64,18 +64,12 @@ class DiscountService
             'active' => Discount::where('is_active', true)
                 ->where(function ($q) use ($now) {
                     $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
-                })
-                ->where(function ($q) use ($now) {
+                })->where(function ($q) use ($now) {
                     $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
-                })
-                ->count(),
-            'scheduled' => Discount::where('is_active', true)
-                ->where('starts_at', '>', $now)
-                ->count(),
+                })->count(),
+            'scheduled' => Discount::where('is_active', true)->where('starts_at', '>', $now)->count(),
             'inactive' => Discount::where('is_active', false)->count(),
-            'expired' => Discount::where('is_active', true)
-                ->where('ends_at', '<', $now)
-                ->count(),
+            'expired' => Discount::where('is_active', true)->where('ends_at', '<', $now)->count(),
             'by_type' => [
                 'percentage' => Discount::where('type', 'percentage')->count(),
                 'fixed' => Discount::where('type', 'fixed')->count(),
@@ -83,43 +77,20 @@ class DiscountService
         ];
     }
 
-    public function getDiscounts(
-        array $filters
-    ): LengthAwarePaginator {
-
+    public function getDiscounts(array $filters): LengthAwarePaginator 
+    {
         return Discount::query()
-
-            ->with([
-                'user',
-                'brand',
-                'category'
-            ])
+            ->with(['user','brand','category'])
 
             ->when(
                 $filters['search'] ?? null,
                 fn($query, $search) =>
                 $query->where(function ($q) use ($search) {
-                    $q->where(
-                        'name',
-                        'like',
-                        "%{$search}%"
-                    )
-                        ->orWhere(
-                            'code',
-                            'like',
-                            "%{$search}%"
-                        );
+                    $q->where('name','like',"%{$search}%")
+                        ->orWhere('code','like',"%{$search}%");
                 })
             )
-
-            ->when(
-                $filters['type'] ?? null,
-                fn($query, $type) =>
-                $query->where(
-                    'type',
-                    $type
-                )
-            )
+            ->when($filters['type'] ?? null,fn($query, $type) =>$query->where('type',$type))
 
             ->when(
                 $filters['status'] ?? null,

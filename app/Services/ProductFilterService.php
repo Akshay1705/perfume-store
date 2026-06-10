@@ -63,16 +63,10 @@ class ProductFilterService
         }
 
         // Eager load with volume-filtered variants
-        return $query->with([
-            'brand',
-            'category',
-            'variants' => function ($q) use ($volumes) {
+        return $query->with(['brand','category','variants' => function ($q) use ($volumes)
+            {
                 $q->where('is_active', true);
-
-                if (!empty($volumes)) {
-                    $q->whereIn('volume', $volumes);
-                }
-
+                if (!empty($volumes)) {$q->whereIn('volume', $volumes);}
                 $q->with('images')->orderBy('price', 'asc');
             }
         ]);
