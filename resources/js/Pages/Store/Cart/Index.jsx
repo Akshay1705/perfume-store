@@ -1,10 +1,21 @@
 import StoreLayout from "@/Layouts/StoreLayout";
-import { Head, router, Link } from "@inertiajs/react";
+import { Head, router, Link, useForm} from "@inertiajs/react";
+import { useState } from "react";
 
 export default function Index({ cart }) {
     // Structural state calculations safety check
     const items = cart?.items || [];
     const hasItems = items.length > 0;
+
+    const [couponCode, setCouponCode] = useState("");
+
+    const form = useForm({
+        code: "",
+    });
+
+    const applyCoupon = () => {
+        form.post(route("cart.discount"));
+    };
 
     const updateQuantity = (id, newQuantity) => {
         if (newQuantity < 1) return;
@@ -210,6 +221,60 @@ export default function Index({ cart }) {
                                         </p>
                                     </div>
 
+                                    <div className="mb-6">
+                                        <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500 mb-2">
+                                            Discount Code
+                                        </label>
+
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={form.data.code}
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        "code",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                placeholder="WELCOME10"
+                                                className="flex-1 border border-stone-200 px-3 py-3 text-sm focus:outline-none focus:border-stone-800"
+                                            />
+
+                                            <button
+                                                type="button"
+                                                disabled={form.processing}
+                                                onClick={applyCoupon}
+                                                className="px-5 bg-black text-white text-xs uppercase tracking-widest"
+                                            >
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {cart.discount && (
+                                        <div className="mb-4 border border-green-200 bg-green-50 p-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs uppercase tracking-wider">
+                                                    {cart.discount.code}
+                                                </span>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        post(
+                                                            route(
+                                                                "cart.discount.remove",
+                                                            ),
+                                                        )
+                                                    }
+                                                    className="text-xs text-red-600 uppercase"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="space-y-3 pt-4 border-t border-stone-200 text-xs tracking-wide">
                                         <div className="flex justify-between text-stone-600 font-light">
                                             <span>Subtotal</span>
@@ -220,6 +285,19 @@ export default function Index({ cart }) {
                                                 ).toLocaleString("en-IN")}
                                             </span>
                                         </div>
+
+                                        {Number(cart.discount_amount) > 0 && (
+                                            <div className="flex justify-between py-2">
+                                                <span>Discount</span>
+
+                                                <span className="text-green-700">
+                                                    -₹
+                                                    {Number(
+                                                        cart.discount_amount,
+                                                    ).toLocaleString("en-IN")}
+                                                </span>
+                                            </div>
+                                        )}
 
                                         <div className="flex justify-between text-stone-600 font-light">
                                             <span>Estimated Delivery</span>

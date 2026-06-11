@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\User;
+use App\Services\CouponService;
+use App\Http\Requests\Store\ApplyDiscountRequest;
 
 class CartController extends Controller
 {
@@ -24,6 +26,7 @@ class CartController extends Controller
             ->with([
                 'items.variant.product',
                 'items.variant.primaryImage',
+                'discount'
             ])
             ->first();
 
@@ -51,6 +54,47 @@ class CartController extends Controller
         return back()->with(
             'success',
             'Product added to cart.',
+        );
+    }
+
+    public function applyDiscount(
+        ApplyDiscountRequest $request,
+        CouponService $service
+    ) {
+
+        /** @var \App\Models\User $user */
+
+        $user = Auth::user();
+
+        $cart = $user->activeCart();
+
+        $service->applyCoupon(
+            $cart,
+            $request->code
+        );
+
+        return back()->with(
+            'success',
+            'Discount applied successfully.'
+        );
+    }
+
+    public function removeDiscount()
+    {
+        /** @var \App\Models\User $user */
+
+
+        $cart = $user->activeCart();
+        $user = Auth::user();
+        $cart->update([
+            'discount_id' => null,
+            'discount_amount' => 0,
+            'total' => $cart->subtotal,
+        ]);
+
+        return back()->with(
+            'success',
+            'Coupon removed.'
         );
     }
 

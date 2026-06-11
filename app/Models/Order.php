@@ -22,6 +22,7 @@ class Order extends Model
         'address_id',
         'status',
         'subtotal',
+        'discount_id',
         'discount_amount',
         'total',
         'placed_at',
@@ -47,6 +48,11 @@ class Order extends Model
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
+    }
+
+    public function discount(): BelongsTo
+    {
+        return $this->belongsTo(Discount::class);
     }
 
     public function scopeCart(Builder $query): Builder

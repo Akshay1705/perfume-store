@@ -21,6 +21,7 @@ class CheckoutController extends Controller
             ->load([
                 'items.variant.product',
                 'items.variant.primaryImage',
+                'discount'
             ]);
 
         $addresses = $user->addresses;

@@ -217,6 +217,36 @@ export default function Index({ cart, addresses = [] }) {
                                     {/* Subtotal is formatted with regional commas via local strings mapping */}
                                 </div>
 
+                                {Number(cart.discount_amount) > 0 && (
+                                    <div className="flex justify-between text-emerald-700 font-medium">
+                                        <span>
+                                            Discount
+                                            {cart.discount?.code && (
+                                                <span className="ml-2 text-[9px] uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5">
+                                                    {cart.discount.code}
+                                                </span>
+                                            )}
+                                        </span>
+
+                                        <span className="font-mono">
+                                            -₹
+                                            {Number(
+                                                cart.discount_amount,
+                                            ).toLocaleString("en-IN")}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {Number(cart.discount_amount) > 0 && (
+                                    <div className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2">
+                                        You saved ₹
+                                        {Number(
+                                            cart.discount_amount,
+                                        ).toLocaleString("en-IN")}{" "}
+                                        with this order.
+                                    </div>
+                                )}
+
                                 <div className="flex justify-between text-stone-600 font-light">
                                     <span>Standard Freight Delivery</span>
                                     <span className="text-[9px] uppercase tracking-widest text-emerald-700 font-medium bg-emerald-50 px-1.5 py-0.5">

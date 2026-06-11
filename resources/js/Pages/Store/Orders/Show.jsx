@@ -184,13 +184,14 @@ export default function Show({ order }) {
                             </span>
                         </div>
 
-                        {Number(order.discount_amount) > 0 && (
-                            <div className="flex justify-between text-rose-600 font-light">
-                                <span>Promotional Discount</span>
-                                <span className="font-mono">
-                                    — ₹
+                        {Number(cart.discount_amount) > 0 && (
+                            <div className="flex justify-between py-2">
+                                <span>Discount</span>
+
+                                <span className="text-green-700">
+                                    -₹
                                     {Number(
-                                        order.discount_amount,
+                                        cart.discount_amount,
                                     ).toLocaleString("en-IN")}
                                 </span>
                             </div>
