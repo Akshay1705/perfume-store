@@ -3,8 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController};
-use App\Http\Controllers\Store\{HomeController, AccountController, AddressController, CartController, ProductController as StoreProductController, CheckoutController, OrderController};
+use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController, OrderController as AdminOrderController};
+use App\Http\Controllers\Store\{HomeController, AddressController, CartController, ProductController as StoreProductController, CheckoutController, OrderController};
+use App\Models\Order;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::resource('products', ProductController::class);
     Route::resource('discounts', DiscountController::class);
 
+    //order managment
+    Route::resource(
+        'orders',
+        AdminOrderController::class
+    )
+        ->names([
+            'index'  => 'admin.orders.index',
+            'show'   => 'admin.orders.show',
+            'update' => 'admin.orders.update',
+        ])
+        ->only([
+            'index',
+            'show',
+            'update',
+        ]);
+        
     // Variant Images
     Route::post('/variants/{variant}/images', [VariantImageController::class, 'store']);
     Route::delete('/variants/{variant}/images/{image}', [VariantImageController::class, 'destroy']);

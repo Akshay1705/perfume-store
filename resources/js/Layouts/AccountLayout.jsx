@@ -10,7 +10,7 @@ export default function AccountLayout({ children }) {
         {
             name: "Profile Information",
             href: route("account.profile"),
-            active: url.startsWith("account/profile"),
+            active: url.startsWith("/account/profile"),
         },
         {
             name: "Saved Addresses",

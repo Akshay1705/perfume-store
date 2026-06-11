@@ -17,7 +17,7 @@ class OrderController extends Controller
         $user = Auth::user();
 
         $orders = $user->orders()
-            ->where('status', 'placed')
+            ->where('status', '!=', Order::STATUS_CART)
             ->latest()
             ->get();
 

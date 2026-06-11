@@ -127,9 +127,7 @@ export default function Show({ order }) {
                                 <div className="w-16 h-20 bg-stone-50 border border-stone-100 overflow-hidden shrink-0">
                                     <img
                                         src={
-                                            item.variant?.primary_image
-                                                ?.image_url ||
-                                            item.variant?.primaryImage?.url ||
+                                            item.variant?.primary_image?.url ||
                                             "/images/placeholder.jpg"
                                         }
                                         alt=""

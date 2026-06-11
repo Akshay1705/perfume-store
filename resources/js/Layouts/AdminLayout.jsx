@@ -1,5 +1,13 @@
 import { Link, usePage } from "@inertiajs/react";
-import { Menu } from "lucide-react";
+import {
+    Menu,
+    LayoutDashboard,
+    Tags,
+    Palette,
+    Package,
+    TicketPercent,
+    ShoppingBag,
+} from "lucide-react";
 import { useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
@@ -9,11 +17,16 @@ export default function AdminLayout({ children }) {
     const { url } = usePage();
 
     const navItems = [
-        { label: "Dashboard", href: "/admin/dashboard", icon: "📊" },
-        { label: "Categories", href: "/admin/categories", icon: "🏷️" },
-        { label: "Brands", href: "/admin/brands", icon: "🎨" },
-        { label: "Products", href: "/admin/products", icon: "📦" },
-        { label: "Discounts", href: "/admin/discounts", icon: "🏷️" },
+        { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+        {
+            label: "Orders",
+            href: "/admin/orders",
+            icon: ShoppingBag,
+        },
+        { label: "Categories", href: "/admin/categories", icon: Tags },
+        { label: "Brands", href: "/admin/brands", icon: Palette },
+        { label: "Products", href: "/admin/products", icon: Package },
+        { label: "Discounts", href: "/admin/discounts", icon: TicketPercent },
     ];
 
     return (
@@ -63,7 +76,7 @@ export default function AdminLayout({ children }) {
                         <nav className="flex flex-col gap-1 p-6">
                             {navItems.map((item) => {
                                 const isActive = url.startsWith(item.href);
-
+                                const Icon = item.icon;
                                 return (
                                     <Link
                                         key={item.href}
@@ -74,11 +87,8 @@ export default function AdminLayout({ children }) {
                                                 : "text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent"
                                         }`}
                                     >
-                                        <span className="text-lg">
-                                            {item.icon}
-                                        </span>
+                                        <Icon size={18} />
                                         <span>{item.label}</span>
-
                                         {/* Active left accent bar */}
                                         {isActive && (
                                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
