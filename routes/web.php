@@ -54,6 +54,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::resource('discounts', DiscountController::class);
 
     //order managment
+    Route::get('orders/export', [AdminOrderController::class, 'export'])
+        ->name('admin.orders.export')
+        ->withoutMiddleware(\App\Http\Middleware\HandleInertiaRequests::class);
+
     Route::resource(
         'orders',
         AdminOrderController::class

@@ -69,7 +69,14 @@ export default function Index({ orders }) {
                         </p>
                     </div>
 
-                    <button className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-slate-950 font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5">
+                    <button
+                        onClick={() =>
+                            (window.location.href = route(
+                                "admin.orders.export",
+                            ))
+                        }
+                        className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-slate-950 font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                    >
                         <Download size={18} />
                         Export Orders
                     </button>

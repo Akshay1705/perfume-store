@@ -6,18 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrderStatusRequest;
 use App\Models\Order;
 use App\Services\OrderService;
+use App\Services\OrderExportService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
-use Inertia\Response;
+use Inertia\Response as InertiaResponse;
+use Illuminate\Http\Response as HttpResponse;
+
 
 class OrderController extends Controller
 {
     /**
      * Display a listing of orders.
      *
-     * @return Response
+     * @return InertiaResponse
      */
-    public function index(): Response
+    public function index(): InertiaResponse
     {
         $orders = Order::query()
             ->with([
@@ -44,9 +47,9 @@ class OrderController extends Controller
      *
      * @param Order $order
      * 
-     * @return Response
+     * @return InertiaResponse
      */
-    public function show(Order $order): Response 
+    public function show(Order $order): InertiaResponse 
     {
         $order->load([
             'user',
@@ -84,5 +87,22 @@ class OrderController extends Controller
             'success',
             'Order status updated successfully.',
         );
+    }
+
+    /**
+     * @return HttpResponse
+     */
+    public function export(OrderExportService $exportService): HttpResponse
+    {
+        $csv      = $exportService->generateCsv();
+        $filename = 'orders-' . now()->format('Y-m-d-His') . '.csv';
+
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma'              => 'no-cache',
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires'             => '0',
+        ]);
     }
 }
