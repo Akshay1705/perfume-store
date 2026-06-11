@@ -42,6 +42,7 @@ class OrderController extends Controller
             'items.variant.product',
             'items.variant.primaryImage',
             'address',
+            'discount',
         ]);
 
         return Inertia::render(
