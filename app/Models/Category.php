@@ -23,4 +23,9 @@ class Category extends Model
     {
         return $this->hasMany(Discount::class);
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }

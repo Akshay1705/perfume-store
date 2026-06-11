@@ -1,11 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController};
-use App\Http\Controllers\Store\{HomeController, AccountController, AddressController, CartController, ProductController as StoreProductController, CheckoutController};
+use App\Http\Controllers\Store\{HomeController, AccountController, AddressController, CartController, ProductController as StoreProductController, CheckoutController, OrderController};
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +74,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('account.profile');
         Route::resource('addresses', AddressController::class);
         Route::post('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
+        Route::get('/orders',[OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}',[OrderController::class, 'show'])->name('orders.show');
     });
 
     // Shopping Cart System
@@ -83,25 +84,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/cart/items/{item}', [CartController::class, 'updateQuantity'])->name('cart.items.update');
     Route::delete('/cart/items/{item}', [CartController::class, 'destroy'])->name('cart.items.destroy');
 
-    Route::get(
-        '/checkout',
-        [CheckoutController::class, 'index']
-    )->name('checkout.index');
-
-    Route::post(
-        '/checkout/place-order',
-        [CheckoutController::class, 'placeOrder']
-    )->name('checkout.place-order');
-
-    Route::post(
-        '/checkout/place-order',
-        [CheckoutController::class, 'placeOrder']
-    )->name('checkout.place-order');
-
-    Route::get(
-        '/checkout/success/{order}',
-        [CheckoutController::class, 'success']
-    )->name('checkout.success');
+    //checkout flow
+    Route::get('/checkout',[CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/place-order',[CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
+    Route::post('/checkout/place-order',[CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
+    Route::get('/checkout/success/{order}',[CheckoutController::class, 'success'])->name('checkout.success');
 });
 
 require __DIR__ . '/auth.php';

@@ -18,11 +18,9 @@ export default function Index({ cart }) {
     };
 
     const removeItem = (id) => {
-        if (confirm("Remove this exquisite item from your curated bag?")) {
-            router.delete(route("cart.items.destroy", id), {
-                preserveScroll: true,
-            });
-        }
+        router.delete(route("cart.items.destroy", id), {
+            preserveScroll: true,
+        });
     };
 
     console.log(items.variant);

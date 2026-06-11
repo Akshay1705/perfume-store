@@ -4,22 +4,30 @@ namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Store\ProductSearchRequest;
-use App\Models\Product;
-use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
 use App\Services\ProductFilterService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ProductController extends Controller
 {
+    /**
+     * @param ProductFilterService $filterService
+     */
     public function __construct(protected ProductFilterService $filterService) {}
 
     /**
-     * Display a listing of all product variants matching query filter strings.
+     * Display a listing of all products matching query filter strings.
+     *
+     * @param ProductSearchRequest $request
+     *
+     * @return Response
      */
-    public function index(ProductSearchRequest $request)
+    public function index(ProductSearchRequest $request): Response
     {
-        // 1. Gather input filters safely from the query string parameters
         $filters = [
             'search'   => $request->query('search'),
             'category' => $request->query('category'),
@@ -28,14 +36,10 @@ class ProductController extends Controller
             'volumes'  => $request->query('volumes', []),
         ];
 
-        // 2. Get filtered products via service
-        $products = $this->filterService->getFilteredProductsQuery($filters)->get();
-
-        // 3. Fetch lookup metadata options for the sidebar view panel
+        $products   = $this->filterService->getPaginatedProducts($filters, $request->query('per_page', 10));
         $categories = Category::select('id', 'name', 'slug')->orderBy('name')->get();
         $brands     = Brand::select('id', 'name', 'slug')->orderBy('name')->get();
 
-        // 4. Return variables and pass 'currentFilters' back to preserve state inside React inputs
         return Inertia::render('Store/Products/Index', [
             'products'       => $products,
             'categories'     => $categories,
@@ -51,9 +55,13 @@ class ProductController extends Controller
     }
 
     /**
-     * Display a single product's comprehensive details.
+     * Display a single product's details.
+     *
+     * @param string $slug
+     *
+     * @return Response
      */
-    public function show($slug)
+    public function show(string $slug): Response
     {
         $product = Product::where('slug', $slug)
             ->where('is_active', true)

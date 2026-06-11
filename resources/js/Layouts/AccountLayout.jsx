@@ -18,9 +18,9 @@ export default function AccountLayout({ children }) {
             active: url.startsWith("/account/addresses"),
         },
         {
-            // name: "Order History",
-            // href: route("orders.index"), // Ensure your orders route name matches this
-            // active: url.startsWith("/orders"),
+            name: "Order History",
+            href: route("orders.index"),
+            active: url.startsWith("/account/orders"),
         },
     ];
 

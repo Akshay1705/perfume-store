@@ -1,18 +1,18 @@
+"use strict";
+
 import { useState, useMemo, useEffect } from "react";
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Link, usePage, router } from "@inertiajs/react";
 import { Search, Sparkles, ArrowRight, X } from "lucide-react";
 
 export default function Index() {
-    // 1. Destructure incoming data directly from our updated Laravel Controller props
     const {
-        products = [],
+        products = { data: [], links: [] },
         categories = [],
         brands = [],
         currentFilters = {},
     } = usePage().props;
 
-    // 2. Initialize state values directly from current backend query strings
     const [searchQuery, setSearchQuery] = useState(currentFilters.search || "");
     const [selectedCategory, setSelectedCategory] = useState(
         currentFilters.category || "all",
@@ -35,8 +35,6 @@ export default function Index() {
 
     const volumeOptions = ["30ml", "50ml", "100ml", "200ml"];
 
-    // ── MASTER ROUTER VISIT SYNC ENGINE ──
-    // Sends the payload straight to Laravel while keeping scroll positions intact
     const applyFilters = (updated) => {
         router.get(
             "/products",
@@ -61,61 +59,64 @@ export default function Index() {
             {
                 preserveState: true,
                 preserveScroll: true,
-                only: ["products", "currentFilters"], // High-performance option: only update data partitions
+                only: ["products", "currentFilters"],
             },
         );
     };
 
-    // ── DEBOUNCE EFFECT FOR THE SEARCH FIELD ──
-    // Delays sending a database request until 400ms after the user stops typing
     useEffect(() => {
         if (searchQuery === (currentFilters.search || "")) return;
 
-        const delayDebounceFn = setTimeout(() => {
+        const debounce = setTimeout(() => {
             applyFilters({ search: searchQuery });
         }, 400);
 
-        return () => clearTimeout(delayDebounceFn);
+        return () => clearTimeout(debounce);
     }, [searchQuery]);
 
-    // ── DYNAMIC CATALOG PARSER ──
-    // Unpacks the validated database records into individual variant display cards
     const catalogItems = useMemo(() => {
         const items = [];
-        products.forEach((product) => {
-            if (product.variants && product.variants.length > 0) {
-                product.variants.forEach((variant) => {
-                    const primaryImage =
-                        variant.images?.find((img) => img.is_primary) ||
-                        variant.images?.[0];
-                    items.push({
-                        id: `${product.id}-${variant.id}`,
-                        name: product.name,
-                        slug: product.slug,
-                        brand: product.brand,
-                        volume: variant.volume,
-                        price: variant.price,
-                        imageUrl: primaryImage?.url || null,
-                    });
+
+        products.data.forEach((product) => {
+            if (!product.variants || product.variants.length === 0) return;
+
+            product.variants.forEach((variant) => {
+                const primaryImage =
+                    variant.images?.find((img) => img.is_primary) ||
+                    variant.images?.[0];
+
+                items.push({
+                    id: `${product.id}-${variant.id}`,
+                    name: product.name,
+                    slug: product.slug,
+                    brand: product.brand,
+                    volume: variant.volume,
+                    price: variant.price,
+                    imageUrl: primaryImage?.url || null,
                 });
-            }
+            });
         });
+
         return items;
     }, [products]);
 
-    // Volume selection array toggle handler
     const handleVolumeToggle = (volume) => {
         const val = volume.toLowerCase().trim();
-        let nextVolumes = [...selectedVolumes];
-
-        if (nextVolumes.includes(val)) {
-            nextVolumes = nextVolumes.filter((v) => v !== val);
-        } else {
-            nextVolumes.push(val);
-        }
+        const nextVolumes = selectedVolumes.includes(val)
+            ? selectedVolumes.filter((v) => v !== val)
+            : [...selectedVolumes, val];
 
         setSelectedVolumes(nextVolumes);
         applyFilters({ volumes: nextVolumes });
+    };
+
+    const handleClearFilters = () => {
+        setSearchQuery("");
+        setSelectedCategory("all");
+        setSelectedBrand("all");
+        setSelectedGender("all");
+        setSelectedVolumes([]);
+        router.get("/products");
     };
 
     return (
@@ -136,9 +137,9 @@ export default function Index() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
-                        {/* ── SIDEBAR FILTERS ── */}
+                        {/* Sidebar Filters */}
                         <aside className="space-y-8 bg-white p-6 border border-stone-200 rounded-none shadow-sm">
-                            {/* Filter: Live Text Search Input */}
+                            {/* Search */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Search
@@ -173,7 +174,7 @@ export default function Index() {
 
                             <hr className="border-stone-100" />
 
-                            {/* Filter: Gender Profiles */}
+                            {/* Gender */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Fragrance Profile
@@ -184,7 +185,11 @@ export default function Index() {
                                             setSelectedGender("all");
                                             applyFilters({ gender: "all" });
                                         }}
-                                        className={`w-full text-left text-xs uppercase tracking-wider py-1.5 transition-colors ${selectedGender === "all" ? "text-amber-700 font-bold" : "text-stone-500 hover:text-stone-900"}`}
+                                        className={`w-full text-left text-xs uppercase tracking-wider py-1.5 transition-colors ${
+                                            selectedGender === "all"
+                                                ? "text-amber-700 font-bold"
+                                                : "text-stone-500 hover:text-stone-900"
+                                        }`}
                                     >
                                         All Collections
                                     </button>
@@ -197,7 +202,11 @@ export default function Index() {
                                                     gender: opt.value,
                                                 });
                                             }}
-                                            className={`w-full text-left text-xs uppercase tracking-wider py-1.5 flex items-center justify-between transition-colors ${selectedGender === opt.value ? "text-amber-700 font-bold" : "text-stone-500 hover:text-stone-900"}`}
+                                            className={`w-full text-left text-xs uppercase tracking-wider py-1.5 flex items-center justify-between transition-colors ${
+                                                selectedGender === opt.value
+                                                    ? "text-amber-700 font-bold"
+                                                    : "text-stone-500 hover:text-stone-900"
+                                            }`}
                                         >
                                             {opt.label}
                                             {selectedGender === opt.value && (
@@ -210,7 +219,7 @@ export default function Index() {
 
                             <hr className="border-stone-100" />
 
-                            {/* Filter: Multi-Select Sizes Available */}
+                            {/* Volume */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Sizes Available
@@ -221,6 +230,7 @@ export default function Index() {
                                             selectedVolumes.includes(
                                                 vol.toLowerCase(),
                                             );
+
                                         return (
                                             <button
                                                 key={vol}
@@ -242,7 +252,7 @@ export default function Index() {
 
                             <hr className="border-stone-100" />
 
-                            {/* Filter: Brand Lookups */}
+                            {/* Brand */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Fragrance House
@@ -266,7 +276,7 @@ export default function Index() {
 
                             <hr className="border-stone-100" />
 
-                            {/* Filter: Olfactory Categories */}
+                            {/* Category */}
                             <div>
                                 <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-stone-800 mb-3">
                                     Categories
@@ -293,63 +303,99 @@ export default function Index() {
                             </div>
                         </aside>
 
-                        {/* ── PRODUCTS CATALOG GRID ── */}
+                        {/* Products Grid */}
                         <main className="lg:col-span-3">
                             {catalogItems.length > 0 ? (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-12">
-                                    {catalogItems.map((item) => (
-                                        <Link
-                                            key={item.id}
-                                            href={`/products/${item.slug}`}
-                                            className="group block"
-                                        >
-                                            <div className="relative aspect-[3/4] bg-white border border-stone-200 overflow-hidden mb-4 rounded-none shadow-sm">
-                                                {item.imageUrl ? (
-                                                    <img
-                                                        src={item.imageUrl}
-                                                        alt={item.name}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-stone-50">
-                                                        <Sparkles
-                                                            size={24}
-                                                            className="text-stone-300"
+                                <>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-12">
+                                        {catalogItems.map((item) => (
+                                            <Link
+                                                key={item.id}
+                                                href={`/products/${item.slug}`}
+                                                className="group block"
+                                            >
+                                                <div className="relative aspect-[3/4] bg-white border border-stone-200 overflow-hidden mb-4 rounded-none shadow-sm">
+                                                    {item.imageUrl ? (
+                                                        <img
+                                                            src={item.imageUrl}
+                                                            alt={item.name}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                         />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-stone-50">
+                                                            <Sparkles
+                                                                size={24}
+                                                                className="text-stone-300"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300" />
+                                                    <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-stone-900 py-3 text-center">
+                                                        <span className="text-white text-xs font-semibold tracking-widest uppercase flex items-center justify-center gap-1">
+                                                            View Product{" "}
+                                                            <ArrowRight
+                                                                size={12}
+                                                            />
+                                                        </span>
                                                     </div>
-                                                )}
-                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300" />
-                                                <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-stone-900 py-3 text-center">
-                                                    <span className="text-white text-xs font-semibold tracking-widest uppercase flex items-center justify-center gap-1">
-                                                        View Product{" "}
-                                                        <ArrowRight size={12} />
-                                                    </span>
                                                 </div>
-                                            </div>
 
-                                            <div>
-                                                <div className="flex justify-between items-start gap-2 mb-1">
-                                                    <p className="text-[10px] tracking-widest uppercase text-amber-800 font-medium">
-                                                        {item.brand?.name ||
-                                                            "Aura Exclusives"}
+                                                <div>
+                                                    <div className="flex justify-between items-start gap-2 mb-1">
+                                                        <p className="text-[10px] tracking-widest uppercase text-amber-800 font-medium">
+                                                            {item.brand?.name ||
+                                                                "Aura Exclusives"}
+                                                        </p>
+                                                        <span className="text-[9px] uppercase tracking-widest text-stone-400 px-1.5 py-0.5 border border-stone-200 bg-stone-50">
+                                                            {item.volume}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="text-stone-900 font-serif text-base group-hover:text-amber-800 transition-colors leading-tight">
+                                                        {item.name}
+                                                    </h3>
+                                                    <p className="text-stone-900 font-medium mt-2 text-sm tracking-wide">
+                                                        ₹
+                                                        {Number(
+                                                            item.price,
+                                                        ).toLocaleString(
+                                                            "en-IN",
+                                                        )}
                                                     </p>
-                                                    <span className="text-[9px] uppercase tracking-widest text-stone-400 px-1.5 py-0.5 border border-stone-200 bg-stone-50">
-                                                        {item.volume}
-                                                    </span>
                                                 </div>
-                                                <h3 className="text-stone-900 font-serif text-base group-hover:text-amber-800 transition-colors leading-tight">
-                                                    {item.name}
-                                                </h3>
-                                                <p className="text-stone-900 font-medium mt-2 text-sm tracking-wide">
-                                                    ₹
-                                                    {Number(
-                                                        item.price,
-                                                    ).toLocaleString("en-IN")}
-                                                </p>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+
+                                    {/* Pagination */}
+                                    <div className="flex items-center justify-center gap-2 mt-12">
+                                        {products.links.map((link, index) => (
+                                            <button
+                                                key={index}
+                                                disabled={!link.url}
+                                                onClick={() =>
+                                                    link.url &&
+                                                    router.get(
+                                                        link.url,
+                                                        {},
+                                                        {
+                                                            preserveScroll: true,
+                                                        },
+                                                    )
+                                                }
+                                                dangerouslySetInnerHTML={{
+                                                    __html: link.label,
+                                                }}
+                                                className={`px-3 py-1.5 text-xs border transition-colors rounded-none ${
+                                                    link.active
+                                                        ? "bg-stone-900 text-white border-stone-900"
+                                                        : link.url
+                                                          ? "bg-white text-stone-600 border-stone-200 hover:border-stone-900 hover:text-stone-900"
+                                                          : "bg-white text-stone-300 border-stone-100 cursor-not-allowed"
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
                             ) : (
                                 <div className="text-center py-20 border border-stone-200 border-dashed rounded-none max-w-md mx-auto px-6 bg-white">
                                     <Sparkles
@@ -364,14 +410,7 @@ export default function Index() {
                                         parameters.
                                     </p>
                                     <button
-                                        onClick={() => {
-                                            setSearchQuery("");
-                                            setSelectedCategory("all");
-                                            setSelectedBrand("all");
-                                            setSelectedGender("all");
-                                            setSelectedVolumes([]);
-                                            router.get("/products"); // Clean wipe reset
-                                        }}
+                                        onClick={handleClearFilters}
                                         className="text-xs font-semibold uppercase tracking-widest text-amber-700 underline underline-offset-4"
                                     >
                                         Clear Active Filters

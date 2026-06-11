@@ -7,10 +7,11 @@ use App\Models\Product;
 use Inertia\Inertia;
 use App\Models\Category;
 use App\Models\Brand;
+use Inertia\Response;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $products = Product::with([
             'brand',
@@ -23,7 +24,6 @@ class HomeController extends Controller
             ->latest()
             ->get();
 
-        // Flatten to one entry per variant for the frontend
         $variants = $products->flatMap(function ($product) {
             return $product->variants->map(function ($variant) use ($product) {
                 return [

@@ -10,12 +10,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
 
 class CartController extends Controller
 {
     public function index(): Response
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $cart = $user->orders()
@@ -38,7 +39,7 @@ class CartController extends Controller
         AddToCartRequest $request,
         CartService $service
     ) {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $service->add(
@@ -49,7 +50,7 @@ class CartController extends Controller
 
         return back()->with(
             'success',
-            'Product added to cart.'
+            'Product added to cart.',
         );
     }
 
@@ -67,10 +68,8 @@ class CartController extends Controller
         return back();
     }
 
-    public function destroy(
-        OrderItem $item,
-        CartService $service
-    ) {
+    public function destroy(OrderItem $item, CartService $service) 
+    {
         $service->removeItem($item);
 
         return back();

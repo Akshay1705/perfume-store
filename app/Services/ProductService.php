@@ -8,84 +8,80 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ProductService
 {
+    /**
+     * Store a newly created product with its variants.
+     *
+     * @param array $data
+     *
+     * @return Product
+     */
     public function store(array $data): Product
     {
-        $product =  Product::create([
-            'name' => $data['name'],
-            'slug' => $data['slug'] ?: Str::slug($data['name']),
+        $product = Product::create([
+            'name'        => $data['name'],
+            'slug'        => $data['slug'] ?: Str::slug($data['name']),
             'description' => $data['description'],
-            'gender' => $data['gender'],
+            'gender'      => $data['gender'],
             'category_id' => $data['category_id'],
-            'brand_id' => $data['brand_id'],
-            'is_active' => $data['is_active'] ?? true,
+            'brand_id'    => $data['brand_id'],
+            'is_active'   => $data['is_active'] ?? true,
         ]);
-        foreach ($data['variants'] as $variant) {
 
+        foreach ($data['variants'] as $variant) {
             $product->variants()->create([
-                'volume' => $variant['volume'],
-                'price' => $variant['price'],
-                'stock' => $variant['stock'],
-                'sku' => strtoupper(
-                    str_replace(' ', '', $product->name)
-                ) . '-' . strtoupper($variant['volume']),
+                'volume'    => $variant['volume'],
+                'price'     => $variant['price'],
+                'stock'     => $variant['stock'],
+                'sku'       => strtoupper(str_replace(' ', '', $product->name)) . '-' . strtoupper($variant['volume']),
                 'is_active' => $variant['is_active'] ?? true,
             ]);
         }
+
         return $product;
     }
 
-    public function update(
-            Product $product,
-            array $data
-        ): Product {
-
-        // dd($data['variants']);
+    /**
+     * Update an existing product and sync its variants.
+     *
+     * @param Product $product
+     * @param array   $data
+     *
+     * @return Product
+     */
+    public function update(Product $product, array $data): Product
+    {
         $product->update([
-            'name' => $data['name'],
-            'slug' => $data['slug'] ?: Str::slug($data['name']),
+            'name'        => $data['name'],
+            'slug'        => $data['slug'] ?: Str::slug($data['name']),
             'description' => $data['description'],
-            'gender' => $data['gender'],
+            'gender'      => $data['gender'],
             'category_id' => $data['category_id'],
-            'brand_id' => $data['brand_id'],
-            'is_active' => $data['is_active'] ?? true,
+            'brand_id'    => $data['brand_id'],
+            'is_active'   => $data['is_active'] ?? true,
         ]);
-
-        // if (!$product->is_active) {
-
-        //     foreach ($data['variants'] as &$variant) {
-        //         $variant['is_active'] = false;
-        //     }
-        // }
 
         $existingIds = [];
 
         foreach ($data['variants'] as $variantData) {
-
             if (!empty($variantData['id'])) {
-
-                $variant = $product->variants()
-                    ->find($variantData['id']);
+                $variant = $product->variants()->find($variantData['id']);
 
                 if ($variant) {
-
                     $variant->update([
-                        'volume' => $variantData['volume'],
-                        'price' => $variantData['price'],
-                        'stock' => $variantData['stock'],
+                        'volume'    => $variantData['volume'],
+                        'price'     => $variantData['price'],
+                        'stock'     => $variantData['stock'],
                         'is_active' => $variantData['is_active'],
                     ]);
 
                     $existingIds[] = $variant->id;
                 }
             } else {
-
                 $newVariant = $product->variants()->create([
-                    'volume' => $variantData['volume'],
-                    'price' => $variantData['price'],
-                    'stock' => $variantData['stock'],
-                    'sku' => strtoupper(
-                        str_replace(' ', '', $product->name)
-                    ) . '-' . strtoupper($variantData['volume']),
+                    'volume'    => $variantData['volume'],
+                    'price'     => $variantData['price'],
+                    'stock'     => $variantData['stock'],
+                    'sku'       => strtoupper(str_replace(' ', '', $product->name)) . '-' . strtoupper($variantData['volume']),
                     'is_active' => $variantData['is_active'],
                 ]);
 
@@ -93,7 +89,6 @@ class ProductService
             }
         }
 
-        // Delete variants removed from UI
         $product->variants()
             ->whereNotIn('id', $existingIds)
             ->delete();
@@ -101,11 +96,25 @@ class ProductService
         return $product;
     }
 
+    /**
+     * Delete the given product.
+     *
+     * @param Product $product
+     *
+     * @return void
+     */
     public function delete(Product $product): void
     {
         $product->delete();
     }
 
+    /**
+     * Get a paginated list of products with optional filters.
+     *
+     * @param array $filters
+     *
+     * @return LengthAwarePaginator
+     */
     public function getProducts(array $filters): LengthAwarePaginator
     {
         return Product::query()
@@ -114,7 +123,6 @@ class ProductService
                 'brand',
                 'variants' => fn($q) => $q->with('images')->orderBy('id'),
             ])
-
             ->when(
                 $filters['search'] ?? null,
                 fn($query, $search) =>
@@ -123,29 +131,24 @@ class ProductService
                         ->orWhere('slug', 'like', "%{$search}%");
                 })
             )
-
             ->when(
                 $filters['category'] ?? null,
                 fn($query, $category) =>
                 $query->where('category_id', $category)
             )
-
             ->when(
                 $filters['brand'] ?? null,
                 fn($query, $brand) =>
                 $query->where('brand_id', $brand)
             )
-
             ->when(
                 $filters['gender'] ?? null,
                 fn($query, $gender) =>
                 $query->where('gender', $gender)
             )
-
             ->when(
                 $filters['status'] ?? null,
                 function ($query, $status) {
-
                     if ($status === 'active') {
                         $query->where('is_active', true);
                     }
@@ -155,7 +158,6 @@ class ProductService
                     }
                 }
             )
-
             ->latest()
             ->paginate($filters['per_page'] ?? 10)
             ->withQueryString();

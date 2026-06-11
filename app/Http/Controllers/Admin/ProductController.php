@@ -3,22 +3,27 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
-use App\Http\Requests\Admin\ProductRequest;
 use App\Services\ProductService;
+use App\Http\Requests\Admin\ProductRequest;
 use App\Http\Requests\Admin\ProductIndexRequest;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * 
+     * @param ProductIndexRequest $request
+     * @param ProductService      $service
+     * 
+     * @return Response
      */
-    public function index(ProductIndexRequest $request,ProductService $service): Response 
+    public function index(ProductIndexRequest $request, ProductService $service): Response 
     {
         $filters = $request->validated();
         $products = $service->getProducts($filters);
@@ -27,7 +32,7 @@ class ProductController extends Controller
             'Admin/Products/Index',
             [
                 'products' => $products,
-                'totalCount' => \App\Models\Product::count(), // always unfiltered
+                'totalCount' => Product::count(),
                 'filters' => [
                     'search' => $filters['search'] ?? '',
                     'category' => $filters['category'] ?? '',
@@ -35,14 +40,16 @@ class ProductController extends Controller
                     'status' => $filters['status'] ?? '',
                     'gender' => $filters['gender'] ?? '',
                 ],
-                'categories' => Category::select('id','name')->orderBy('name')->get(),
-                'brands' => Brand::select('id','name')->orderBy('name')->get(),
-            ]
+                'categories' => Category::select('id', 'name')->orderBy('name')->get(),
+                'brands' => Brand::select('id', 'name')->orderBy('name')->get(),
+            ],
         );
     }
 
     /**
      * Show the form for creating a new resource.
+     * 
+     * @return Response
      */
     public function create(): Response
     {
@@ -54,39 +61,36 @@ class ProductController extends Controller
             [
                 'categories' => $categories,
                 'brands' => $brands,
-            ]
+            ],
         );
     }
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param ProductRequest $request
+     * @param ProductService $service
+     *
+     * @return RedirectResponse
      */
-    public function store(
-        ProductRequest $request,
-        ProductService $service
-    ) {
-        // Create the product
+    public function store(ProductRequest $request, ProductService $service): RedirectResponse
+    {
         $product = $service->store($request->validated());
 
-        // Return with product data so React can capture the ID
         return redirect()
             ->route('products.index')
             ->with([
                 'success' => 'Product created successfully.',
-                'product' => $product, // Pass the product back
+                'product' => $product->id,
             ]);
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
+     * 
+     * @param Product $product
+     * 
+     * @return Response
      */
     public function edit(Product $product): Response 
     {
@@ -100,37 +104,49 @@ class ProductController extends Controller
                     'category', 
                     'brand',
                     'variants' => function ($q) {
-                            $q->with([
-                                'images',
-                                'primaryImage'
-                            ]);
-                        },
+                        $q->with([
+                            'images',
+                            'primaryImage',
+                        ]);
+                    },
                     ]),
                 'categories' => $categories,
                 'brands' => $brands,
-            ]
+            ],
         );
     }
 
     /**
      * Update the specified resource in storage.
+     * 
+     * @param ProductRequest  $request
+     * @param Product         $product
+     * @param ProductService  $service
+     * 
+     * @return RedirectResponse
+     * 
      */
-    public function update(ProductRequest $request,Product $product,ProductService $service) 
+    public function update(ProductRequest $request, Product $product, ProductService $service): RedirectResponse
     {
-        $service->update($product,$request->validated());
+        $service->update($product, $request->validated());
 
         return redirect()
             ->route('products.index')
             ->with(
                 'success',
-                'Product updated successfully.'
+                'Product updated successfully.',
             );
     }
 
     /**
      * Remove the specified resource from storage.
+     * 
+     * @param Product        $product
+     * @param ProductService $service
+     * 
+     * @return RedirectResponse
      */
-    public function destroy(Product $product,ProductService $service) 
+    public function destroy(Product $product, ProductService $service): RedirectResponse
     {
         $service->delete($product);
 
@@ -138,7 +154,7 @@ class ProductController extends Controller
             ->route('products.index')
             ->with(
                 'success',
-                'Product deleted successfully.'
+                'Product deleted successfully.',
             );
     }
 }

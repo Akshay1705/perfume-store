@@ -1,13 +1,9 @@
 import { Link, usePage } from "@inertiajs/react";
 
-export default function Navbar({ categories = [], brands = [] }) {
+export default function Navbar({ categories = [], brands = [], cartCount = [] }) {
     const { auth } = usePage().props;
-    const { props } = usePage();
-    const cartItemCount = props.cart?.items?.length || 0;
     const user = auth?.user;
 
-    console.log("AUTH:", auth);
-    console.log("USER:", user);
     return (
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100 px-6 py-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -116,7 +112,7 @@ export default function Navbar({ categories = [], brands = [] }) {
                                 </Link>
 
                                 <Link
-                                    href="account/orders"
+                                    href={route("orders.index")}
                                     className="block px-4 py-3 hover:bg-stone-50"
                                 >
                                     My Orders
@@ -141,7 +137,7 @@ export default function Navbar({ categories = [], brands = [] }) {
                     <Link
                         href={route("cart.index")}
                         className="p-2 text-stone-600 hover:text-stone-950 transition-colors relative inline-flex items-center justify-center group"
-                        aria-label={`Shopping Bag containing ${cartItemCount} items`}
+                        aria-label={`Shopping Bag containing ${cartCount} items`}
                     >
                         {/* Clean Minimalist Vector Bag Icon */}
                         <svg
@@ -158,9 +154,9 @@ export default function Navbar({ categories = [], brands = [] }) {
                         </svg>
 
                         {/* Dynamic Notification Badge Overlay */}
-                        {cartItemCount > 0 && (
+                        {cartCount > 0 && (
                             <span className="absolute -top-0.5 -right-0.5 bg-stone-950 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-mono font-bold tracking-tighter animate-fade-in">
-                                {cartItemCount}
+                                {cartCount}
                             </span>
                         )}
                     </Link>

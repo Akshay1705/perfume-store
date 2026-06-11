@@ -11,10 +11,18 @@ use Illuminate\Http\JsonResponse;
 
 class VariantImageController extends Controller
 {
-    public function store(Request $request,ProductVariant $variant): JsonResponse 
+    /**
+     * Store a newly uploaded variant image.
+     *
+     * @param Request        $request
+     * @param ProductVariant $variant
+     *
+     * @return JsonResponse
+     */
+    public function store(Request $request, ProductVariant $variant): JsonResponse
     {
         $validated = $request->validate([
-            'image' => 'required|image|max:5120',
+            'image'      => 'required|image|max:5120',
             'is_primary' => 'boolean',
         ]);
 
@@ -28,18 +36,26 @@ class VariantImageController extends Controller
 
         return response()->json([
             'image' => [
-                'id' => $image->id,
-                'url' => $service->getImageUrl($image),
+                'id'         => $image->id,
+                'url'        => $service->getImageUrl($image),
                 'is_primary' => $image->is_primary,
-            ]
+            ],
         ]);
     }
 
-    public function destroy(ProductVariant $variant,VariantImage $image): JsonResponse 
+    /**
+     * Remove the specified variant image.
+     *
+     * @param ProductVariant $variant
+     * @param VariantImage   $image
+     *
+     * @return JsonResponse
+     */
+    public function destroy(ProductVariant $variant, VariantImage $image): JsonResponse
     {
-        if ($image->product_variant_id !== $variant->id){
+        if ($image->product_variant_id !== $variant->id) {
             return response()->json([
-                'error' => 'Image not found'
+                'error' => 'Image not found',
             ], 404);
         }
 
@@ -49,18 +65,26 @@ class VariantImageController extends Controller
 
         return response()->json([
             'images' => $variant->images->map(fn($img) => [
-                'id' => $img->id,
-                'url' => $service->getImageUrl($img),
+                'id'         => $img->id,
+                'url'        => $service->getImageUrl($img),
                 'is_primary' => $img->is_primary,
-            ])
+            ]),
         ]);
     }
 
-    public function setPrimary(ProductVariant $variant,VariantImage $image): JsonResponse 
+    /**
+     * Set the specified image as primary for the variant.
+     *
+     * @param ProductVariant $variant
+     * @param VariantImage   $image
+     *
+     * @return JsonResponse
+     */
+    public function setPrimary(ProductVariant $variant, VariantImage $image): JsonResponse
     {
-        if ($image->product_variant_id !== $variant->id){
+        if ($image->product_variant_id !== $variant->id) {
             return response()->json([
-                'error' => 'Image not found'
+                'error' => 'Image not found',
             ], 404);
         }
 
@@ -70,10 +94,10 @@ class VariantImageController extends Controller
 
         return response()->json([
             'images' => $variant->images->map(fn($img) => [
-                'id' => $img->id,
-                'url' => $service->getImageUrl($img),
+                'id'         => $img->id,
+                'url'        => $service->getImageUrl($img),
                 'is_primary' => $img->is_primary,
-            ])
+            ]),
         ]);
     }
 }

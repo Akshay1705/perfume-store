@@ -14,7 +14,7 @@ class CheckoutController extends Controller
 {
     public function index(): Response
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $cart = $user->activeCart()

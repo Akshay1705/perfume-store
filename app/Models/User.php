@@ -66,6 +66,14 @@ class User extends Authenticatable
             );
     }
 
+    public function cartCount(): int
+    {
+        return $this->activeCart()
+            ->items()
+            ->sum('quantity');
+    }
+    
+
     /**
      * The attributes that should be hidden for serialization.
      *
