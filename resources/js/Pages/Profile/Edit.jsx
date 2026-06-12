@@ -1,3 +1,5 @@
+"use strict";
+
 import AccountLayout from "@/Layouts/AccountLayout";
 import { Head } from "@inertiajs/react";
 import DeleteUserForm from "./Partials/DeleteUserForm";

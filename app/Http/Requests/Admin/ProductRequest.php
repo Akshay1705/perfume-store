@@ -17,12 +17,7 @@ class ProductRequest extends FormRequest
         $productId = $this->route('product')?->id;
 
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
+            'name' => ['required', 'string', 'max:255',],
             'slug' => [
                 'required',
                 'string',
@@ -32,39 +27,18 @@ class ProductRequest extends FormRequest
                     ->ignore($productId),
             ],
 
-            'description' => [
-                'required',
-                'string',
-            ],
-
-            'gender' => [
-                'required',
-                'in:men,women,unisex'
-            ],
-
-            'category_id' => [
-                'required',
-                'exists:categories,id',
-            ],
-
-            'brand_id' => [
-                'required',
-                'exists:brands,id',
-            ],
-
-            'is_active' => [
-                'boolean',
-            ],
+            'description' => ['required', 'string',],
+            'gender' => ['required','in:men,women,unisex',],
+            'category_id' => ['required', 'exists:categories,id',],
+            'brand_id' => ['required', 'exists:brands,id',],
+            'is_active' => ['boolean',],
 
             'variants' => 'required|array|min:1',
             'variants.*.id' => 'sometimes|exists:product_variants,id',
             'variants.*.volume' => 'required|string|max:100',
             'variants.*.price' => 'required|numeric|min:0',
             'variants.*.stock' => 'required|integer|min:0',
-            'variants.*.is_active' => [
-                'required',
-                'boolean',
-            ],
+            'variants.*.is_active' => ['required', 'boolean',],
         ];
     }
 }

@@ -1,3 +1,5 @@
+"use strict";
+
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
@@ -10,7 +12,6 @@ export default function Index({ cart, addresses = [] }) {
             null,
     );
 
-    const { post, processing } = useForm();
     const form = useForm({
         address_id: selectedAddress,
     });

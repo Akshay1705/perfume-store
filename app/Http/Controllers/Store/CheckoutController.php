@@ -16,14 +16,12 @@ class CheckoutController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-
         $cart = $user->activeCart()
             ->load([
                 'items.variant.product',
                 'items.variant.primaryImage',
-                'discount'
+                'discount',
             ]);
-
         $addresses = $user->addresses;
 
         return Inertia::render(
@@ -35,22 +33,16 @@ class CheckoutController extends Controller
         );
     }
 
-    public function placeOrder(
-        PlaceOrderRequest $request,
-        CheckoutService $service
-    ) {
+    public function placeOrder(PlaceOrderRequest $request, CheckoutService $service)
+    {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-
-        $order = $service->placeOrder(
-            $user,
-            $request->address_id
-        );
+        $order = $service->placeOrder($user, $request->address_id);
 
         return redirect()
             ->route(
                 'checkout.success',
-                $order->id
+                $order->id,
             );
     }
 

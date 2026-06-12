@@ -1,7 +1,19 @@
+"use strict";
+
 import StoreLayout from "@/Layouts/StoreLayout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link,usePage } from "@inertiajs/react";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function Success({ orderId }) {
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        console.log("Flash data:", flash);
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
+    
     return (
         <StoreLayout>
             <Head title="Order Placed" />

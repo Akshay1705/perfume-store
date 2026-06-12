@@ -32,7 +32,6 @@ class DiscountRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Safe resolution of the discount ID parameter for unique checks
         $discountParam = $this->route('discount');
         $discountId = is_object($discountParam) ? $discountParam->id : $discountParam;
 

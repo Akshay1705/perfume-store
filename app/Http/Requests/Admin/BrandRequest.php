@@ -28,8 +28,7 @@ class brandRequest extends FormRequest
                 'string',
                 'max:255',
 
-                Rule::unique('categories', 'slug')
-                    ->ignore($brandId),
+                Rule::unique('categories', 'slug')->ignore($brandId),
             ],
         ];
     }

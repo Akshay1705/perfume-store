@@ -1,9 +1,21 @@
+"use strict";
+
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Head } from "@inertiajs/react";
 import { useState } from "react";
 import { useForm } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
+import { toast } from "react-toastify";
+import { useEffect } from "react";
 
 export default function ProductShow({ product }) {
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
+
     const firstVariant = product.variants?.[0] || null;
     const [selectedVariant, setSelectedVariant] = useState(firstVariant);
     const { data, setData, post } = useForm({
@@ -11,7 +23,6 @@ export default function ProductShow({ product }) {
         quantity: 1,
     });
 
-    // Active image comes from selected variant's images
     const getVariantPrimaryImage = (variant) =>
         variant?.images?.find((img) => !!img.is_primary)?.url ??
         variant?.images?.[0]?.url ??
@@ -21,13 +32,11 @@ export default function ProductShow({ product }) {
         getVariantPrimaryImage(firstVariant),
     );
 
-    // When user picks a variant — switch images automatically
     const handleVariantSelect = (variant) => {
         setSelectedVariant(variant);
         setActiveImageUrl(getVariantPrimaryImage(variant));
     };
 
-    // Current images to show in gallery = selected variant's images
     const galleryImages = selectedVariant?.images || [];
 
     const handleAddToCart = () => {

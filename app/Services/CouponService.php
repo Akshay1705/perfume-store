@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Validation\ValidationException;
 use App\Models\Discount;
 use App\Models\Order;
 
@@ -28,27 +29,24 @@ class CouponService
             ->first();
 
         if (!$discount) {
-            abort(
-                422,
-                'Invalid discount code.'
-            );
+            throw ValidationException::withMessages([
+                'code' => 'Invalid discount code.',
+            ]);
         }
 
         if (!$discount->isValid()) {
-            abort(
-                422,
-                'This discount is no longer active.'
-            );
+            throw ValidationException::withMessages([
+                'code' => 'This discount is no longer active.',
+            ]);
         }
 
         if (
             $cart->subtotal <
             $discount->min_order_amount
         ) {
-            abort(
-                422,
-                'Minimum order amount not reached.'
-            );
+            throw ValidationException::withMessages([
+                'code' => 'Minimum order amount not reached.',
+            ]);
         }
 
         $eligibleAmount = $this->calculateEligibleAmount(
@@ -57,10 +55,9 @@ class CouponService
         );
 
         if ($eligibleAmount <= 0) {
-            abort(
-                422,
-                'Discount is not applicable to cart items.'
-            );
+            throw ValidationException::withMessages([
+                'code' => 'Discount is not applicable to cart items.',
+            ]);
         }
 
         $discountAmount = $this->calculateDiscountAmount(
@@ -105,14 +102,14 @@ class CouponService
                 $discount->target_type === 'brand' &&
                 $product->brand_id === $discount->brand_id
             ) {
-                $eligibleAmount += $item->price * $item->quantity;
+                $eligibleAmount += $item->unit_price * $item->quantity;
             }
 
             if (
                 $discount->target_type === 'category' &&
                 $product->category_id === $discount->category_id
             ) {
-                $eligibleAmount += $item->price * $item->quantity;
+                $eligibleAmount += $item->unit_price * $item->quantity;
             }
         }
 

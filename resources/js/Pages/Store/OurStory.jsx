@@ -1,3 +1,5 @@
+"use strict";
+
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Link } from "@inertiajs/react";
 import { ArrowRight, Sparkles } from "lucide-react";

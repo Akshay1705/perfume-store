@@ -1,7 +1,20 @@
+"use strict";
+
 import AccountLayout from "@/Layouts/AccountLayout";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, useForm, usePage } from "@inertiajs/react";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function Index({ addresses = [] }) {
+
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        console.log("Flash data:", flash);
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
+    
     const { delete: destroy } = useForm();
 
     const handleDelete = (id) => {

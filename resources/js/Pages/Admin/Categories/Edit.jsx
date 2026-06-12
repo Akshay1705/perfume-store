@@ -1,22 +1,24 @@
+"use strict";
+
 import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link } from "@inertiajs/react";
 import { ArrowLeft, Save } from "lucide-react";
-import { useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
-import { toast } from 'react-toastify';
-
-const { flash } = usePage().props;
-
-useEffect(() => {
-    if (flash?.success) toast.success(flash.success);
-    if (flash?.error) toast.error(flash.error);
-}, [flash]);
+import { use, useEffect } from "react";
+import { usePage } from "@inertiajs/react";
+import { toast } from "react-toastify";
 
 export default function Edit({ category }) {
     const { data, setData, put, processing, errors } = useForm({
         name: category.name,
         slug: category.slug,
     });
+
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
 
     function submit(e) {
         e.preventDefault();

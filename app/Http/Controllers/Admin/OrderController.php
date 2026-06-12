@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Http\Requests\Admin\UpdateOrderStatusRequest;
 use App\Models\Order;
 use App\Services\OrderService;
@@ -17,27 +18,26 @@ class OrderController extends Controller
 {
     /**
      * Display a listing of orders.
+     * @param Request      $request
+     * @param OrderService $service
      *
      * @return InertiaResponse
      */
-    public function index(): InertiaResponse
+    public function index(Request $request, OrderService $service): InertiaResponse
     {
         $orders = Order::query()
-            ->with([
-                'user',
-            ])
-            ->where(
-                'status',
-                '!=',
-                Order::STATUS_CART
-            )
+            ->with(['user',])
+            ->where('status','!=',Order::STATUS_CART)
             ->latest()
             ->paginate(15);
 
         return Inertia::render(
             'Admin/Orders/Index',
             [
-                'orders' => $orders,
+                'orders'   => $service->getOrders($request),
+                'statuses' => Order::statuses(),
+                'filters'  => $request->only(['search', 'status']),
+                'totalOrders' => Order::where('status', '!=', Order::STATUS_CART)->count(),
             ]
         );
     }
@@ -78,15 +78,18 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderStatusRequest $request,Order $order,OrderService $service): RedirectResponse 
     {
+        // dd($request->validated());
         $service->updateStatus(
             $order,
             $request->validated()['status'],
         );
 
-        return back()->with(
-            'success',
-            'Order status updated successfully.',
-        );
+        return redirect()
+            ->route('admin.orders.index')
+            ->with(
+                'success',
+                'Order status updated successfully.',
+            );
     }
 
     /**

@@ -11,6 +11,9 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
+    /**
+     * @return Response
+     */
     public function index(): Response
     {
         /** @var User $user */
@@ -29,14 +32,14 @@ class OrderController extends Controller
         );
     }
 
-    public function show(
-        Order $order
-    ): Response {
-
-        abort_if(
-            $order->user_id !== Auth::id(),
-            403
-        );
+    /**
+     * @param Order $order
+     * 
+     * @return Response
+     */
+    public function show(Order $order): Response 
+    {
+        abort_if($order->user_id !== Auth::id(),403);
 
         $order->load([
             'items.variant.product',

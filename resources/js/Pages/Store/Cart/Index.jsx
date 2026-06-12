@@ -1,5 +1,7 @@
+"use strict";
+
 import StoreLayout from "@/Layouts/StoreLayout";
-import { Head, router, Link, useForm} from "@inertiajs/react";
+import { Head, router, Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
 
 export default function Index({ cart }) {
@@ -7,14 +9,15 @@ export default function Index({ cart }) {
     const items = cart?.items || [];
     const hasItems = items.length > 0;
 
-    const [couponCode, setCouponCode] = useState("");
-
     const form = useForm({
         code: "",
     });
 
     const applyCoupon = () => {
         form.post(route("cart.discount"));
+    };
+    const removeCupon = () => {
+        form.post(route("cart.discount.remove"));
     };
 
     const updateQuantity = (id, newQuantity) => {
@@ -226,7 +229,7 @@ export default function Index({ cart }) {
                                             Discount Code
                                         </label>
 
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 ">
                                             <input
                                                 type="text"
                                                 value={form.data.code}
@@ -237,9 +240,13 @@ export default function Index({ cart }) {
                                                     )
                                                 }
                                                 placeholder="WELCOME10"
-                                                className="flex-1 border border-stone-200 px-3 py-3 text-sm focus:outline-none focus:border-stone-800"
+                                                className={`flex-1 border border-stone-200 px-3 py-3 text-sm focus:outline-none focus:border-stone-800 
+                                                    ${
+                                                        form.errors.code
+                                                            ? "border-red-500"
+                                                            : "border-stone-200 focus:border-stone-800"
+                                                    }`}
                                             />
-
                                             <button
                                                 type="button"
                                                 disabled={form.processing}
@@ -249,6 +256,11 @@ export default function Index({ cart }) {
                                                 Apply
                                             </button>
                                         </div>
+                                        {form.errors.code && (
+                                            <p className="mt-2 text-xs text-red-600">
+                                                {form.errors.code}
+                                            </p>
+                                        )}
                                     </div>
 
                                     {cart.discount && (
@@ -260,13 +272,8 @@ export default function Index({ cart }) {
 
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        post(
-                                                            route(
-                                                                "cart.discount.remove",
-                                                            ),
-                                                        )
-                                                    }
+                                                    disabled={form.processing}
+                                                    onClick={removeCupon}
                                                     className="text-xs text-red-600 uppercase"
                                                 >
                                                     Remove

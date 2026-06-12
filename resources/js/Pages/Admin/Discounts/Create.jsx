@@ -1,3 +1,5 @@
+"use strict";
+
 import React from "react";
 import { useForm, Link, usePage } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";

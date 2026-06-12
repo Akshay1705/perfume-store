@@ -52,16 +52,11 @@ class HandleInertiaRequests extends Middleware
                 'success' => session()->get('success'),
                 'error'   => session()->get('error'),
             ],
-            'categories' => fn() =>
-            Category::orderBy('name')->get(),
-
-            'brands' => fn() =>
-            Brand::orderBy('name')->get(),
-            'cartCount' => function () {
-
-                if (!Auth::check()) {
-                    return 0;
-                }
+            'categories' => fn() =>Category::orderBy('name')->get(),
+            'brands' => fn() =>Brand::orderBy('name')->get(),
+            'cartCount' => function ()
+            {
+                if (!Auth::check()) {return 0;}
 
                 /** @var \App\Models\User $user */
                 $user = Auth::user();

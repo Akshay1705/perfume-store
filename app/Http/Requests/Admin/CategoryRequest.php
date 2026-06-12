@@ -28,8 +28,7 @@ class CategoryRequest extends FormRequest
                 'string',
                 'max:255',
 
-                Rule::unique('categories', 'slug')
-                    ->ignore($categoryId),
+                Rule::unique('categories', 'slug')->ignore($categoryId),
             ],
         ];
     }

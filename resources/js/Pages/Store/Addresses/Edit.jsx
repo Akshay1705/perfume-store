@@ -1,9 +1,11 @@
+"use strict";
+
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import AccountLayout from "@/Layouts/AccountLayout";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, useForm, usePage } from "@inertiajs/react";
 
 export default function Edit({ address }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -17,6 +19,7 @@ export default function Edit({ address }) {
         country: address.country || "India",
         is_default: !!address.is_default,
     });
+
 
     const submit = (e) => {
         e.preventDefault();

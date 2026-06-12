@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Order;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 
 class OrderService
 {
@@ -18,9 +20,58 @@ class OrderService
         Order $order,
         string $status
     ): void {
+        if (
+            $status === Order::STATUS_SHIPPED &&
+            $order->status !== Order::STATUS_SHIPPED
+        ) {
+            $this->reduceStock($order);
+        }
         $order->update([
             'status' => $status,
         ]);
+    }
+
+    private function reduceStock(
+        Order $order
+    ): void {
+
+        foreach ($order->items as $item) {
+
+            $variant = $item->variant;
+
+            $variant->decrement(
+                'stock',
+                $item->quantity
+            );
+        }
+    }
+
+    /**
+     * Get paginated orders with filters.
+     */
+    public function getOrders(Request $request): LengthAwarePaginator
+    {
+        $search = $request->input('search');
+        $status = $request->input('status');
+
+        return Order::query()
+            ->with(['user'])
+            ->where('status', '!=', Order::STATUS_CART)
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('id', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($status, function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
     }
 
     /**

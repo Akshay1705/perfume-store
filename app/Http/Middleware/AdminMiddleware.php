@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
+    /**
+     * @param Request $request
+     * @param Closure $next
+     * 
+     * @return Response
+     */
     public function handle(Request $request, Closure $next): Response
     {
         if (! Auth::check()) {return redirect('/login');}

@@ -1,14 +1,8 @@
+"use strict";
+
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
-import {
-    ArrowLeft,
-    User,
-    MapPin,
-    Package,
-    Receipt,
-    RefreshCw,
-    Check,
-} from "lucide-react";
+import {ArrowLeft, User, MapPin, Package, Receipt, RefreshCw, Check,} from "lucide-react";
 
 export default function Show({ order, statuses }) {
     const { data, setData, patch, processing } = useForm({
@@ -17,11 +11,7 @@ export default function Show({ order, statuses }) {
 
     const submit = (e) => {
         e.preventDefault();
-        patch(route("admin.orders.update", order.id), {
-            onSuccess: () => {
-                // Redirect handled by controller — flash msg shown on index
-            },
-        });
+        patch(route("admin.orders.update", order.id));
     };
 
     const getStatusBadge = (status) => {
@@ -273,15 +263,15 @@ export default function Show({ order, statuses }) {
                                     </div>
                                 </div>
 
-                                <Link
-                                    href={route("admin.orders.index")}
+                                <button
                                     type="submit"
+                                    href="/admin/orders"
                                     disabled={processing}
                                     className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-slate-950 font-bold text-sm hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                                 >
                                     <Check size={15} />
                                     {processing ? "Updating…" : "Update status"}
-                                </Link>
+                                </button>
                             </form>
                         </div>
                     </div>

@@ -1,3 +1,5 @@
+"use strict";
+
 import React, { useState } from "react";
 import { Link, usePage, router } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
@@ -17,14 +19,13 @@ import Swal from "sweetalert2";
 
 export default function Index() {
     const { flash } = usePage().props;
-    
+
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
     const { discounts, totalCount, stats, filters } = usePage().props;
     const [deleteId, setDeleteId] = useState(null);
-
 
     const handleDelete = (id) => {
         Swal.fire({

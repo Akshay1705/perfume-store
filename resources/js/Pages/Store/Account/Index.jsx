@@ -1,3 +1,5 @@
+"use strict";
+
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Link, usePage } from "@inertiajs/react";
 

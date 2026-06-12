@@ -1,3 +1,5 @@
+"use strict";
+
 import StoreLayout from "@/Layouts/StoreLayout";
 import Hero from "@/Components/Store/Hero";
 import CategoryGrid from "@/Components/Store/CategoryGrid";

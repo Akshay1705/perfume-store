@@ -1,3 +1,5 @@
+"use strict";
+
 import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link } from "@inertiajs/react";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -5,15 +7,14 @@ import { useEffect } from "react";
 import { usePage } from "@inertiajs/react";
 import { toast } from "react-toastify";
 
-
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
         name: "",
         slug: "",
     });
-    
+
     const { flash } = usePage().props;
-    
+
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);

@@ -105,10 +105,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/cart/items/{item}', [CartController::class, 'updateQuantity'])->name('cart.items.update');
     Route::delete('/cart/items/{item}', [CartController::class, 'destroy'])->name('cart.items.destroy');
     Route::post('/cart/apply-discount',[CartController::class, 'applyDiscount'])->name('cart.discount');
-    Route::post(
-        '/cart/remove-discount',
-        [CartController::class, 'removeDiscount']
-    )->name('cart.discount.remove');
+    Route::post('/cart/remove-discount',[CartController::class, 'removeDiscount'])->name('cart.discount.remove');
 
     //checkout flow
     Route::get('/checkout',[CheckoutController::class, 'index'])->name('checkout.index');

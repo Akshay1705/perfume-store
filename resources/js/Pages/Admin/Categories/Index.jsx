@@ -1,3 +1,5 @@
+"use strict";
+
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router, usePage } from "@inertiajs/react";
 import { Edit, Trash2, Plus, RotateCcw, Flame } from "lucide-react";
@@ -8,7 +10,6 @@ import Swal from "sweetalert2";
 export default function Index({ categories }) {
     const { flash } = usePage().props;
 
-    // Show toast from flash message after redirect
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
