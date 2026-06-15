@@ -208,15 +208,42 @@ export default function Show({ order, statuses }) {
                                     ₹{Number(order.subtotal).toLocaleString()}
                                 </span>
                             </div>
-                            <div className="flex justify-between py-2.5 border-b border-slate-700/20 text-sm">
-                                <span className="text-slate-400">Discount</span>
-                                <span className="text-red-400 tabular-nums">
-                                    − ₹
-                                    {Number(
-                                        order.discount_amount,
-                                    ).toLocaleString()}
-                                </span>
-                            </div>
+                            {order.discount_amount > 0 && (
+                                <div className="py-2.5 border-b border-slate-700/20">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-400">
+                                            Discount
+                                        </span>
+
+                                        <span className="text-green-400 tabular-nums">
+                                            − ₹
+                                            {Number(
+                                                order.discount_amount,
+                                            ).toLocaleString()}
+                                        </span>
+                                    </div>
+
+                                    {order.coupon_code && (
+                                        <div className="mt-2 flex items-center justify-between text-xs">
+                                            <span className="text-slate-500">
+                                                Coupon Applied
+                                            </span>
+
+                                            <div className="text-right">
+                                                <p className="font-medium text-amber-400">
+                                                    {order.coupon_code}
+                                                </p>
+
+                                                {order.coupon_name && (
+                                                    <p className="text-slate-500">
+                                                        {order.coupon_name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <div className="flex justify-between pt-3 mt-1">
                                 <span className="font-bold text-slate-100">
                                     Total

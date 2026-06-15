@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class DiscountRequest extends FormRequest
 {
@@ -37,16 +38,49 @@ class DiscountRequest extends FormRequest
 
         return [
             'name' => 'required|string|max:255',
-            'code' => 'nullable|string|max:255|unique:discounts,code,' . $discountId,
+
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('discounts', 'code')
+                    ->ignore($discountId),
+            ],
+
             'type' => 'required|in:percentage,fixed',
-            'value' => 'required|numeric|min:0.01|max:99999.99',
+
+            'value' => [
+                'required',
+                'numeric',
+                'min:1',
+            ],
+
             'target_type' => 'required|in:all,user,brand,category',
-            'user_id' => 'nullable|exists:users,id',
-            'brand_id' => 'nullable|exists:brands,id',
-            'category_id' => 'nullable|exists:categories,id',
+
+            'user_id' => [
+                'required_if:target_type,user',
+                'nullable',
+                'exists:users,id',
+            ],
+
+            'brand_id' => [
+                'required_if:target_type,brand',
+                'nullable',
+                'exists:brands,id',
+            ],
+
+            'category_id' => [
+                'required_if:target_type,category',
+                'nullable',
+                'exists:categories,id',
+            ],
+
             'min_order_amount' => 'nullable|numeric|min:0',
+
             'starts_at' => 'nullable|date',
-            'ends_at' => 'nullable|date|after_or_equal:starts_at',
+
+            'ends_at' => 'nullable|date|after:starts_at',
+
             'is_active' => 'boolean',
         ];
     }

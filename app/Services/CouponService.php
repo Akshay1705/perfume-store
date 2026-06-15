@@ -34,9 +34,38 @@ class CouponService
             ]);
         }
 
-        if (!$discount->isValid()) {
+        $now = now();
+
+        if (
+            $discount->starts_at &&
+            $now->lt($discount->starts_at)
+        ) {
             throw ValidationException::withMessages([
-                'code' => 'This discount is no longer active.',
+                'code' => 'This coupon is not active yet.',
+            ]);
+        }
+
+        if (
+            $discount->ends_at &&
+            $now->gt($discount->ends_at)
+        ) {
+            throw ValidationException::withMessages([
+                'code' => 'This coupon has expired.',
+            ]);
+        }
+
+        if (!$discount->is_active) {
+            throw ValidationException::withMessages([
+                'code' => 'This coupon is inactive.',
+            ]);
+        }
+
+        if (
+            $discount->target_type === 'user' &&
+            $discount->user_id !== $cart->user_id
+        ) {
+            throw ValidationException::withMessages([
+                'code' => 'This coupon is not assigned to your account.',
             ]);
         }
 
@@ -45,7 +74,11 @@ class CouponService
             $discount->min_order_amount
         ) {
             throw ValidationException::withMessages([
-                'code' => 'Minimum order amount not reached.',
+                'code' => 'Minimum order amount is ₹' .
+                    number_format(
+                        $discount->min_order_amount,
+                        0
+                    ),
             ]);
         }
 
@@ -65,6 +98,14 @@ class CouponService
             $discount
         );
 
+        if (
+            $cart->discount_id === $discount->id
+        ) {
+            throw ValidationException::withMessages([
+                'code' => 'This coupon is already applied.',
+            ]);
+        }
+
         $cart->update([
             'discount_id'     => $discount->id,
             'discount_amount' => $discountAmount,
@@ -77,15 +118,33 @@ class CouponService
 
     /**
      * Calculate eligible cart amount.
+     *
+     * @param Order $cart
+     * @param Discount $discount
+     *
+     * @return float
      */
-    protected function calculateEligibleAmount(Order $cart, Discount $discount): float
-    {
+    protected function calculateEligibleAmount(
+        Order $cart,
+        Discount $discount
+    ): float {
+
         $cart->load(
             'items.variant.product.brand',
             'items.variant.product.category'
         );
 
-        if ($discount->target_type === 'all') {
+        /*
+    |--------------------------------------------------------------------------
+    | Entire Cart Discounts
+    |--------------------------------------------------------------------------
+    */
+        if (
+            in_array(
+                $discount->target_type,
+                ['all', 'user']
+            )
+        ) {
             return (float) $cart->subtotal;
         }
 
@@ -95,18 +154,33 @@ class CouponService
 
             $product = $item->variant->product;
 
-            if (
-                $discount->target_type === 'brand' &&
-                $product->brand_id === $discount->brand_id
-            ) {
-                $eligibleAmount += $item->unit_price * $item->quantity;
-            }
+            switch ($discount->target_type) {
 
-            if (
-                $discount->target_type === 'category' &&
-                $product->category_id === $discount->category_id
-            ) {
-                $eligibleAmount += $item->unit_price * $item->quantity;
+                case 'brand':
+
+                    if (
+                        $product->brand_id ==
+                        $discount->brand_id
+                    ) {
+                        $eligibleAmount +=
+                            $item->unit_price *
+                            $item->quantity;
+                    }
+
+                    break;
+
+                case 'category':
+
+                    if (
+                        $product->category_id ==
+                        $discount->category_id
+                    ) {
+                        $eligibleAmount +=
+                            $item->unit_price *
+                            $item->quantity;
+                    }
+
+                    break;
             }
         }
 
@@ -133,5 +207,20 @@ class CouponService
             (float) $discount->value,
             $eligibleAmount
         );
+    }
+
+    public function recalculateCoupon(Order $cart): void
+    {
+        if (!$cart->discount) {
+            $cart->update(['discount_amount' => 0, 'total' => $cart->subtotal,]);
+            return;
+        }
+        $eligibleAmount = $this->calculateEligibleAmount($cart, $cart->discount);
+        if ($eligibleAmount <= 0) {
+            $cart->update(['discount_id' => null, 'discount_amount' => 0, 'total' => $cart->subtotal,]);
+            return;
+        }
+        $discountAmount = $this->calculateDiscountAmount($eligibleAmount, $cart->discount);
+        $cart->update(['discount_amount' => $discountAmount, 'total' => max(0, $cart->subtotal - $discountAmount),]);
     }
 }

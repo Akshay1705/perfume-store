@@ -38,7 +38,7 @@ class CartController extends Controller
         );
     }
 
-    public function add(AddToCartRequest $request, CartService $service)
+    public function add(AddToCartRequest $request, CartService $service, CouponService $couponService)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -48,6 +48,8 @@ class CartController extends Controller
             $request->variant_id,
             $request->quantity
         );
+
+        $couponService->recalculateCoupon($user->activeCart());
 
         return back()->with(
             'success',
@@ -86,16 +88,18 @@ class CartController extends Controller
         );
     }
 
-    public function updateQuantity(Request $request, OrderItem $item, CartService $service)
+    public function updateQuantity(Request $request, OrderItem $item, CartService $service, CouponService $couponService)
     {
         $service->updateQuantity($item, $request->quantity);
+        $couponService->recalculateCoupon($item->order);
 
         return back();
     }
 
-    public function destroy(OrderItem $item, CartService $service) 
+    public function destroy(OrderItem $item, CartService $service, CouponService $couponService) 
     {
         $service->removeItem($item);
+        $couponService->recalculateCoupon($item->order);
 
         return back();
     }

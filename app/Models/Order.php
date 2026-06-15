@@ -26,6 +26,8 @@ class Order extends Model
         'discount_amount',
         'total',
         'placed_at',
+        'coupon_code',
+        'coupon_name',
     ];
 
     protected $casts = [

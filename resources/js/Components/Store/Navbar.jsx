@@ -83,20 +83,6 @@ export default function Navbar({ categories = [], brands = [], cartCount = [] })
 
                 {/* Actions */}
                 <div className="flex items-center space-x-4 text-stone-700">
-                    <button
-                        className="p-2 hover:text-stone-950 transition-colors"
-                        aria-label="Search"
-                    >
-                        <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                        >
-                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </button>
                     {user ? (
                         <div className="relative group">
                             <button className="text-sm font-medium text-stone-700">

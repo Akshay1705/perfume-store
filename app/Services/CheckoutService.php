@@ -26,8 +26,10 @@ class CheckoutService
 
             $cart->update([
                 'address_id' => $addressId,
-                'status' => 'placed',
+                'status' => Order::STATUS_PLACED,
                 'placed_at' => now(),
+                'coupon_code' => $cart->discount?->code,
+                'coupon_name' => $cart->discount?->name,
             ]);
 
             // create fresh cart

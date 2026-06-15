@@ -2,24 +2,40 @@ import { Link } from "@inertiajs/react";
 
 export default function Hero() {
     return (
-        <section className="relative overflow-hidden bg-gradient-to-r from-stone-100 to-amber-50/40 py-24 md:py-32 px-4 text-center rounded-2xl my-4">
+        <section className="relative overflow-hidden bg-gradient-to-r from-stone-100 to-amber-200 py-24 md:py-32 px-4 text-center rounded-3xl my-4 border border-stone-200/40">
             <div className="max-w-3xl mx-auto">
-                <span className="text-xs font-semibold tracking-widest text-amber-700 uppercase">
-                    The Luxury Collection
+                <span className="text-[10px] tracking-[0.4em] uppercase font-bold text-amber-800">
+                    100% Verified Authentic Curation
                 </span>
-                <h2 className="mt-3 text-4xl md:text-6xl font-serif font-light tracking-wide text-stone-900">
-                    Premium Fragrances
+
+                <h2 className="mt-4 text-4xl md:text-6xl font-serif font-light tracking-wide text-stone-900 leading-tight">
+                    Rare Middle Eastern <br />& Niche{" "}
+                    <span className="italic text-amber-700 font-normal">
+                        Perfumeries
+                    </span>
                 </h2>
-                <p className="mt-4 text-base md:text-lg text-stone-600 max-w-md mx-auto font-light">
-                    Discover exquisite Perfumes, traditional Attars, and curated
-                    Discovery Sets.
+
+                <p className="mt-6 text-sm md:text-base text-stone-600 max-w-xl mx-auto font-light tracking-wide leading-relaxed">
+                    Bringing hard-to-find global fragrances directly to India.
+                    Explore curated luxury Perfumes, traditional Attars, daily
+                    Deodorants, Body Mists, and signature Discovery Sets with
+                    absolute trust.
                 </p>
-                <Link
-                    href="/products"
-                    className="inline-block mt-8 px-8 py-4 border border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white text-xs tracking-[0.2em] font-semibold uppercase rounded-none transition-all duration-300"
-                >
-                    Explore Collection
-                </Link>
+
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <Link
+                        href="/products"
+                        className="w-full sm:w-auto inline-block px-8 py-4 border border-stone-900 bg-stone-900 text-white hover:bg-transparent hover:text-stone-900 text-[11px] tracking-[0.2em] font-medium uppercase transition-all duration-300"
+                    >
+                        Explore Collection
+                    </Link>
+                    <Link
+                        href={`/products?category=discovery-set`}
+                        className="w-full sm:w-auto inline-block px-8 py-4 border border-stone-300 text-stone-700 hover:border-stone-900 hover:text-stone-900 text-[11px] tracking-[0.2em] font-medium uppercase transition-all duration-300"
+                    >
+                        Try Discovery Sets
+                    </Link>
+                </div>
             </div>
         </section>
     );

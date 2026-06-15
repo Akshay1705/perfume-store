@@ -4,7 +4,7 @@ import AccountLayout from "@/Layouts/AccountLayout";
 import { Head, Link } from "@inertiajs/react";
 
 export default function Show({ order }) {
-    // Dynamic status text styling configuration matrix
+    // Dynamic status text styling configuration
     const getStatusStyles = (status) => {
         const base =
             "text-[10px] uppercase tracking-widest px-2.5 py-1 font-medium rounded-none inline-block ";
@@ -30,18 +30,18 @@ export default function Show({ order }) {
 
     return (
         <AccountLayout>
-            <Head title={`Order Manifest #${order.id}`} />
+            <Head title={`Order Details #${order.id}`} />
 
             <div className="space-y-8 text-stone-900 antialiased selection:bg-stone-900 selection:text-stone-50">
-                {/* Header Subsystem Navigation Strip */}
+                {/* Header Section */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-5 border-b border-stone-200">
                     <div>
                         <h1 className="text-lg font-serif tracking-[0.2em] text-stone-900 uppercase font-medium">
                             Order #{order.id}
                         </h1>
                         <p className="text-[11px] text-stone-400 font-light mt-1 tracking-wide">
-                            Authorized invoice transaction state parameters
-                            dashboard.
+                            View your purchase history and current shipping
+                            status.
                         </p>
                     </div>
 
@@ -53,23 +53,23 @@ export default function Show({ order }) {
                     </Link>
                 </div>
 
-                {/* Grid Split Content Matrix (Shipping Context vs Financial Calculation Summary) */}
+                {/* Shipping & Status Row */}
                 <div className="grid md:grid-cols-2 gap-6">
-                    {/* Block A: Physical Shipment Destination Address Map */}
+                    {/* Shipping Address Box */}
                     <div className="border border-stone-200/80 p-6 rounded-none bg-white">
                         <h2 className="text-xs font-serif tracking-[0.15em] uppercase font-bold text-stone-900 mb-4 pb-2 border-b border-stone-100">
-                            Shipping Coordinates
+                            Shipping Address
                         </h2>
 
                         <div className="space-y-4">
                             <div>
                                 <span className="text-xs font-serif tracking-widest text-stone-900 uppercase font-semibold">
                                     {order.address?.full_name ||
-                                        "Recipient Dynamic Fallback"}
+                                        "Customer Name"}
                                 </span>
                                 <p className="text-[11px] text-stone-400 font-mono mt-0.5 tracking-wide">
                                     {order.address?.phone ||
-                                        "No Contact Assigned"}
+                                        "No phone number provided"}
                                 </p>
                             </div>
 
@@ -94,30 +94,30 @@ export default function Show({ order }) {
                         </div>
                     </div>
 
-                    {/* Block B: Manifest Current Logistics State Framework */}
+                    {/* Order Status Box */}
                     <div className="border border-stone-200/80 p-6 rounded-none bg-stone-50/30 flex flex-col justify-between">
                         <div>
                             <h2 className="text-xs font-serif tracking-[0.15em] uppercase font-bold text-stone-900 mb-4 pb-2 border-b border-stone-100">
-                                Manifest Status
+                                Delivery Status
                             </h2>
                             <p className="text-[11px] text-stone-400 font-light tracking-wide leading-relaxed mb-4">
-                                Current monitoring milestone logged by your
-                                parcel dispatch service router.
+                                Current delivery tracking stage updated by our
+                                delivery partners.
                             </p>
                         </div>
 
                         <div className="pt-2">
                             <span className={getStatusStyles(order.status)}>
-                                {order.status || "In Queue"}
+                                {order.status || "Processing"}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Block C: Itemized Content Purchased Items Grid Ledger */}
+                {/* Purchased Items List */}
                 <div className="border border-stone-200/80 p-6 rounded-none bg-white">
                     <h2 className="text-xs font-serif tracking-[0.15em] uppercase font-bold text-stone-900 mb-6 pb-2 border-b border-stone-100">
-                        Purchased Manifest Items ({order.items?.length || 0})
+                        Items Ordered ({order.items?.length || 0})
                     </h2>
 
                     <div className="divide-y divide-stone-100">
@@ -140,16 +140,16 @@ export default function Show({ order }) {
                                 <div className="flex-1 min-w-0">
                                     <h3 className="text-xs font-serif tracking-widest text-stone-900 uppercase font-semibold truncate">
                                         {item.variant?.product?.name ||
-                                            "Premium Fragrance Compound"}
+                                            "Premium Product"}
                                     </h3>
                                     <p className="text-[11px] text-stone-400 font-light mt-0.5 tracking-wide font-mono">
-                                        Volume Matrix:{" "}
+                                        Size/Volume:{" "}
                                         {item.variant?.volume ||
                                             item.variant?.name ||
-                                            "Standard Size"}
+                                            "Standard"}
                                     </p>
                                     <p className="text-[11px] text-stone-500 font-light tracking-wide mt-1">
-                                        Quantity Ordered:{" "}
+                                        Qty:{" "}
                                         <span className="font-mono text-stone-900 font-normal">
                                             {item.quantity}
                                         </span>
@@ -169,53 +169,64 @@ export default function Show({ order }) {
                     </div>
                 </div>
 
-                {/* Block D: Ledger Financial Summary Segment */}
-                <div className="border border-stone-200/80 p-6 rounded-none bg-stone-50/40 ml-auto max-w-md">
-                    <h2 className="text-xs font-serif tracking-[0.15em] uppercase font-bold text-stone-900 mb-4 pb-2 border-b border-stone-200/80">
-                        Ledger Accumulations Summary
-                    </h2>
+                {/* Bottom Billing Details Layout Area */}
+                <div className="flex flex-col md:flex-row gap-6 justify-end items-start">
+                    {/* Financial Summary Box */}
+                    <div className="border border-stone-200/80 p-6 rounded-none bg-stone-50/40 w-full md:max-w-sm">
+                        <h2 className="text-xs font-serif tracking-[0.15em] uppercase font-bold text-stone-900 mb-4 pb-2 border-b border-stone-200/80">
+                            Order Summary
+                        </h2>
 
-                    <div className="space-y-2.5 text-xs tracking-wide">
-                        <div className="flex justify-between text-stone-600 font-light">
-                            <span>Basket Subtotal</span>
-                            <span className="font-mono text-stone-900">
-                                ₹
-                                {Number(order.subtotal || 0).toLocaleString(
-                                    "en-IN",
-                                )}
-                            </span>
-                        </div>
-
-                        {Number(order.discount_amount) > 0 && (
-                            <div className="flex justify-between py-2">
-                                <span>Discount</span>
-
-                                <span className="text-green-700">
-                                    -₹
-                                    {Number(
-                                        order.discount_amount,
-                                    ).toLocaleString("en-IN")}
+                        <div className="space-y-2.5 text-xs tracking-wide">
+                            <div className="flex justify-between text-stone-600 font-light">
+                                <span>Subtotal</span>
+                                <span className="font-mono text-stone-900">
+                                    ₹
+                                    {Number(order.subtotal || 0).toLocaleString(
+                                        "en-IN",
+                                    )}
                                 </span>
                             </div>
-                        )}
 
-                        <div className="flex justify-between text-stone-600 font-light">
-                            <span>Courier Service Freight</span>
-                            <span className="text-[10px] uppercase tracking-widest text-emerald-700 font-medium">
-                                Complimentary
-                            </span>
-                        </div>
+                            {order.coupon_code && (
+                                <>
+                                    <div className="flex justify-between text-stone-600 font-light">
+                                        <span>
+                                            Coupon ({order.coupon_code})
+                                        </span>
 
-                        <div className="flex justify-between text-stone-900 font-medium pt-3 border-t border-stone-200 text-sm">
-                            <span className="font-serif uppercase tracking-wider">
-                                Aggregate Total
-                            </span>
-                            <span className="font-mono">
-                                ₹
-                                {Number(order.total || 0).toLocaleString(
-                                    "en-IN",
-                                )}
-                            </span>
+                                        <span className="font-mono text-emerald-700">
+                                            -₹
+                                            {Number(
+                                                order.discount_amount,
+                                            ).toLocaleString("en-IN")}
+                                        </span>
+                                    </div>
+
+                                    <div className="text-[10px] text-emerald-700 tracking-wider uppercase">
+                                        {order.coupon_name}
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="flex justify-between text-stone-600 font-light">
+                                <span>Shipping Fees</span>
+                                <span className="text-[10px] uppercase tracking-widest text-emerald-700 font-medium">
+                                    Free
+                                </span>
+                            </div>
+
+                            <div className="flex justify-between text-stone-900 font-medium pt-3 border-t border-stone-200 text-sm">
+                                <span className="font-serif uppercase tracking-wider">
+                                    Grand Total
+                                </span>
+                                <span className="font-mono">
+                                    ₹
+                                    {Number(order.total || 0).toLocaleString(
+                                        "en-IN",
+                                    )}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

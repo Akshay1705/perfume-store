@@ -2,7 +2,7 @@ import { Link } from "@inertiajs/react";
 
 export default function Footer() {
     return (
-        <footer className="bg-stone-950 text-stone-400 text-sm mt-24 border-t border-stone-800 rounded-none">
+        <footer className="bg-stone-950 text-stone-400 text-sm mt-24 border-t border-stone-900 rounded-none">
             <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
                 {/* ── COLUMN 1: BRAND IDENTITY ── */}
                 <div className="col-span-2 md:col-span-1 space-y-4">
@@ -13,13 +13,14 @@ export default function Footer() {
                         AURA<span className="text-amber-600 font-light">.</span>
                     </Link>
                     <p className="text-stone-400 font-light leading-relaxed text-xs max-w-xs">
-                        Crafting elite sensory experiences through exquisite
-                        artisanal perfumes, traditional attars, and premium
-                        discovery collections.
+                        Your trusted gateway to rare Middle Eastern houses,
+                        premium attars, and niche global fragrances.
+                        Authenticity guaranteed, delivered seamlessly across
+                        India.
                     </p>
                 </div>
 
-                {/* ── COLUMN 2: BACKEND FILTER INTEGRATION LINK COLLECTION ── */}
+                {/* ── COLUMN 2: EXPANDED CATEGORY SEARCH LINKS ── */}
                 <div>
                     <h4 className="text-stone-200 font-medium tracking-widest uppercase text-[11px] mb-5">
                         Shop Collection
@@ -30,25 +31,39 @@ export default function Footer() {
                                 href="/products"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
-                                Shop All Fragrances
+                                All Fragrances
                             </Link>
                         </li>
                         <li>
-                            {/* Points straight to your controller's category logic */}
                             <Link
-                                href="/products?category=perfumes"
+                                href="/products?category=middle-eastern"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
-                                Artisanal Perfumes
+                                Middle Eastern & Niche
                             </Link>
                         </li>
                         <li>
-                            {/* Points straight to your controller's category logic */}
                             <Link
                                 href="/products?category=attars"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
                                 Pure Attar Oils
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/products?category=discovery-sets"
+                                className="hover:text-white transition-colors text-stone-400"
+                            >
+                                Discovery & Gift Sets
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/products?category=mists-deodorants"
+                                className="hover:text-white transition-colors text-stone-400"
+                            >
+                                Deos & Body Mists
                             </Link>
                         </li>
                     </ul>
@@ -65,7 +80,7 @@ export default function Footer() {
                                 href="/our-story"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
-                                Our Story & Heritage
+                                Our Story & Trust
                             </Link>
                         </li>
                         <li>
@@ -73,7 +88,7 @@ export default function Footer() {
                                 href="#"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
-                                Shipping & Returns
+                                Shipping & Delivery (India)
                             </Link>
                         </li>
                         <li>
@@ -81,7 +96,7 @@ export default function Footer() {
                                 href="#"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
-                                Contact Support
+                                Authenticity Guarantee
                             </Link>
                         </li>
                     </ul>
@@ -91,18 +106,18 @@ export default function Footer() {
                 <div className="col-span-2 md:col-span-1 space-y-5">
                     <div>
                         <h4 className="text-stone-200 font-medium tracking-widest uppercase text-[11px] mb-3">
-                            Boutique Hours
+                            Concierge Hours
                         </h4>
                         <p className="text-xs font-light text-stone-400 leading-relaxed tracking-wide">
                             Mon — Sat: 11:00 AM — 8:00 PM <br />
-                            Sunday: Closed
+                            Sunday: Closed (Online 24/7)
                         </p>
                     </div>
 
                     {/* Minimalist Social Icons */}
                     <div className="pt-2">
                         <h5 className="text-stone-400 font-medium text-[10px] uppercase tracking-[0.2em] mb-3">
-                            Follow Us
+                            Follow Our Journey
                         </h5>
                         <div className="flex space-x-4 text-stone-400">
                             <a
@@ -156,7 +171,8 @@ export default function Footer() {
             <div className="border-t border-stone-900 max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-600 font-light tracking-wider gap-4">
                 <div>
                     &copy; {new Date().getFullYear()} Aura Luxury Fragrances.
-                    All rights reserved.
+                    All original products are property of their respective
+                    owners.
                 </div>
                 <div className="flex space-x-6">
                     <Link
