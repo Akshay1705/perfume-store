@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ class CheckoutService
 
             $cart->update([
                 'address_id' => $addressId,
-                'status' => Order::STATUS_PLACED,
+                'status' => OrderStatus::PLACED->value,
                 'placed_at' => now(),
                 'coupon_code' => $cart->discount?->code,
                 'coupon_name' => $cart->discount?->name,

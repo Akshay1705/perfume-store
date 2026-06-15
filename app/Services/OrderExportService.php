@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 
 class OrderExportService
@@ -13,7 +14,7 @@ class OrderExportService
             'address',
             'items.variant.product',
         ])
-            ->whereNot('status', Order::STATUS_CART)
+            ->whereNot('status', OrderStatus::CART->value)
             ->orderByDesc('id')
             ->get();
 

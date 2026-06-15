@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Enums\OrderStatus;
 
 class OrderController extends Controller
 {
@@ -20,7 +21,7 @@ class OrderController extends Controller
         $user = Auth::user();
 
         $orders = $user->orders()
-            ->where('status', '!=', Order::STATUS_CART)
+            ->where('status', '!=', OrderStatus::CART->value)
             ->latest()
             ->get();
 

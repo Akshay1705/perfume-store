@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\DiscountTargetType;
+use App\Enums\DiscountType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -47,15 +49,29 @@ class DiscountRequest extends FormRequest
                     ->ignore($discountId),
             ],
 
-            'type' => 'required|in:percentage,fixed',
+            'type' => 'required|in:' .
+                implode(',', [
+                    DiscountType::PERCENTAGE->value,
+                    DiscountType::FIXED->value,
+                ]),
 
             'value' => [
                 'required',
                 'numeric',
                 'min:1',
+                Rule::when(
+                    $this->type === DiscountType::PERCENTAGE->value,
+                    ['max:100']
+                ),
             ],
 
-            'target_type' => 'required|in:all,user,brand,category',
+            'target_type' => 'required|in:' .
+                implode(',', [
+                    DiscountTargetType::ALL->value,
+                    DiscountTargetType::USER->value,
+                    DiscountTargetType::BRAND->value,
+                    DiscountTargetType::CATEGORY->value,
+                ]),
 
             'user_id' => [
                 'required_if:target_type,user',
@@ -96,7 +112,7 @@ class DiscountRequest extends FormRequest
             'type.required' => 'Discount type is required',
             'value.required' => 'Discount value is required',
             'target_type.required' => 'Target type is required',
-            'ends_at.after_or_equal' => 'End date must be after start date',
+            'ends_at.after' => 'End date must be after start date',
         ];
     }
 }

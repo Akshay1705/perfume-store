@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Illuminate\Http\Response as HttpResponse;
+use App\Enums\OrderStatus;
 
 
 class OrderController extends Controller
@@ -25,19 +26,13 @@ class OrderController extends Controller
      */
     public function index(Request $request, OrderService $service): InertiaResponse
     {
-        $orders = Order::query()
-            ->with(['user',])
-            ->where('status','!=',Order::STATUS_CART)
-            ->latest()
-            ->paginate(15);
-
         return Inertia::render(
             'Admin/Orders/Index',
             [
                 'orders'   => $service->getOrders($request),
                 'statuses' => Order::statuses(),
                 'filters'  => $request->only(['search', 'status']),
-                'totalOrders' => Order::where('status', '!=', Order::STATUS_CART)->count(),
+                'totalOrders' => Order::where('status', '!=', OrderStatus::CART->value)->count(),
             ]
         );
     }

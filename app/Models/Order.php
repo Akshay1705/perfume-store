@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use App\Enums\OrderStatus;
 
 class Order extends Model
 {
@@ -61,7 +62,7 @@ class Order extends Model
     {
         return $query->where(
             'status',
-            self::STATUS_CART,
+            OrderStatus::CART->value,
         );
     }
 
@@ -69,7 +70,7 @@ class Order extends Model
     {
         return $query->where(
             'status',
-            self::STATUS_PLACED,
+            OrderStatus::PLACED->value,
         );
     }
 
@@ -77,7 +78,7 @@ class Order extends Model
     {
         return $query->where(
             'status',
-            self::STATUS_PROCESSING,
+            OrderStatus::PROCESSING->value,
         );
     }
 
@@ -85,7 +86,7 @@ class Order extends Model
     {
         return $query->where(
             'status',
-            self::STATUS_SHIPPED,
+            OrderStatus::SHIPPED->value,
         );
     }
 
@@ -93,19 +94,22 @@ class Order extends Model
     {
         return $query->where(
             'status',
-            self::STATUS_DELIVERED,
+            OrderStatus::DELIVERED->value,
         );
     }
 
     public static function statuses(): array
     {
-        return [
-            self::STATUS_PLACED,
-            self::STATUS_PROCESSING,
-            self::STATUS_SHIPPED,
-            self::STATUS_DELIVERED,
-            self::STATUS_CANCELLED,
-            self::STATUS_RETURNED,
-        ];
+        return array_map(
+            fn($status) => $status->value,
+            [
+                OrderStatus::PLACED,
+                OrderStatus::PROCESSING,
+                OrderStatus::SHIPPED,
+                OrderStatus::DELIVERED,
+                OrderStatus::CANCELLED,
+                OrderStatus::RETURNED,
+            ]
+        );
     }
 }

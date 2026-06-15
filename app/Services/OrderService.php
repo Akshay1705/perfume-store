@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -21,8 +22,8 @@ class OrderService
         string $status
     ): void {
         if (
-            $status === Order::STATUS_SHIPPED &&
-            $order->status !== Order::STATUS_SHIPPED
+            $status === OrderStatus::SHIPPED->value &&
+            $order->status !== OrderStatus::SHIPPED->value
         ) {
             $this->reduceStock($order);
         }
@@ -31,15 +32,13 @@ class OrderService
         ]);
     }
 
-    private function reduceStock(
-        Order $order
-    ): void {
+    private function reduceStock(Order $order): void
+    {
+        $order->load('items.variant');
 
         foreach ($order->items as $item) {
 
-            $variant = $item->variant;
-
-            $variant->decrement(
+            $item->variant->decrement(
                 'stock',
                 $item->quantity
             );
@@ -56,7 +55,7 @@ class OrderService
 
         return Order::query()
             ->with(['user'])
-            ->where('status', '!=', Order::STATUS_CART)
+            ->where('status', '!=', OrderStatus::CART->value)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('id', 'like', "%{$search}%")
@@ -88,8 +87,8 @@ class OrderService
         return in_array(
             $order->status,
             [
-                Order::STATUS_PLACED,
-                Order::STATUS_PROCESSING,
+                OrderStatus::PLACED->value,
+                OrderStatus::PROCESSING->value,
             ]
         );
     }
@@ -105,7 +104,7 @@ class OrderService
         Order $order
     ): void {
         $order->update([
-            'status' => Order::STATUS_CANCELLED,
+            'status' => OrderStatus::CANCELLED->value,
         ]);
     }
 
@@ -120,7 +119,7 @@ class OrderService
         Order $order
     ): void {
         $order->update([
-            'status' => Order::STATUS_PROCESSING,
+            'status' => OrderStatus::PROCESSING->value,
         ]);
     }
 
@@ -135,7 +134,7 @@ class OrderService
         Order $order
     ): void {
         $order->update([
-            'status' => Order::STATUS_SHIPPED,
+            'status' => OrderStatus::SHIPPED->value,
         ]);
     }
 
@@ -150,7 +149,7 @@ class OrderService
         Order $order
     ): void {
         $order->update([
-            'status' => Order::STATUS_DELIVERED,
+            'status' => OrderStatus::DELIVERED->value,
         ]);
     }
 
@@ -165,7 +164,7 @@ class OrderService
         Order $order
     ): void {
         $order->update([
-            'status' => Order::STATUS_RETURNED,
+            'status' => OrderStatus::RETURNED->value,
         ]);
     }
 }

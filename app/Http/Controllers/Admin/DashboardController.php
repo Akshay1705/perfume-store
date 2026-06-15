@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
@@ -20,47 +21,47 @@ class DashboardController extends Controller
      */
     public function index(): Response
     {
-        $totalRevenue = Order::where('status', Order::STATUS_DELIVERED)->sum('total');
-        $totalOrders = Order::whereNot('status', Order::STATUS_CART)->count();
+        $totalRevenue = Order::where('status', OrderStatus::DELIVERED->value)->sum('total');
+        $totalOrders = Order::whereNot('status', OrderStatus::CART->value)->count();
         $totalCustomers = User::count();
         $totalProducts = Product::count();
-        $todayRevenue = Order::whereDate('created_at',today())->where('status', Order::STATUS_DELIVERED)->sum('total');
+        $todayRevenue = Order::whereDate('created_at',today())->where('status', OrderStatus::DELIVERED->value)->sum('total');
         $todayOrders = Order::whereDate('created_at', today())->count();
-        $pendingOrders = Order::where('status', Order::STATUS_PLACED)->count();
-        $deliveredOrders = Order::where('status', Order::STATUS_DELIVERED)->count();
+        $pendingOrders = Order::where('status', OrderStatus::PLACED->value)->count();
+        $deliveredOrders = Order::where('status', OrderStatus::DELIVERED->value)->count();
         $recentOrders = Order::with('user')->latest()->take(10)->get();
         $revenueChart = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
             $revenueChart[] = [
                 'day' => $date->format('D'),
-                'revenue' => Order::whereDate('created_at', $date)->where('status', Order::STATUS_DELIVERED)->sum('total'),
+                'revenue' => Order::whereDate('created_at', $date)->where('status', OrderStatus::DELIVERED->value)->sum('total'),
             ];
         }
         $statusChart = [
             [
                 'status' => 'Placed',
-                'count' => Order::where('status', Order::STATUS_PLACED)->count(),
+                'count' => Order::where('status', OrderStatus::PLACED->value)->count(),
             ],
             [
                 'status' => 'Processing',
-                'count' => Order::where('status', Order::STATUS_PROCESSING)->count(),
+                'count' => Order::where('status', OrderStatus::PROCESSING->value)->count(),
             ],
             [
                 'status' => 'Shipped',
-                'count' => Order::where('status', Order::STATUS_SHIPPED)->count(),
+                'count' => Order::where('status', OrderStatus::SHIPPED->value)->count(),
             ],
             [
                 'status' => 'Delivered',
-                'count' => Order::where('status', Order::STATUS_DELIVERED)->count(),
+                'count' => Order::where('status', OrderStatus::DELIVERED->value)->count(),
             ],
             [
                 'status' => 'Cancelled',
-                'count' => Order::where('status', Order::STATUS_CANCELLED)->count(),
+                'count' => Order::where('status', OrderStatus::CANCELLED->value)->count(),
             ],
             [
                 'status' => 'Returned',
-                'count' => Order::where('status', Order::STATUS_RETURNED)->count(),
+                'count' => Order::where('status', OrderStatus::RETURNED->value)->count(),
             ],
         ];
 

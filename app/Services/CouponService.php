@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DiscountTargetType;
 use Illuminate\Validation\ValidationException;
 use App\Models\Discount;
 use App\Models\Order;
@@ -34,6 +35,14 @@ class CouponService
             ]);
         }
 
+        if (
+            $cart->discount_id === $discount->id
+        ) {
+            throw ValidationException::withMessages([
+                'code' => 'This coupon is already applied.',
+            ]);
+        }
+
         $now = now();
 
         if (
@@ -61,7 +70,7 @@ class CouponService
         }
 
         if (
-            $discount->target_type === 'user' &&
+            $discount->target_type === DiscountTargetType::USER->value &&
             $discount->user_id !== $cart->user_id
         ) {
             throw ValidationException::withMessages([
@@ -97,14 +106,6 @@ class CouponService
             $eligibleAmount,
             $discount
         );
-
-        if (
-            $cart->discount_id === $discount->id
-        ) {
-            throw ValidationException::withMessages([
-                'code' => 'This coupon is already applied.',
-            ]);
-        }
 
         $cart->update([
             'discount_id'     => $discount->id,
@@ -142,7 +143,10 @@ class CouponService
         if (
             in_array(
                 $discount->target_type,
-                ['all', 'user']
+                [
+                    DiscountTargetType::ALL->value,
+                    DiscountTargetType::USER->value,
+                ]
             )
         ) {
             return (float) $cart->subtotal;
@@ -152,11 +156,14 @@ class CouponService
 
         foreach ($cart->items as $item) {
 
+            if (!$item->variant || !$item->variant->product) {
+                continue;
+            }
             $product = $item->variant->product;
 
             switch ($discount->target_type) {
 
-                case 'brand':
+                case DiscountTargetType::BRAND->value:
 
                     if (
                         $product->brand_id ==
@@ -169,7 +176,7 @@ class CouponService
 
                     break;
 
-                case 'category':
+                case DiscountTargetType::CATEGORY->value:
 
                     if (
                         $product->category_id ==
@@ -195,7 +202,7 @@ class CouponService
         Discount $discount
     ): float {
 
-        if ($discount->type === 'percentage') {
+        if ($discount->isPercentage()) {
 
             return round(
                 ($eligibleAmount * $discount->value) / 100,
@@ -211,16 +218,40 @@ class CouponService
 
     public function recalculateCoupon(Order $cart): void
     {
+        $cart->load('discount');
         if (!$cart->discount) {
-            $cart->update(['discount_amount' => 0, 'total' => $cart->subtotal,]);
+            $this->resetCartDiscount($cart);
+            return;
+        }
+        if (!$cart->discount->isValid()){
+            $this->resetCartDiscount($cart);
+
+            return;
+        }
+        if (
+            $cart->subtotal <
+            $cart->discount->min_order_amount
+        ) {
+            $this->resetCartDiscount($cart);
             return;
         }
         $eligibleAmount = $this->calculateEligibleAmount($cart, $cart->discount);
         if ($eligibleAmount <= 0) {
-            $cart->update(['discount_id' => null, 'discount_amount' => 0, 'total' => $cart->subtotal,]);
+            $this->resetCartDiscount($cart);
             return;
         }
         $discountAmount = $this->calculateDiscountAmount($eligibleAmount, $cart->discount);
         $cart->update(['discount_amount' => $discountAmount, 'total' => max(0, $cart->subtotal - $discountAmount),]);
+    }
+
+    protected function resetCartDiscount(
+        Order $cart
+    ): void {
+
+        $cart->update([
+            'discount_id' => null,
+            'discount_amount' => 0,
+            'total' => $cart->subtotal,
+        ]);
     }
 }

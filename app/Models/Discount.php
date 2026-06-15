@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DiscountType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -57,4 +58,17 @@ class Discount extends Model
 
         return true;
     }
+
+    public function isPercentage(): bool
+    {
+        return $this->type ===
+            DiscountType::PERCENTAGE->value;
+    }
+
+    public function isFixed(): bool
+    {
+        return $this->type ===
+            DiscountType::FIXED->value;
+    }
+
 }
