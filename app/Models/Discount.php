@@ -46,7 +46,6 @@ class Discount extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // Helper: check if discount is currently valid
     public function isValid(): bool
     {
         if (!$this->is_active) return false;

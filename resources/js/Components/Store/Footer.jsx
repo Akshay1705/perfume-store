@@ -36,7 +36,7 @@ export default function Footer() {
                         </li>
                         <li>
                             <Link
-                                href="/products?category=middle-eastern"
+                                href="/products?category=perfume"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
                                 Middle Eastern & Niche
@@ -44,7 +44,7 @@ export default function Footer() {
                         </li>
                         <li>
                             <Link
-                                href="/products?category=attars"
+                                href="/products?category=attar"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
                                 Pure Attar Oils
@@ -52,7 +52,7 @@ export default function Footer() {
                         </li>
                         <li>
                             <Link
-                                href="/products?category=discovery-sets"
+                                href="/products?category=discovery-set"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
                                 Discovery & Gift Sets
@@ -60,7 +60,7 @@ export default function Footer() {
                         </li>
                         <li>
                             <Link
-                                href="/products?category=mists-deodorants"
+                                href="/products?category=body-mist"
                                 className="hover:text-white transition-colors text-stone-400"
                             >
                                 Deos & Body Mists

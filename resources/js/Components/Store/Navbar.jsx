@@ -1,21 +1,56 @@
+import { useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 
-export default function Navbar({ categories = [], brands = [], cartCount = [] }) {
+export default function Navbar({
+    categories = [],
+    brands = [],
+    cartCount = 0,
+}) {
     const { auth } = usePage().props;
     const user = auth?.user;
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100 px-6 py-4">
+        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-100 px-4 sm:px-6 py-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
-                {/* Logo */}
-                <Link
-                    href="/"
-                    className="text-xl font-serif tracking-widest text-stone-900 uppercase font-semibold"
-                >
-                    AURA<span className="text-amber-700 font-light">.</span>
-                </Link>
+                {/* Left Side: Mobile Hamburger Button & Logo */}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="md:hidden p-2 -ml-2 text-stone-600 hover:text-stone-950 focus:outline-none transition-colors"
+                        aria-label="Toggle navigation menu"
+                    >
+                        <svg
+                            className="w-5 h-5 stroke-[1.75]"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            {isMenuOpen ? (
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            ) : (
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                />
+                            )}
+                        </svg>
+                    </button>
 
-                {/* Nav Links */}
+                    <Link
+                        href="/"
+                        className="text-xl font-serif tracking-widest text-stone-900 uppercase font-semibold"
+                    >
+                        AURA<span className="text-amber-700 font-light">.</span>
+                    </Link>
+                </div>
+
+                {/* Nav Links (Desktop) */}
                 <div className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide text-stone-600">
                     {/* Home */}
                     <Link
@@ -24,6 +59,7 @@ export default function Navbar({ categories = [], brands = [], cartCount = [] })
                     >
                         Home
                     </Link>
+
                     {/* Shop Dropdown */}
                     <div className="relative group">
                         <button className="hover:text-stone-950 transition-colors">
@@ -53,6 +89,7 @@ export default function Navbar({ categories = [], brands = [], cartCount = [] })
                             </div>
                         </div>
                     </div>
+
                     {/* Brands Dropdown */}
                     <div className="relative group">
                         <button className="hover:text-stone-950 transition-colors">
@@ -73,6 +110,7 @@ export default function Navbar({ categories = [], brands = [], cartCount = [] })
                             </div>
                         </div>
                     </div>
+
                     <Link
                         href="/our-story"
                         className="hover:text-stone-950 transition-colors"
@@ -81,7 +119,7 @@ export default function Navbar({ categories = [], brands = [], cartCount = [] })
                     </Link>
                 </div>
 
-                {/* Actions */}
+                {/* Actions (Untouched Login/Register/Cart UI) */}
                 <div className="flex items-center space-x-4 text-stone-700">
                     {user ? (
                         <div className="relative group">
@@ -115,17 +153,27 @@ export default function Navbar({ categories = [], brands = [], cartCount = [] })
                             </div>
                         </div>
                     ) : (
-                        <>
-                            <Link href="/login">Login</Link>
-                            <Link href="/register">Register</Link>
-                        </>
+                        <div className="hidden sm:flex items-center space-x-4 text-sm font-medium">
+                            <Link
+                                href="/login"
+                                className="hover:text-stone-950 transition-colors"
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="hover:text-stone-950 transition-colors"
+                            >
+                                Register
+                            </Link>
+                        </div>
                     )}
+
                     <Link
                         href={route("cart.index")}
                         className="p-2 text-stone-600 hover:text-stone-950 transition-colors relative inline-flex items-center justify-center group"
                         aria-label={`Shopping Bag containing ${cartCount} items`}
                     >
-                        {/* Clean Minimalist Vector Bag Icon */}
                         <svg
                             className="w-[19px] h-[19px] stroke-[1.5]"
                             fill="none"
@@ -139,15 +187,112 @@ export default function Navbar({ categories = [], brands = [], cartCount = [] })
                             ></path>
                         </svg>
 
-                        {/* Dynamic Notification Badge Overlay */}
-                        {cartCount > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 bg-stone-950 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-mono font-bold tracking-tighter animate-fade-in">
+                        {Number(cartCount) > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 bg-stone-950 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-mono font-bold tracking-tighter">
                                 {cartCount}
                             </span>
                         )}
                     </Link>
                 </div>
             </div>
+
+            {/* Mobile Navigation Drawer Panel */}
+            {isMenuOpen && (
+                <div className="md:hidden fixed top-[69px] left-0 w-full h-[calc(100vh-69px)] bg-white border-t border-stone-100 z-40 overflow-y-auto px-6 py-8 flex flex-col justify-between">
+                    
+                    <div className="space-y-8">
+                        {/* Primary Core Sections */}
+                        <div className="flex flex-col space-y-4 text-sm uppercase tracking-widest font-medium text-stone-900">
+                            <Link
+                                href="/"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="hover:text-amber-800 transition-colors"
+                            >
+                                Home
+                            </Link>
+                            <Link
+                                href="/products"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="hover:text-amber-800 transition-colors"
+                            >
+                                All Products
+                            </Link>
+                            <Link
+                                href="/our-story"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="hover:text-amber-800 transition-colors border-b border-stone-100 pb-2"
+                            >
+                                Our Story
+                            </Link>
+                        </div>
+
+                        {/* Mobile Categories Accordion Grid */}
+                        {categories.length > 0 && (
+                            <div className="space-y-3">
+                                <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400">
+                                    Categories
+                                </h4>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs tracking-wide text-stone-600">
+                                    {categories.map((c) => (
+                                        <Link
+                                            key={c.id}
+                                            href={`/products?category=${c.slug}`}
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="hover:text-stone-900 py-0.5"
+                                        >
+                                            {c.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Mobile Brands Accordion Grid */}
+                        {brands.length > 0 && (
+                            <div className="space-y-3 pt-2">
+                                <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400">
+                                    Our Fragrance Houses
+                                </h4>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs tracking-wide text-stone-600">
+                                    {brands.map((b) => (
+                                        <Link
+                                            key={b.id}
+                                            href={`/products?brand=${b.slug}`}
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="hover:text-stone-900 py-0.5"
+                                        >
+                                            {b.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Bottom Utility Actions Drawer Panel */}
+                    <div className="pt-6 border-t border-stone-100 mt-auto">
+
+                        {!user && (
+                            <div className="flex flex-col gap-2">
+                                <Link
+                                    href="/login"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="w-full text-center bg-stone-950 text-white text-xs tracking-widest font-medium uppercase py-3 transition-colors"
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="w-full text-center border border-stone-200 bg-white text-stone-700 text-xs tracking-widest font-medium uppercase py-3 transition-colors"
+                                >
+                                    Register
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }
