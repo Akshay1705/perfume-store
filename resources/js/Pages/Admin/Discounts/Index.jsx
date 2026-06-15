@@ -328,19 +328,13 @@ export default function Index() {
                                             </td>
 
                                             <td className="px-6 py-4 text-slate-300 text-sm">
-                                                <div className="flex items-center gap-1.5 text-slate-400">
-                                                    <Calendar
-                                                        size={14}
-                                                        className="text-slate-500"
-                                                    />
-                                                    <span>
-                                                        {discount.ends_at
-                                                            ? new Date(
-                                                                  discount.ends_at,
-                                                              ).toLocaleDateString()
-                                                            : "Never"}
-                                                    </span>
-                                                </div>
+                                                {discount.ends_at
+                                                    ? new Date(discount.ends_at).toLocaleDateString('en-GB', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric'
+                                                    })
+                                                    : "Never"}
                                             </td>
 
                                             <td className="px-6 py-4">

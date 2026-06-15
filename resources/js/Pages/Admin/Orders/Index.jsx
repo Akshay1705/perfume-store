@@ -217,9 +217,6 @@ export default function Index({ orders, statuses, filters, totalOrders }) {
                                                     #
                                                     {String(order.id).slice(-2)}
                                                 </div>
-                                                <span className="font-semibold text-slate-100">
-                                                    #{order.id}
-                                                </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-slate-300">
@@ -239,9 +236,11 @@ export default function Index({ orders, statuses, filters, totalOrders }) {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">
-                                            {new Date(
-                                                order.created_at,
-                                            ).toLocaleDateString()}
+                                            {new Date(order.created_at).toLocaleDateString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric'
+                                            })}
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <Link

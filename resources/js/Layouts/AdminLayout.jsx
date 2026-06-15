@@ -1,28 +1,18 @@
+'use strict';
+
 import { Link, usePage } from "@inertiajs/react";
-import {
-    Menu,
-    LayoutDashboard,
-    Tags,
-    Palette,
-    Package,
-    TicketPercent,
-    ShoppingBag,
-} from "lucide-react";
+import {Menu, LayoutDashboard, Tags, Palette, Package, TicketPercent, ShoppingBag,} from "lucide-react";
 import { useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
 export default function AdminLayout({ children }) {
-    const [sidebarOpen, setIsOpen] = useState(true);
+    const [sidebarOpen, setIsOpen] = useState(window.innerWidth >= 1024);
     const { url } = usePage();
 
     const navItems = [
         { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-        {
-            label: "Orders",
-            href: "/admin/orders",
-            icon: ShoppingBag,
-        },
+        { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
         { label: "Categories", href: "/admin/categories", icon: Tags },
         { label: "Brands", href: "/admin/brands", icon: Palette },
         { label: "Products", href: "/admin/products", icon: Package },
@@ -37,7 +27,7 @@ export default function AdminLayout({ children }) {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setIsOpen(!sidebarOpen)}
-                            className="hidden p-2 hover:bg-slate-800 rounded-lg transition-colors lg:flex"
+                            className="flex p-2 hover:bg-slate-800 rounded-lg transition-colors"
                         >
                             <Menu size={20} className="text-slate-400" />
                         </button>
@@ -56,7 +46,7 @@ export default function AdminLayout({ children }) {
                         href="/"
                         className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 text-sm font-medium text-amber-400 hover:border-amber-500/60 hover:from-amber-500/20 hover:to-orange-500/20 transition-all duration-300"
                     >
-                        perfume.com
+                        Aura.com
                         <span className="group-hover:translate-x-0.5 transition-transform">
                             →
                         </span>
@@ -69,9 +59,8 @@ export default function AdminLayout({ children }) {
                 <aside
                     className={`${
                         sidebarOpen ? "w-64" : "w-0"
-                    } fixed lg:sticky left-0 top-[73px] h-[calc(100vh-73px)] bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 transition-all duration-300 overflow-hidden`}
+                    } fixed lg:sticky left-0 top-[73px] h-[calc(100vh-73px)] bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 transition-all duration-300 overflow-hidden z-30`}
                 >
-                    {/* This wrapper ensures content is clipped when sidebar collapses */}
                     <div className="w-64">
                         <nav className="flex flex-col gap-1 p-6">
                             {navItems.map((item) => {
@@ -81,6 +70,12 @@ export default function AdminLayout({ children }) {
                                     <Link
                                         key={item.href}
                                         href={item.href}
+                                        onClick={() => {
+                                            // Close sidebar on mobile after clicking a nav item
+                                            if (window.innerWidth < 1024) {
+                                                setIsOpen(false);
+                                            }
+                                        }}
                                         className={`relative flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                                             isActive
                                                 ? "text-amber-400 bg-amber-500/10 border border-amber-500/30"
@@ -89,7 +84,6 @@ export default function AdminLayout({ children }) {
                                     >
                                         <Icon size={18} />
                                         <span>{item.label}</span>
-                                        {/* Active left accent bar */}
                                         {isActive && (
                                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
                                         )}
@@ -105,7 +99,7 @@ export default function AdminLayout({ children }) {
                 {/* Overlay for mobile */}
                 {sidebarOpen && (
                     <div
-                        className="fixed inset-0 top-[73px] z-30 bg-black/50 lg:hidden"
+                        className="fixed inset-0 top-[73px] z-20 bg-black/50 lg:hidden"
                         onClick={() => setIsOpen(false)}
                     />
                 )}
@@ -117,6 +111,7 @@ export default function AdminLayout({ children }) {
                     </div>
                 </main>
             </div>
+
             <ToastContainer
                 position="top-right"
                 autoClose={3000}

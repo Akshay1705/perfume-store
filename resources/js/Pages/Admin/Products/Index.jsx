@@ -1,3 +1,5 @@
+'use strict';
+
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router, usePage } from "@inertiajs/react";
 import { Edit, Trash2, Plus, ChevronRight, ChevronDown } from "lucide-react";
@@ -6,11 +8,11 @@ import AppSelect from "@/Components/ui/AppSelect";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import React from "react";
 
 
 export default function Index({products,totalCount,filters,categories,brands,}) 
 {
-    const [deleteId, setDeleteId] = useState(null);
     const [expandedProducts, setExpandedProducts] = useState([]);
     
     const { flash } = usePage().props;
@@ -317,9 +319,8 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                             0,
                                         ) || 0;
                                     return (
-                                        <>
+                                        <React.Fragment key={product.id}>
                                             <tr
-                                                key={product.id}
                                                 className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group"
                                             >
                                                 <td className="px-4 py-4">
@@ -396,9 +397,6 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                         <p className="font-semibold text-slate-100">
                                                             {product.name}
                                                         </p>
-                                                        {/* <p className="text-xs text-slate-500 mt-0.5">
-                                                    ID: {product.id}
-                                                </p> */}
                                                     </div>
                                                 </td>
 
@@ -543,12 +541,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                             (
                                                                                 variant,
                                                                             ) => (
-                                                                                <tr
-                                                                                    key={
-                                                                                        variant.id
-                                                                                    }
-                                                                                    className="border-t border-slate-800"
-                                                                                >
+                                                                                <tr key={variant.id} className="border-t border-slate-800">
                                                                                     <td className="py-2 text-slate-300">
                                                                                         {
                                                                                             variant.sku
@@ -580,9 +573,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                                                       : "bg-red-500/20 text-red-400"
                                                                                             }`}
                                                                                         >
-                                                                                            {
-                                                                                                variant.stock
-                                                                                            }
+                                                                                            {variant.stock}
                                                                                         </span>
                                                                                     </td>
 
@@ -594,9 +585,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                                                     : "bg-gray-500/20 text-gray-400"
                                                                                             }`}
                                                                                         >
-                                                                                            {variant.is_active
-                                                                                                ? "Yes"
-                                                                                                : "No"}
+                                                                                            {variant.is_active ? "Yes":"No"}
                                                                                         </span>
                                                                                     </td>
                                                                                 </tr>
@@ -608,7 +597,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                         </td>
                                                     </tr>
                                                 )}
-                                        </>
+                                        </React.Fragment>
                                     );
                                 })}
                             </tbody>

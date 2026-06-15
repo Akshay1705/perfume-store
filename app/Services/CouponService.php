@@ -78,11 +78,8 @@ class CouponService
     /**
      * Calculate eligible cart amount.
      */
-    protected function calculateEligibleAmount(
-        Order $cart,
-        Discount $discount
-    ): float {
-
+    protected function calculateEligibleAmount(Order $cart, Discount $discount): float
+    {
         $cart->load(
             'items.variant.product.brand',
             'items.variant.product.category'

@@ -3,9 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController, OrderController as AdminOrderController};
+use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController, OrderController as AdminOrderController, DashboardController};
 use App\Http\Controllers\Store\{HomeController, AddressController, CartController, ProductController as StoreProductController, CheckoutController, OrderController};
-use App\Models\Order;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,9 +34,8 @@ Route::get('/storage/products/{filename}', function ($filename) {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Admin/Dashboard');
-    })->name('admin.dashboard');
+    //dashboard page
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Categories Management
     Route::resource('categories', CategoryController::class);
@@ -53,26 +51,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::resource('products', ProductController::class);
     Route::resource('discounts', DiscountController::class);
 
-    //order managment
-    Route::get('orders/export', [AdminOrderController::class, 'export'])
-        ->name('admin.orders.export')
-        ->withoutMiddleware(\App\Http\Middleware\HandleInertiaRequests::class);
+    //order export
+    Route::get('orders/export', [AdminOrderController::class, 'export'])->name('admin.orders.export')->withoutMiddleware(\App\Http\Middleware\HandleInertiaRequests::class);
 
-    Route::resource(
-        'orders',
-        AdminOrderController::class
-    )
+    //order managment
+    Route::resource('orders', AdminOrderController::class)
         ->names([
             'index'  => 'admin.orders.index',
             'show'   => 'admin.orders.show',
             'update' => 'admin.orders.update',
         ])
-        ->only([
-            'index',
-            'show',
-            'update',
-        ]);
-        
+        ->only(['index', 'show', 'update',]);
+
     // Variant Images
     Route::post('/variants/{variant}/images', [VariantImageController::class, 'store']);
     Route::delete('/variants/{variant}/images/{image}', [VariantImageController::class, 'destroy']);
