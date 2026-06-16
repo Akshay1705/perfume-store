@@ -6,9 +6,14 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use App\Repositories\Contracts\OrderRepositoryInterface;
 
 class OrderService
 {
+    protected OrderRepositoryInterface $orders;
+    public function __construct(OrderRepositoryInterface $orders) {
+        $this->orders = $orders;
+    }
     /**
      * Update order status.
      *
@@ -17,19 +22,11 @@ class OrderService
      * 
      * @return void
      */
-    public function updateStatus(
-        Order $order,
-        string $status
-    ): void {
-        if (
-            $status === OrderStatus::SHIPPED->value &&
-            $order->status !== OrderStatus::SHIPPED->value
-        ) {
+    public function updateStatus(Order $order, string $status): void {
+        if ($status === OrderStatus::SHIPPED->value && $order->status !== OrderStatus::SHIPPED->value) {
             $this->reduceStock($order);
         }
-        $order->update([
-            'status' => $status,
-        ]);
+        $this->orders->saveStatus($order, $status);
     }
 
     private function reduceStock(Order $order): void
@@ -37,7 +34,6 @@ class OrderService
         $order->load('items.variant');
 
         foreach ($order->items as $item) {
-
             $item->variant->decrement(
                 'stock',
                 $item->quantity
@@ -48,29 +44,11 @@ class OrderService
     /**
      * Get paginated orders with filters.
      */
-    public function getOrders(Request $request): LengthAwarePaginator
-    {
-        $search = $request->input('search');
-        $status = $request->input('status');
-
-        return Order::query()
-            ->with(['user'])
-            ->where('status', '!=', OrderStatus::CART->value)
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('id', 'like', "%{$search}%")
-                        ->orWhereHas('user', function ($q) use ($search) {
-                            $q->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->when($status, function ($query, $status) {
-                $query->where('status', $status);
-            })
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+    public function getOrders(Request $request): LengthAwarePaginator {
+        return $this->orders->getFilteredOrders(
+            $request->input('search'),
+            $request->input('status')
+        );
     }
 
     /**
@@ -81,9 +59,7 @@ class OrderService
      * 
      * @return bool
      */
-    public function canBeCancelled(
-        Order $order
-    ): bool {
+    public function canBeCancelled(Order $order): bool {
         return in_array(
             $order->status,
             [
@@ -100,12 +76,8 @@ class OrderService
      * 
      * @return void
      */
-    public function cancel(
-        Order $order
-    ): void {
-        $order->update([
-            'status' => OrderStatus::CANCELLED->value,
-        ]);
+    public function cancel(Order $order): void {
+        $this->orders->saveStatus($order, OrderStatus::CANCELLED->value);
     }
 
     /**
@@ -115,12 +87,8 @@ class OrderService
      * 
      * @return void
      */
-    public function markAsProcessing(
-        Order $order
-    ): void {
-        $order->update([
-            'status' => OrderStatus::PROCESSING->value,
-        ]);
+    public function markAsProcessing(Order $order): void {
+        $this->orders->saveStatus($order, OrderStatus::PROCESSING->value);
     }
 
     /**
@@ -130,12 +98,8 @@ class OrderService
      * 
      * @return void
      */
-    public function markAsShipped(
-        Order $order
-    ): void {
-        $order->update([
-            'status' => OrderStatus::SHIPPED->value,
-        ]);
+    public function markAsShipped(Order $order): void {
+        $this->orders->saveStatus($order, OrderStatus::SHIPPED->value);
     }
 
     /**
@@ -145,12 +109,8 @@ class OrderService
      * 
      * @return void
      */
-    public function markAsDelivered(
-        Order $order
-    ): void {
-        $order->update([
-            'status' => OrderStatus::DELIVERED->value,
-        ]);
+    public function markAsDelivered(Order $order): void {
+        $this->orders->saveStatus($order, OrderStatus::DELIVERED->value);
     }
 
     /**
@@ -160,11 +120,7 @@ class OrderService
      * 
      * @return void
      */
-    public function markAsReturned(
-        Order $order
-    ): void {
-        $order->update([
-            'status' => OrderStatus::RETURNED->value,
-        ]);
+    public function markAsReturned(Order $order): void {
+        $this->orders->saveStatus($order, OrderStatus::RETURNED->value);
     }
 }

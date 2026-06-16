@@ -5,9 +5,15 @@ namespace App\Services;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Repositories\Contracts\ProductRepositoryInterface;
 
 class ProductService
 {
+    protected ProductRepositoryInterface $products;
+
+    public function __construct(ProductRepositoryInterface $products) {
+        $this->products = $products;
+    }
     /**
      * Store a newly created product with its variants.
      *
@@ -17,7 +23,7 @@ class ProductService
      */
     public function store(array $data): Product
     {
-        $product = Product::create([
+        $product = $this->products->create([
             'name'        => $data['name'],
             'slug'        => $data['slug'] ?: Str::slug($data['name']),
             'description' => $data['description'],
@@ -50,15 +56,18 @@ class ProductService
      */
     public function update(Product $product, array $data): Product
     {
-        $product->update([
-            'name'        => $data['name'],
-            'slug'        => $data['slug'] ?: Str::slug($data['name']),
-            'description' => $data['description'],
-            'gender'      => $data['gender'],
-            'category_id' => $data['category_id'],
-            'brand_id'    => $data['brand_id'],
-            'is_active'   => $data['is_active'] ?? true,
-        ]);
+        $this->products->update(
+            $product,
+            [
+                'name'        => $data['name'],
+                'slug'        => $data['slug'] ?: Str::slug($data['name']),
+                'description' => $data['description'],
+                'gender'      => $data['gender'],
+                'category_id' => $data['category_id'],
+                'brand_id'    => $data['brand_id'],
+                'is_active'   => $data['is_active'] ?? true,
+            ]
+        );
 
         $existingIds = [];
 
@@ -105,7 +114,7 @@ class ProductService
      */
     public function delete(Product $product): void
     {
-        $product->delete();
+        $this->products->delete($product);
     }
 
     /**
@@ -115,51 +124,7 @@ class ProductService
      *
      * @return LengthAwarePaginator
      */
-    public function getProducts(array $filters): LengthAwarePaginator
-    {
-        return Product::query()
-            ->with([
-                'category',
-                'brand',
-                'variants' => fn($q) => $q->with('images')->orderBy('id'),
-            ])
-            ->when(
-                $filters['search'] ?? null,
-                fn($query, $search) =>
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('slug', 'like', "%{$search}%");
-                })
-            )
-            ->when(
-                $filters['category'] ?? null,
-                fn($query, $category) =>
-                $query->where('category_id', $category)
-            )
-            ->when(
-                $filters['brand'] ?? null,
-                fn($query, $brand) =>
-                $query->where('brand_id', $brand)
-            )
-            ->when(
-                $filters['gender'] ?? null,
-                fn($query, $gender) =>
-                $query->where('gender', $gender)
-            )
-            ->when(
-                $filters['status'] ?? null,
-                function ($query, $status) {
-                    if ($status === 'active') {
-                        $query->where('is_active', true);
-                    }
-
-                    if ($status === 'inactive') {
-                        $query->where('is_active', false);
-                    }
-                }
-            )
-            ->latest()
-            ->paginate($filters['per_page'] ?? 10)
-            ->withQueryString();
+    public function getProducts(array $filters): LengthAwarePaginator {
+        return $this->products->getFilteredProducts($filters);
     }
 }

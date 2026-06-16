@@ -91,7 +91,7 @@ class DiscountRequest extends FormRequest
                 'exists:categories,id',
             ],
 
-            'min_order_amount' => 'nullable|numeric|min:0',
+            'min_order_amount' => 'nullable|numeric|min:1000',
 
             'starts_at' => 'nullable|date',
 

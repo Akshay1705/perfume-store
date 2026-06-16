@@ -6,9 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Store\ProductSearchRequest;
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Product;
+use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Services\ProductFilterService;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -61,20 +60,9 @@ class ProductController extends Controller
      *
      * @return Response
      */
-    public function show(string $slug): Response
+    public function show(string $slug, ProductRepositoryInterface $products): Response
     {
-        $product = Product::where('slug', $slug)
-            ->where('is_active', true)
-            ->with([
-                'brand',
-                'category',
-                'variants' => function ($q) {
-                    $q->where('is_active', true)
-                        ->with('images')
-                        ->orderBy('id');
-                },
-            ])
-            ->firstOrFail();
+        $product = $products->findBySlug($slug);
 
         return Inertia::render('Store/ProductShow', [
             'product' => $product,

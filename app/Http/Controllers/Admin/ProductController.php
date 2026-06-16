@@ -12,18 +12,20 @@ use App\Models\Brand;
 use App\Services\ProductService;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Http\Requests\Admin\ProductIndexRequest;
+use App\Repositories\Contracts\ProductRepositoryInterface;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      * 
-     * @param ProductIndexRequest $request
-     * @param ProductService      $service
+     * @param ProductIndexRequest        $request
+     * @param ProductService             $service
+     * @param ProductRepositoryInterface $products
      * 
      * @return Response
      */
-    public function index(ProductIndexRequest $request, ProductService $service): Response 
+    public function index(ProductIndexRequest $request, ProductService $service, ProductRepositoryInterface $productRepository): Response 
     {
         $filters = $request->validated();
         $products = $service->getProducts($filters);
@@ -32,7 +34,7 @@ class ProductController extends Controller
             'Admin/Products/Index',
             [
                 'products' => $products,
-                'totalCount' => Product::count(),
+                'totalCount' => $productRepository->countProducts(),
                 'filters' => [
                     'search' => $filters['search'] ?? '',
                     'category' => $filters['category'] ?? '',
@@ -92,7 +94,7 @@ class ProductController extends Controller
      * 
      * @return Response
      */
-    public function edit(Product $product): Response 
+    public function edit(Product $product, ProductRepositoryInterface $products): Response 
     {
         $categories = Category::all();
         $brands = Brand::all();
@@ -100,16 +102,7 @@ class ProductController extends Controller
         return Inertia::render(
             'Admin/Products/Edit',
             [
-                'product' => $product->load([
-                    'category', 
-                    'brand',
-                    'variants' => function ($q) {
-                        $q->with([
-                            'images',
-                            'primaryImage',
-                        ]);
-                    },
-                    ]),
+                'product' => $products->findForEdit($product->id),
                 'categories' => $categories,
                 'brands' => $brands,
             ],

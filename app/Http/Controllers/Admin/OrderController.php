@@ -12,8 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Illuminate\Http\Response as HttpResponse;
-use App\Enums\OrderStatus;
-
+use App\Repositories\Contracts\OrderRepositoryInterface;
 
 class OrderController extends Controller
 {
@@ -24,7 +23,7 @@ class OrderController extends Controller
      *
      * @return InertiaResponse
      */
-    public function index(Request $request, OrderService $service): InertiaResponse
+    public function index(Request $request, OrderService $service, OrderRepositoryInterface $orders): InertiaResponse
     {
         return Inertia::render(
             'Admin/Orders/Index',
@@ -32,7 +31,7 @@ class OrderController extends Controller
                 'orders'   => $service->getOrders($request),
                 'statuses' => Order::statuses(),
                 'filters'  => $request->only(['search', 'status']),
-                'totalOrders' => Order::where('status', '!=', OrderStatus::CART->value)->count(),
+                'totalOrders' => $orders->countNonCartOrders(),
             ]
         );
     }
@@ -73,11 +72,7 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderStatusRequest $request,Order $order,OrderService $service): RedirectResponse 
     {
-        // dd($request->validated());
-        $service->updateStatus(
-            $order,
-            $request->validated()['status'],
-        );
+        $service->updateStatus($order, $request->validated()['status'],);
 
         return redirect()
             ->route('admin.orders.index')
