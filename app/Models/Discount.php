@@ -49,9 +49,7 @@ class Discount extends Model
     public function isValid(): bool
     {
         if (!$this->is_active) return false;
-
         $now = now();
-
         if ($this->starts_at && $now->lt($this->starts_at)) return false;
         if ($this->ends_at && $now->gt($this->ends_at)) return false;
 
