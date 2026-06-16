@@ -4,12 +4,123 @@ namespace App\Repositories;
 
 use App\Models\Discount;
 use App\Repositories\Contracts\DiscountRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DiscountRepository
 implements DiscountRepositoryInterface
 {
-    public function findByCode(string $code): ?Discount
-    {
+    public function findByCode(string $code): ?Discount{
         return Discount::where('code',strtoupper(trim($code)))->first();
     }
+
+    public function find(int $id): ?Discount{
+        return Discount::find($id);
+    }
+
+    public function create(array $data): Discount{
+        return Discount::create($data);
+    }
+
+    public function update(Discount $discount,array $data): bool {
+        return $discount->update($data);
+    }
+
+    public function delete(Discount $discount): bool {
+        return $discount->delete();
+    }
+
+    public function countDiscounts(): int{
+        return Discount::count();
+    }
+
+    public function getAllWithRelations(): Collection{
+        return Discount::with([
+            'user',
+            'brand',
+            'category',
+        ])
+            ->latest()
+            ->get();
+    }
+
+    public function getByIdWithRelations(int $id): ?Discount {
+        return Discount::with([
+            'user',
+            'brand',
+            'category',
+        ])
+            ->find($id);
+    }
+
+    public function getFilteredDiscounts(array $filters): LengthAwarePaginator{
+        return Discount::query()
+            ->with([
+                'user',
+                'brand',
+                'category',
+            ])
+
+            ->when(
+                $filters['search'] ?? null,
+                fn($query, $search) =>
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%");
+                })
+            )
+            ->when($filters['type'] ?? null, fn($query, $type) => $query->where('type', $type))
+
+            ->when(
+                $filters['status'] ?? null,
+                function ($query, $status) {
+                    $now = now();
+                    if ($status === 'active') {
+                        $query->where('is_active', true)
+                            ->where(function ($q) use ($now) {
+                                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+                            })
+                            ->where(function ($q) use ($now) {
+                                $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+                            });
+                    } elseif ($status === 'inactive') {
+                        $query->where('is_active', false);
+                    } elseif ($status === 'scheduled') {
+                        $query->where('is_active', true)
+                            ->where('starts_at', '>', $now);
+                    } elseif ($status === 'expired') {
+                        $query->where('is_active', true)
+                            ->where('ends_at', '<', $now);
+                    }
+                }
+            )
+
+            ->latest()
+            ->paginate(
+                $filters['per_page'] ?? 10
+            )
+            ->withQueryString();
+    }
+
+    public function getStats(): array{
+        $now = now();
+
+        return [
+            'total' => Discount::count(),
+            'active' => Discount::where('is_active', true)
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+                })->where(function ($q) use ($now) {
+                    $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+                })->count(),
+            'scheduled' => Discount::where('is_active', true)->where('starts_at', '>', $now)->count(),
+            'inactive' => Discount::where('is_active', false)->count(),
+            'expired' => Discount::where('is_active', true)->where('ends_at', '<', $now)->count(),
+            'by_type' => [
+                'percentage' => Discount::where('type', 'percentage')->count(),
+                'fixed' => Discount::where('type', 'fixed')->count(),
+            ],
+        ];
+    }
+
 }

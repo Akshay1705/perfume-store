@@ -146,7 +146,7 @@ export default function Navbar({
                                     href="/logout"
                                     method="post"
                                     as="button"
-                                    className="block w-full text-left px-4 py-3 hover:bg-stone-50"
+                                    className="block w-full text-left px-4 py-3 hover:bg-red-50 text-red-600"
                                 >
                                     Logout
                                 </Link>

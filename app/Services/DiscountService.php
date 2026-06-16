@@ -5,17 +5,23 @@ namespace App\Services;
 use App\Models\Discount;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Repositories\Contracts\DiscountRepositoryInterface;
 
 class DiscountService
 {
+    protected DiscountRepositoryInterface $discounts;
+
+    public function __construct(
+        DiscountRepositoryInterface $discounts
+    ) {
+        $this->discounts = $discounts;
+    }
     /**
      * Get all discounts with relationships
      */
     public function getAll(): Collection
     {
-        return Discount::with(['user', 'brand', 'category'])
-            ->latest()
-            ->get();
+        return $this->discounts->getAllWithRelations();
     }
 
     /**
@@ -23,8 +29,7 @@ class DiscountService
      */
     public function getById(int $id): ?Discount
     {
-        return Discount::with(['user', 'brand', 'category'])
-            ->find($id);
+        return $this->discounts->getByIdWithRelations($id);
     }
 
     /**
@@ -32,7 +37,7 @@ class DiscountService
      */
     public function create(array $data): Discount
     {
-        return Discount::create($data);
+        return $this->discounts->create($data);
     }
 
     /**
@@ -40,7 +45,7 @@ class DiscountService
      */
     public function update(Discount $discount, array $data): Discount
     {
-        $discount->update($data);
+        $this->discounts->update($discount, $data);
         return $discount;
     }
 
@@ -49,7 +54,7 @@ class DiscountService
      */
     public function delete(Discount $discount): bool
     {
-        return $discount->delete();
+        return $this->discounts->delete($discount);
     }
 
     /**
@@ -57,69 +62,16 @@ class DiscountService
      */
     public function getStats(): array
     {
-        $now = now();
-
-        return [
-            'total' => Discount::count(),
-            'active' => Discount::where('is_active', true)
-                ->where(function ($q) use ($now) {
-                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
-                })->where(function ($q) use ($now) {
-                    $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
-                })->count(),
-            'scheduled' => Discount::where('is_active', true)->where('starts_at', '>', $now)->count(),
-            'inactive' => Discount::where('is_active', false)->count(),
-            'expired' => Discount::where('is_active', true)->where('ends_at', '<', $now)->count(),
-            'by_type' => [
-                'percentage' => Discount::where('type', 'percentage')->count(),
-                'fixed' => Discount::where('type', 'fixed')->count(),
-            ],
-        ];
+        return $this->discounts->getStats();
     }
 
     public function getDiscounts(array $filters): LengthAwarePaginator 
     {
-        return Discount::query()
-            ->with(['user','brand','category'])
+        return $this->discounts->getFilteredDiscounts($filters); 
+    }
 
-            ->when(
-                $filters['search'] ?? null,
-                fn($query, $search) =>
-                $query->where(function ($q) use ($search) {
-                    $q->where('name','like',"%{$search}%")
-                        ->orWhere('code','like',"%{$search}%");
-                })
-            )
-            ->when($filters['type'] ?? null,fn($query, $type) =>$query->where('type',$type))
-
-            ->when(
-                $filters['status'] ?? null,
-                function ($query, $status) {
-                    $now = now();
-                    if ($status === 'active') {
-                        $query->where('is_active', true)
-                            ->where(function ($q) use ($now) {
-                                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
-                            })
-                            ->where(function ($q) use ($now) {
-                                $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
-                            });
-                    } elseif ($status === 'inactive') {
-                        $query->where('is_active', false);
-                    } elseif ($status === 'scheduled') {
-                        $query->where('is_active', true)
-                            ->where('starts_at', '>', $now);
-                    } elseif ($status === 'expired') {
-                        $query->where('is_active', true)
-                            ->where('ends_at', '<', $now);
-                    }
-                }
-            )
-
-            ->latest()
-            ->paginate(
-                $filters['per_page'] ?? 10
-            )
-            ->withQueryString();
+    public function countDiscounts(): int
+    {
+        return $this->discounts->countDiscounts();
     }
 }

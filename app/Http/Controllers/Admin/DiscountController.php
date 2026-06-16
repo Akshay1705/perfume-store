@@ -47,7 +47,7 @@ class DiscountController extends Controller
             'Admin/Discounts/Index',
             [
                 'discounts'  => $discounts,
-                'totalCount' => Discount::count(),
+                'totalCount' => $this->service->countDiscounts(),
                 'stats'      => $stats,
                 'filters'    => [
                     'search' => $filters['search'] ?? '',
