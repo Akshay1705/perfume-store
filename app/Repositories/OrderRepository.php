@@ -117,6 +117,7 @@ implements OrderRepositoryInterface
 
     public function recentOrders(int $limit = 10) {
         return Order::with('user')
+            ->where('status', '!=', OrderStatus::CART->value)
             ->latest()
             ->take($limit)
             ->get();
