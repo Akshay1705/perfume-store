@@ -8,23 +8,11 @@ use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class ProductRepository
+class ProductRepository extends BaseRepository
 implements ProductRepositoryInterface
 {
-    public function find(int $id): ?Product {
-        return Product::find($id);
-    }
-
-    public function create(array $data): Product{
-        return Product::create($data);
-    }
-
-    public function update(Product $product, array $data): bool{
-        return $product->update($data);
-    }
-
-    public function delete(Product $product): bool{
-        return $product->delete();
+    public function __construct(Product $product){
+        parent::__construct($product);
     }
 
     public function countProducts(): int{
@@ -34,7 +22,7 @@ implements ProductRepositoryInterface
     public function getLowStockProducts(int $limit = 10): Collection{
         return ProductVariant::with('product','primaryImage')
             ->where('stock', '>', 0)
-            ->where('stock', '<=', 20)
+            ->where('stock', '<=', 10)
             ->orderBy('stock')
             ->take($limit)
             ->get();

@@ -9,6 +9,7 @@ use Inertia\Response;
 use App\Services\CheckoutService;
 use App\Http\Requests\Store\PlaceOrderRequest;
 use App\Models\User;
+use League\Uri\Builder;
 
 class CheckoutController extends Controller
 {
@@ -46,7 +47,7 @@ class CheckoutController extends Controller
             );
     }
 
-    public function success($order)
+    public function success(Builder $order)
     {
         return Inertia::render(
             'Store/Checkout/Success',

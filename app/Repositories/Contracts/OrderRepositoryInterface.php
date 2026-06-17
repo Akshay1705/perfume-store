@@ -5,9 +5,8 @@ namespace App\Repositories\Contracts;
 use App\Models\Order;
 
 interface OrderRepositoryInterface
+extends BaseRepositoryInterface
 {
-    public function find(int $id): ?Order;
-
     public function saveStatus(Order $order,string $status): bool;
 
     public function countNonCartOrders(): int;

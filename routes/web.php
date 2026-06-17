@@ -14,7 +14,7 @@ use App\Http\Controllers\Store\{HomeController, AddressController, CartControlle
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/products', [StoreProductController::class, 'index'])->name('store.products');
-Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])->name('products.show');
+Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])->name('store.products.show');
 Route::get('/our-story', function () {
     return Inertia::render('Store/OurStory');
 })->name('store.story');
@@ -99,7 +99,6 @@ Route::middleware('auth')->group(function () {
 
     //checkout flow
     Route::get('/checkout',[CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/place-order',[CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
     Route::post('/checkout/place-order',[CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
     Route::get('/checkout/success/{order}',[CheckoutController::class, 'success'])->name('checkout.success');
 });

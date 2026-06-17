@@ -1,14 +1,7 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { useForm, Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
-import {
-    ArrowLeft,
-    Save,
-    Plus,
-    Trash2,
-    ChevronDown,
-    ChevronUp,
-} from "lucide-react";
+import {ArrowLeft, Save, Plus, Trash2, ChevronDown, ChevronUp,} from "lucide-react";
 import AppSelect from "@/Components/ui/AppSelect";
 import VariantImageManager from "@/Components/Admin/VariantImageManager";
 

@@ -7,11 +7,11 @@ use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Enums\OrderStatus;
 use Carbon\Carbon;
 
-class OrderRepository
+class OrderRepository extends BaseRepository
 implements OrderRepositoryInterface
 {
-    public function find(int $id): ?Order{
-        return Order::find($id);
+    public function __construct(Order $order){
+        parent::__construct($order);
     }
 
     public function saveStatus(Order $order, string $status): bool{

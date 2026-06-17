@@ -186,8 +186,14 @@ export default function Dashboard({stats, recentOrders, revenueChart, statusChar
                             </h2>
                         </div>
                         <div className="p-5">
-                            <div style={{height: 220, minHeight: 220, width: "100%",}}>
-                                <ResponsiveContainer width="100%" height="100%">
+                            <div
+                                style={{
+                                    height: 220,
+                                    minHeight: 220,
+                                    width: "100%",
+                                }}
+                            >
+                                <ResponsiveContainer width="100%" height="100%" debounce={1}>
                                     <LineChart data={revenueChart}>
                                         <XAxis
                                             dataKey="day"
@@ -239,8 +245,8 @@ export default function Dashboard({stats, recentOrders, revenueChart, statusChar
                             </h2>
                         </div>
                         <div className="p-5">
-                            <div style={{ height: 220 }}>
-                                <ResponsiveContainer width="100%" height="100%">
+                            <div style={{ width: "100%", height: 200 }}>
+                                <ResponsiveContainer width="100%" height="100%" debounce={1}>
                                     <PieChart>
                                         <Pie
                                             data={statusChart.map(

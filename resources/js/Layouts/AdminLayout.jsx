@@ -1,4 +1,4 @@
-'use strict';
+'use client';
 
 import { Link, usePage } from "@inertiajs/react";
 import {Menu, LayoutDashboard, Tags, Palette, Package, TicketPercent, ShoppingBag,} from "lucide-react";
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }) {
                 )}
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1 overflow-auto min-w-0">
                     <div className="px-6 py-8 lg:px-8">
                         <div className="mx-auto max-w-7xl">{children}</div>
                     </div>

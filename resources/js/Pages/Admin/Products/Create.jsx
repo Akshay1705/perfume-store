@@ -15,8 +15,6 @@ export default function Create({ categories, brands }) {
     const [customVolume, setCustomVolume] = useState("");
     const [isCustomVolume, setIsCustomVolume] = useState(false);
 
-    const volumeOptions = ["30ml", "50ml", "100ml", "200ml"];
-
     const { data, setData, post, processing, errors, reset } = useForm({
         name: "",
         slug: "",
@@ -48,18 +46,9 @@ export default function Create({ categories, brands }) {
         }
     `;
 
-    const [variants, setVariants] = useState([
-        {
-            volume: "",
-            price: "",
-            stock: "",
-            is_active: true,
-        },
-    ]);
-
     const addVariant = () => {
-        setVariants([
-            ...variants,
+        setData("variants", [
+            ...data.variants,
             {
                 volume: "",
                 price: "",
@@ -70,22 +59,21 @@ export default function Create({ categories, brands }) {
     };
 
     const removeVariant = (index) => {
-        setVariants(
-            variants.filter((_, i) => i !== index)
+        if (data.variants.length === 1) return;
+
+        setData(
+            "variants",
+            data.variants.filter((_, i) => i !== index),
         );
     };
 
     const updateVariant = (index, field, value) => {
-        const updated = [...variants];
+        const updated = [...data.variants];
 
         updated[index][field] = value;
 
-        setVariants(updated);
-
         setData("variants", updated);
     };
-
-
 
     const ErrorMsg = ({ field }) =>
         errors[field] ? (
@@ -306,7 +294,7 @@ export default function Create({ categories, brands }) {
                             </div>
 
                             <div className="space-y-4">
-                                {variants.map((variant, index) => (
+                                {data.variants.map((variant, index) => (
                                     <div
                                         key={index}
                                         className="grid grid-cols-4 gap-4 p-4 rounded-lg border border-slate-700 bg-slate-900/30"

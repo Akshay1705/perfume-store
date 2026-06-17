@@ -1,4 +1,4 @@
-'use strict';
+'use client';
 
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router, usePage } from "@inertiajs/react";

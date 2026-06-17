@@ -7,27 +7,15 @@ use App\Repositories\Contracts\DiscountRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class DiscountRepository
+class DiscountRepository extends BaseRepository
 implements DiscountRepositoryInterface
 {
+    public function __construct(Discount $discount){
+        parent::__construct($discount);
+    }
+
     public function findByCode(string $code): ?Discount{
         return Discount::where('code',strtoupper(trim($code)))->first();
-    }
-
-    public function find(int $id): ?Discount{
-        return Discount::find($id);
-    }
-
-    public function create(array $data): Discount{
-        return Discount::create($data);
-    }
-
-    public function update(Discount $discount,array $data): bool {
-        return $discount->update($data);
-    }
-
-    public function delete(Discount $discount): bool {
-        return $discount->delete();
     }
 
     public function countDiscounts(): int{
