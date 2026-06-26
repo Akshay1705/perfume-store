@@ -5,7 +5,7 @@ import { Head, Link,usePage } from "@inertiajs/react";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 
-export default function Success({ orderId }) {
+export default function Success({ order }) {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function Success({ orderId }) {
                 </h1>
 
                 <p className="text-stone-500 mb-8">
-                    Your order #{orderId} has been received.
+                    Your order #{order.id} has been received.
                 </p>
 
                 <Link

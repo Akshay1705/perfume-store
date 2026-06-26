@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/react";
 export default function ProductCard({ variant }) {
     return (
         <Link
-            href={route("products.show", variant.slug)}
+            href={route("store.products.show", variant.slug)}
             className="block group"
         >
             {/* Image */}

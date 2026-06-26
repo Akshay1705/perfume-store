@@ -100,7 +100,6 @@ Route::middleware('auth')->group(function () {
     //checkout flow
     Route::get('/checkout',[CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/place-order',[CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
-    Route::get('/checkout/success/{order}',[CheckoutController::class, 'success'])->name('checkout.success');
-});
+    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');});
 
 require __DIR__ . '/auth.php';

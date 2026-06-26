@@ -21,7 +21,7 @@ class ProductController extends Controller
      * 
      * @param ProductIndexRequest        $request
      * @param ProductService             $service
-     * @param ProductRepositoryInterface $products
+     * @param ProductRepositoryInterface $productRepository
      * 
      * @return Response
      */
