@@ -329,11 +329,16 @@ export default function Index() {
 
                                             <td className="px-6 py-4 text-slate-300 text-sm">
                                                 {discount.ends_at
-                                                    ? new Date(discount.ends_at).toLocaleDateString('en-GB', {
-                                                        day: '2-digit',
-                                                        month: '2-digit',
-                                                        year: 'numeric'
-                                                    })
+                                                    ? new Date(
+                                                          discount.ends_at,
+                                                      ).toLocaleDateString(
+                                                          "en-GB",
+                                                          {
+                                                              day: "2-digit",
+                                                              month: "2-digit",
+                                                              year: "numeric",
+                                                          },
+                                                      )
                                                     : "Never"}
                                             </td>
 

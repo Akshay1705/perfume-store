@@ -16,7 +16,7 @@ class CheckoutService
 
         return DB::transaction(function () use (
             $user,
-            $addressId
+            $addressId,
         ) {
 
             $cart = $user->activeCart();

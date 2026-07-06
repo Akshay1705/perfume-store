@@ -11,7 +11,8 @@ class ProductService
 {
     protected ProductRepositoryInterface $products;
 
-    public function __construct(ProductRepositoryInterface $products) {
+    public function __construct(ProductRepositoryInterface $products)
+    {
         $this->products = $products;
     }
     /**
@@ -124,7 +125,8 @@ class ProductService
      *
      * @return LengthAwarePaginator
      */
-    public function getProducts(array $filters): LengthAwarePaginator {
+    public function getProducts(array $filters): LengthAwarePaginator
+    {
         return $this->products->getFilteredProducts($filters);
     }
 }

@@ -25,7 +25,7 @@ class ProductController extends Controller
      * 
      * @return Response
      */
-    public function index(ProductIndexRequest $request, ProductService $service, ProductRepositoryInterface $productRepository): Response 
+    public function index(ProductIndexRequest $request, ProductService $service, ProductRepositoryInterface $productRepository): Response
     {
         $filters = $request->validated();
         $products = $service->getProducts($filters);
@@ -94,7 +94,7 @@ class ProductController extends Controller
      * 
      * @return Response
      */
-    public function edit(Product $product, ProductRepositoryInterface $products): Response 
+    public function edit(Product $product, ProductRepositoryInterface $products): Response
     {
         $categories = Category::all();
         $brands = Brand::all();

@@ -10,7 +10,6 @@ use App\Services\CheckoutService;
 use App\Http\Requests\Store\PlaceOrderRequest;
 use App\Models\Order;
 use App\Models\User;
-use League\Uri\Builder;
 
 class CheckoutController extends Controller
 {

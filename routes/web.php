@@ -85,8 +85,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('account.profile');
         Route::resource('addresses', AddressController::class);
         Route::post('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
-        Route::get('/orders',[OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}',[OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     });
 
     // Shopping Cart System
@@ -94,12 +94,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::patch('/cart/items/{item}', [CartController::class, 'updateQuantity'])->name('cart.items.update');
     Route::delete('/cart/items/{item}', [CartController::class, 'destroy'])->name('cart.items.destroy');
-    Route::post('/cart/apply-discount',[CartController::class, 'applyDiscount'])->name('cart.discount');
-    Route::post('/cart/remove-discount',[CartController::class, 'removeDiscount'])->name('cart.discount.remove');
+    Route::post('/cart/apply-discount', [CartController::class, 'applyDiscount'])->name('cart.discount');
+    Route::post('/cart/remove-discount', [CartController::class, 'removeDiscount'])->name('cart.discount.remove');
 
     //checkout flow
-    Route::get('/checkout',[CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/place-order',[CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
-    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');});
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
+    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+});
 
 require __DIR__ . '/auth.php';

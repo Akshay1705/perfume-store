@@ -28,7 +28,7 @@ class ProductRequest extends FormRequest
             ],
 
             'description' => ['required', 'string',],
-            'gender' => ['required','in:men,women,unisex',],
+            'gender' => ['required', 'in:men,women,unisex',],
             'category_id' => ['required', 'exists:categories,id',],
             'brand_id' => ['required', 'exists:brands,id',],
             'is_active' => ['boolean',],

@@ -32,6 +32,7 @@ class ProductFilterService
                 }
             });
 
+        
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -40,7 +41,7 @@ class ProductFilterService
                     });
             });
         }
-
+        
         if (!empty($category) && $category !== 'all') {
             $query->whereHas('category', function ($q) use ($category) {
                 $q->where('slug', $category);

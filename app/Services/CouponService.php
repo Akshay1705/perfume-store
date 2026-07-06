@@ -191,7 +191,9 @@ class CouponService
             return;
         }
         $discountAmount = $this->calculateDiscountAmount($eligibleAmount, $cart->discount);
-        $cart->update(['discount_amount' => $discountAmount, 'total' => max(0, $cart->subtotal - $discountAmount),]);
+        $cart->update([
+            'discount_amount' => $discountAmount,
+            'total' => max(0, $cart->subtotal - $discountAmount),]);
     }
 
     protected function resetCartDiscount(Order $cart): void

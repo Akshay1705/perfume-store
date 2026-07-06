@@ -65,9 +65,9 @@ class DiscountService
         return $this->discounts->getStats();
     }
 
-    public function getDiscounts(array $filters): LengthAwarePaginator 
+    public function getDiscounts(array $filters): LengthAwarePaginator
     {
-        return $this->discounts->getFilteredDiscounts($filters); 
+        return $this->discounts->getFilteredDiscounts($filters);
     }
 
     public function countDiscounts(): int
