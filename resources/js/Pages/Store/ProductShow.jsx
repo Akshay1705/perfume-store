@@ -18,7 +18,7 @@ export default function ProductShow({ product }) {
 
     const firstVariant = product.variants?.[0] || null;
     const [selectedVariant, setSelectedVariant] = useState(firstVariant);
-    const { data, setData, post } = useForm({
+    const { setData, post } = useForm({
         variant_id: null,
         quantity: 1,
     });

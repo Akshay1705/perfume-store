@@ -74,17 +74,17 @@ export default function Index({ brands }) {
         <AdminLayout>
             {/* Header Section */}
             <div className="mb-8">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                                 Brands
                             </h1>
-                            <span className="px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-sm font-semibold border border-purple-500/30">
+                            <span className="px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-sm font-semibold border border-purple-500/30 whitespace-nowrap">
                                 {activeBrands.length} active
                             </span>
                             {trashedBrands.length > 0 && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30">
+                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30 whitespace-nowrap">
                                     {trashedBrands.length} trashed
                                 </span>
                             )}
@@ -96,7 +96,7 @@ export default function Index({ brands }) {
 
                     <Link
                         href={route("brands.create")}
-                        className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-0.5"
                     >
                         <Plus size={18} />
                         Create Brand

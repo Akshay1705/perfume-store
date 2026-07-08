@@ -29,6 +29,7 @@ class DashboardController extends Controller
         $totalCustomers = User::count();
         $totalProducts = $products->countProducts();
         $lowStockProducts = $products->getLowStockProducts();
+     
 
         return Inertia::render(
             'Admin/Dashboard',

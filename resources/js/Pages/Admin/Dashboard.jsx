@@ -2,7 +2,7 @@
 
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link } from "@inertiajs/react";
-import {TrendingUp, Package, Users, ShoppingCart, LineChart as LineChartIcon, PieChart as PieChartIcon, Clock, Eye, AlertTriangle, IndianRupee, ShoppingBag,} from "lucide-react";
+import {TrendingUp, Package, Users, ShoppingCart, LineChart as LineChartIcon, PieChart as PieChartIcon, Clock, Eye, AlertTriangle, IndianRupee, ShoppingBag, Hourglass, PackageCheck,} from "lucide-react";
 import {ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, PieChart, Pie, Legend} from "recharts";
 
 export default function Dashboard({stats, recentOrders, revenueChart, statusChart, lowStockProducts,})
@@ -52,6 +52,20 @@ export default function Dashboard({stats, recentOrders, revenueChart, statusChar
             Icon: ShoppingCart,
             color: "text-blue-400",
             iconBg: "bg-blue-500/10 border-blue-500/25",
+        },
+        {
+            title: "Pending Orders",
+            value: stats.pendingOrders,
+            Icon: Hourglass,
+            color: "text-yellow-400",
+            iconBg: "bg-yellow-500/10 border-yellow-500/25",
+        },
+        {
+            title: "Delivered Orders",
+            value: stats.deliveredOrders,
+            Icon: PackageCheck,
+            color: "text-green-400",
+            iconBg: "bg-green-500/10 border-green-500/25",
         },
     ];
 
@@ -149,7 +163,7 @@ export default function Dashboard({stats, recentOrders, revenueChart, statusChar
                 </div>
 
                 {/* Today Cards */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
                     {todayCards.map(({ title, value, Icon, color, iconBg }) => (
                         <div
                             key={title}
@@ -193,7 +207,11 @@ export default function Dashboard({stats, recentOrders, revenueChart, statusChar
                                     width: "100%",
                                 }}
                             >
-                                <ResponsiveContainer width="100%" height="100%" debounce={1}>
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                    debounce={1}
+                                >
                                     <LineChart data={revenueChart}>
                                         <XAxis
                                             dataKey="day"
@@ -246,7 +264,11 @@ export default function Dashboard({stats, recentOrders, revenueChart, statusChar
                         </div>
                         <div className="p-5">
                             <div style={{ width: "100%", height: 200 }}>
-                                <ResponsiveContainer width="100%" height="100%" debounce={1}>
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                    debounce={1}
+                                >
                                     <PieChart>
                                         <Pie
                                             data={statusChart.map(

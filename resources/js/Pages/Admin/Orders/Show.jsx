@@ -51,7 +51,7 @@ export default function Show({ order, statuses }) {
 
                         <p className="text-slate-400 text-sm mt-1">
                             Placed on{" "}
-                            {new Date(order.created_at).toLocaleDateString(
+                            {new Date(order.placed_at ?? order.created_at).toLocaleDateString(
                                 "en-IN",
                                 {
                                     day: "numeric",

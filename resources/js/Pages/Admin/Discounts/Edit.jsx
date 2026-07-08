@@ -70,7 +70,7 @@ export default function Edit() {
                 </p>
             </div>
 
-            {/* Form Container — wider, full available width */}
+            {/* Form Container*/}
             <form
                 onSubmit={handleSubmit}
                 className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-8 backdrop-blur-sm space-y-6"

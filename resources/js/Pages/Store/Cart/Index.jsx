@@ -2,7 +2,6 @@
 
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Head, router, Link, useForm } from "@inertiajs/react";
-import { useState } from "react";
 
 export default function Index({ cart }) {
     // Structural state calculations safety check
@@ -37,7 +36,6 @@ export default function Index({ cart }) {
         });
     };
 
-    console.log(items.variant);
     return (
         <StoreLayout>
             <Head title="Shopping Bag" />

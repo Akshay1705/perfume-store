@@ -70,13 +70,13 @@ export default function Index({products,totalCount,filters,categories,brands,})
         <AdminLayout>
             {/* Header Section */}
             <div className="mb-8">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                                 Products
                             </h1>
-                            <span className="px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-400 text-sm font-semibold border border-cyan-500/30">
+                            <span className="px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-400 text-sm font-semibold border border-cyan-500/30 whitespace-nowrap">
                                 {totalCount} total
                             </span>
                         </div>
@@ -87,36 +87,35 @@ export default function Index({products,totalCount,filters,categories,brands,})
 
                     <Link
                         href={route("products.create")}
-                        className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5"
                     >
                         <Plus size={18} />
                         Create Product
                     </Link>
                 </div>
 
-                {/* Stats Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
                             In Stock
                         </p>
-                        <p className="text-3xl font-bold text-green-400 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-green-400 mt-1">
                             {inStockCount}
                         </p>
                     </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
                             Low Stock
                         </p>
-                        <p className="text-3xl font-bold text-yellow-400 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1">
                             {lowStockCount}
                         </p>
                     </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm col-span-2 sm:col-span-1">
+                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
                             Out of Stock
                         </p>
-                        <p className="text-3xl font-bold text-red-400 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-red-400 mt-1">
                             {outOfStockCount}
                         </p>
                     </div>
@@ -320,9 +319,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                         ) || 0;
                                     return (
                                         <React.Fragment key={product.id}>
-                                            <tr
-                                                className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group"
-                                            >
+                                            <tr className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group">
                                                 <td className="px-4 py-4">
                                                     {product.variants?.length >
                                                         1 && (
@@ -443,8 +440,17 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                 {/* Price Cell */}
                                                 <td className="px-6 py-4 text-right whitespace-nowrap">
                                                     <span className="font-semibold text-cyan-400">
-                                                        ₹{Math.min(...product.variants.map((v) => Number(v.price)))}
-                                                        {product.variants.length > 1 && " +"}
+                                                        ₹
+                                                        {Math.min(
+                                                            ...product.variants.map(
+                                                                (v) =>
+                                                                    Number(
+                                                                        v.price,
+                                                                    ),
+                                                            ),
+                                                        )}
+                                                        {product.variants
+                                                            .length > 1 && " +"}
                                                     </span>
                                                 </td>
 
@@ -541,7 +547,12 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                             (
                                                                                 variant,
                                                                             ) => (
-                                                                                <tr key={variant.id} className="border-t border-slate-800">
+                                                                                <tr
+                                                                                    key={
+                                                                                        variant.id
+                                                                                    }
+                                                                                    className="border-t border-slate-800"
+                                                                                >
                                                                                     <td className="py-2 text-slate-300">
                                                                                         {
                                                                                             variant.sku
@@ -573,7 +584,9 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                                                       : "bg-red-500/20 text-red-400"
                                                                                             }`}
                                                                                         >
-                                                                                            {variant.stock}
+                                                                                            {
+                                                                                                variant.stock
+                                                                                            }
                                                                                         </span>
                                                                                     </td>
 
@@ -585,7 +598,9 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                                                     : "bg-gray-500/20 text-gray-400"
                                                                                             }`}
                                                                                         >
-                                                                                            {variant.is_active ? "Yes":"No"}
+                                                                                            {variant.is_active
+                                                                                                ? "Yes"
+                                                                                                : "No"}
                                                                                         </span>
                                                                                     </td>
                                                                                 </tr>

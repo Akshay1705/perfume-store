@@ -45,7 +45,6 @@ implements OrderRepositoryInterface
                                 ->orWhereHas(
                                     'user',
                                     function ($q) use ($search) {
-
                                         $q->where(
                                             'name',
                                             'like',
@@ -63,49 +62,56 @@ implements OrderRepositoryInterface
                 }
             )
             ->when(
-                $status,
+                $status && OrderStatus::tryFrom($status),
                 fn($query) =>
                 $query->where(
                     'status',
                     $status
                 )
             )
-            ->latest()
+            ->orderByDesc('placed_at')
             ->paginate(20)
             ->withQueryString();
     }
 
     public function totalRevenue(): float{
-        return Order::where(
-            'status',
-            OrderStatus::DELIVERED->value
-        )->sum('total');
+        return Order::whereNotIn('status', [
+            OrderStatus::CART->value,
+            OrderStatus::CANCELLED->value,
+            OrderStatus::RETURNED->value,
+        ])->sum('total');
     }
 
     public function todayRevenue(): float{
         return Order::whereDate(
-            'created_at',
+            'placed_at',
             today()
         )
-            ->where(
-                'status',
-                OrderStatus::DELIVERED->value
-            )
+            ->whereNotIn('status', [
+                OrderStatus::CART->value,
+                OrderStatus::CANCELLED->value,
+                OrderStatus::RETURNED->value,
+            ])
             ->sum('total');
     }
 
     public function todayOrdersCount(): int{
         return Order::whereDate(
-            'created_at',
+            'placed_at',
             today()
-        )->count();
+        )
+            ->whereNotIn('status', [
+                OrderStatus::CART->value,
+                OrderStatus::CANCELLED->value,
+                OrderStatus::RETURNED->value,
+            ])
+        ->count();
     }
 
     public function pendingOrdersCount(): int{
-        return Order::where(
-            'status',
-            OrderStatus::PLACED->value
-        )->count();
+        return Order::whereIn(
+            'status', [OrderStatus::PLACED->value, OrderStatus::PROCESSING->value, OrderStatus::SHIPPED->value])
+        ->count();
     }
 
     public function deliveredOrdersCount(): int{
@@ -115,10 +121,10 @@ implements OrderRepositoryInterface
         )->count();
     }
 
-    public function recentOrders(int $limit = 10) {
+    public function recentOrders(int $limit = 5) {
         return Order::with('user')
             ->where('status', '!=', OrderStatus::CART->value)
-            ->latest()
+            ->orderByDesc('placed_at')
             ->take($limit)
             ->get();
     }
@@ -129,8 +135,12 @@ implements OrderRepositoryInterface
             $date = Carbon::today()->subDays($i);
             $chart[] = [
                 'day' => $date->format('D'),
-                'revenue' => Order::whereDate('created_at', $date)
-                    ->where('status', OrderStatus::DELIVERED->value)
+                'revenue' => Order::whereDate('placed_at', $date)
+                    ->whereNotIn('status', [
+                        OrderStatus::CART->value,
+                        OrderStatus::CANCELLED->value,
+                        OrderStatus::RETURNED->value,
+                    ])
                     ->sum('total'),
             ];
         }

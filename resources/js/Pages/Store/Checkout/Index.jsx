@@ -3,6 +3,8 @@
 import StoreLayout from "@/Layouts/StoreLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { useEffect } from "react";
 
 export default function Index({ cart, addresses = [] }) {
     // Safely default state selection hook mapping sequence
@@ -15,6 +17,19 @@ export default function Index({ cart, addresses = [] }) {
     const form = useForm({
         address_id: selectedAddress,
     });
+
+    useEffect(() => {
+        if (form.errors.cart) {
+            toast.error(form.errors.cart);
+        }
+
+        if (form.errors.error) {
+            toast.error(form.errors.error);
+        }
+    }, [form.errors]);
+
+    // console.log(form.errors);
+
     const placeOrder = () => {
         form.setData("address_id", selectedAddress);
 

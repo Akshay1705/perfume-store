@@ -19,7 +19,7 @@ implements ProductRepositoryInterface
         return Product::count();
     }
 
-    public function getLowStockProducts(int $limit = 10): Collection{
+    public function getLowStockProducts(int $limit = 5): Collection{
         return ProductVariant::with('product','primaryImage')
             ->where('stock', '>', 0)
             ->where('stock', '<=', 10)

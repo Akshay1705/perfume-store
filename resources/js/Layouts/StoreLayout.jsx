@@ -1,7 +1,6 @@
 import { usePage } from "@inertiajs/react";
 import Navbar from "@/Components/Store/Navbar";
 import Footer from "@/Components/Store/Footer";
-import { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

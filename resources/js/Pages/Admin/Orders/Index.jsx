@@ -82,10 +82,10 @@ export default function Index({ orders, statuses, filters, totalOrders }) {
 
             {/* Header */}
             <div className="mb-6">
-                <div className="flex items-start justify-between mb-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
+                            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
                                 Orders
                             </h1>
                             <span className="px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-sm font-semibold border border-green-500/30">
@@ -104,7 +104,7 @@ export default function Index({ orders, statuses, filters, totalOrders }) {
                                 "admin.orders.export",
                             ))
                         }
-                        className="flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-slate-950 font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-slate-950 font-semibold hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-0.5"
                     >
                         <Download size={18} />
                         Export CSV
@@ -112,9 +112,8 @@ export default function Index({ orders, statuses, filters, totalOrders }) {
                 </div>
 
                 {/* Search + Status Filters */}
-                <div className="flex flex-col gap-3">
-                    {/* Search bar */}
-                    <div className="relative max-w-sm">
+                <div className="flex flex-col gap-4">
+                    <div className="relative w-full max-w-sm">
                         <Search
                             size={15}
                             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
@@ -130,7 +129,7 @@ export default function Index({ orders, statuses, filters, totalOrders }) {
 
                     {/* Status filter pills */}
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs text-slate-500 font-medium">
+                        <span className="text-xs text-slate-500 font-medium mr-1">
                             Filter:
                         </span>
 
@@ -236,10 +235,13 @@ export default function Index({ orders, statuses, filters, totalOrders }) {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">
-                                            {new Date(order.created_at).toLocaleDateString('en-GB', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: 'numeric'
+                                            {new Date(
+                                                order.placed_at ??
+                                                    order.created_at,
+                                            ).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "numeric",
                                             })}
                                         </td>
                                         <td className="px-6 py-4 text-right">

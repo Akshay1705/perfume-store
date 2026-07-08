@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Exceptions\CartEmptyException;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ class CheckoutService
             $cart = $user->activeCart();
 
             if ($cart->items()->count() === 0) {
-                abort(422, 'Cart is empty.');
+                throw new CartEmptyException('Your cart is empty.');
             }
 
             $cart->update([

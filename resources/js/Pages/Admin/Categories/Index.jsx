@@ -77,17 +77,17 @@ export default function Index({ categories }) {
         <AdminLayout>
             {/* Header Section */}
             <div className="mb-8">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                                 Categories
                             </h1>
-                            <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-sm font-semibold border border-amber-500/30">
+                            <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-sm font-semibold border border-amber-500/30 whitespace-nowrap">
                                 {activeCategories.length} active
                             </span>
                             {trashedCategories.length > 0 && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30">
+                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30 whitespace-nowrap">
                                     {trashedCategories.length} trashed
                                 </span>
                             )}
@@ -99,7 +99,7 @@ export default function Index({ categories }) {
 
                     <Link
                         href={route("categories.create")}
-                        className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300 hover:-translate-y-0.5"
                     >
                         <Plus size={18} />
                         Create Category

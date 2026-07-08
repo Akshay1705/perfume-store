@@ -12,8 +12,6 @@ export default function Create({ categories, brands }) {
     const [productId, setProductId] = useState(null);
     const [productCreated, setProductCreated] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-    const [customVolume, setCustomVolume] = useState("");
-    const [isCustomVolume, setIsCustomVolume] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: "",

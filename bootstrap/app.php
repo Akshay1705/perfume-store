@@ -1,6 +1,8 @@
 <?php
 
+use App\Exceptions\CartEmptyException;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -22,5 +24,21 @@ return Application::configure(basePath: dirname(__DIR__))
     
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (CartEmptyException $e, Request $request) {
+            return back()->withErrors([
+                'cart' => $e->getMessage(),
+            ]);
+        });
+
+        $exceptions->render(function (Throwable $e, Request $request) {
+            report($e);
+
+            if (config('app.debug')) {
+                return null;
+            }
+
+            return back()->withErrors([
+                'error' => 'Something went wrong. Please try again later.',
+            ]);
+        });
     })->create();

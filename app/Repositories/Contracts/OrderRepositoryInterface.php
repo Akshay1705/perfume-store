@@ -23,7 +23,7 @@ extends BaseRepositoryInterface
 
     public function deliveredOrdersCount(): int;
 
-    public function recentOrders(int $limit = 10);
+    public function recentOrders(int $limit = 5);
 
     public function revenueChart(int $days = 7): array;
 

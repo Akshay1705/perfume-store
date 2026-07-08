@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useState } from "react";
+import React from "react";
 import { Link, usePage, router } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import {
@@ -25,7 +25,6 @@ export default function Index() {
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
     const { discounts, totalCount, stats, filters } = usePage().props;
-    const [deleteId, setDeleteId] = useState(null);
 
     const handleDelete = (id) => {
         Swal.fire({
@@ -93,13 +92,13 @@ export default function Index() {
         <AdminLayout>
             {/* Header Section */}
             <div className="mb-8">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-400 to-rose-500 bg-clip-text text-transparent">
                                 Discounts
                             </h1>
-                            <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30">
+                            <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30 whitespace-nowrap">
                                 {totalCount} total
                             </span>
                         </div>
@@ -111,44 +110,43 @@ export default function Index() {
 
                     <Link
                         href={route("discounts.create")}
-                        className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300 hover:-translate-y-0.5"
                     >
                         <Plus size={18} />
                         Create Discount
                     </Link>
                 </div>
 
-                {/* Stats Bar */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
                             Active
                         </p>
-                        <p className="text-3xl font-bold text-emerald-400 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-emerald-400 mt-1">
                             {stats?.active || 0}
                         </p>
                     </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
                             Scheduled
                         </p>
-                        <p className="text-3xl font-bold text-blue-400 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-blue-400 mt-1">
                             {stats?.scheduled || 0}
                         </p>
                     </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
                             Inactive
                         </p>
-                        <p className="text-3xl font-bold text-rose-400 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-rose-400 mt-1">
                             {stats?.inactive || 0}
                         </p>
                     </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-sm font-medium">
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
                             Expired
                         </p>
-                        <p className="text-3xl font-bold text-slate-400 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-slate-400 mt-1">
                             {stats?.expired || 0}
                         </p>
                     </div>
