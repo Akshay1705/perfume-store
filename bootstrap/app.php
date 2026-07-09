@@ -25,21 +25,6 @@ return Application::configure(basePath: dirname(__DIR__))
     
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (CartEmptyException $e, Request $request) {
-            return back()->withErrors([
-                'cart' => $e->getMessage(),
-            ]);
-        });
-        $exceptions->render(function (
-            OutOfStockException $e,
-            Request $request
-        ) {
-            return back()->with(
-                'error',
-                $e->getMessage()
-            );
-        });
-
         $exceptions->render(function (Throwable $e, Request $request) {
             report($e);
 

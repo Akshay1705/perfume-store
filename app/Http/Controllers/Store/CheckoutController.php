@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Store;
 
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+
+use App\Exceptions\CheckoutException;
+use App\Http\Controllers\BaseController;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -11,7 +14,7 @@ use App\Http\Requests\Store\PlaceOrderRequest;
 use App\Models\Order;
 use App\Models\User;
 
-class CheckoutController extends Controller
+class CheckoutController extends BaseController
 {
     public function index(): Response
     {
@@ -36,15 +39,22 @@ class CheckoutController extends Controller
 
     public function placeOrder(PlaceOrderRequest $request, CheckoutService $service)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $order = $service->placeOrder($user, $request->address_id);
+        try{
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $order = $service->placeOrder($user, $request->address_id);
 
-        return redirect()
-            ->route(
-                'checkout.success',
-                $order->id,
+            return redirect()
+                ->route(
+                    'checkout.success',
+                    $order->id,
+                );
+        } catch (CheckoutException $e) {
+
+            return $this->redirectError(
+                $e->getMessage()
             );
+        }
     }
 
     public function success(Order $order)

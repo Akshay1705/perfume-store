@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class CartEmptyException extends Exception {}
+class CartEmptyException extends CheckoutException {}

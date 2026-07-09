@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class OutOfStockException extends Exception {}
+class OutOfStockException extends CheckoutException {}
