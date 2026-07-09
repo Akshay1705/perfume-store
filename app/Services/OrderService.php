@@ -22,19 +22,31 @@ class OrderService
      * 
      * @return void
      */
-    public function updateStatus(Order $order, string $status): void {
-        if ($status === OrderStatus::SHIPPED->value && $order->status !== OrderStatus::SHIPPED->value) {
-            $this->reduceStock($order);
+    public function updateStatus(Order $order, string $status): void
+    {
+        if (
+            $status === OrderStatus::CANCELLED->value &&
+            $this->canBeCancelled($order)
+        ) {
+            $this->restoreStock($order);
         }
+
+        if (
+            $status === OrderStatus::RETURNED->value &&
+            $order->status === OrderStatus::DELIVERED->value
+        ) {
+            $this->restoreStock($order);
+        }
+
         $this->orders->saveStatus($order, $status);
     }
 
-    private function reduceStock(Order $order): void
+    private function restoreStock(Order $order): void
     {
         $order->load('items.variant');
 
         foreach ($order->items as $item) {
-            $item->variant->decrement(
+            $item->variant->increment(
                 'stock',
                 $item->quantity
             );
@@ -77,7 +89,7 @@ class OrderService
      * @return void
      */
     public function cancel(Order $order): void {
-        $this->orders->saveStatus($order, OrderStatus::CANCELLED->value);
+        $this->$this->updateStatus($order, OrderStatus::CANCELLED->value);
     }
 
     /**
@@ -88,7 +100,7 @@ class OrderService
      * @return void
      */
     public function markAsProcessing(Order $order): void {
-        $this->orders->saveStatus($order, OrderStatus::PROCESSING->value);
+        $this->$this->updateStatus($order, OrderStatus::PROCESSING->value);
     }
 
     /**
@@ -99,7 +111,7 @@ class OrderService
      * @return void
      */
     public function markAsShipped(Order $order): void {
-        $this->orders->saveStatus($order, OrderStatus::SHIPPED->value);
+        $this->$this->updateStatus($order, OrderStatus::SHIPPED->value);
     }
 
     /**
@@ -110,7 +122,7 @@ class OrderService
      * @return void
      */
     public function markAsDelivered(Order $order): void {
-        $this->orders->saveStatus($order, OrderStatus::DELIVERED->value);
+        $this->$this->updateStatus($order, OrderStatus::DELIVERED->value);
     }
 
     /**
@@ -121,6 +133,6 @@ class OrderService
      * @return void
      */
     public function markAsReturned(Order $order): void {
-        $this->orders->saveStatus($order, OrderStatus::RETURNED->value);
+        $this->$this->updateStatus($order, OrderStatus::RETURNED->value);
     }
 }

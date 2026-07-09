@@ -6,6 +6,7 @@ use App\Models\OrderItem;
 use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Exceptions\OutOfStockException;
 
 class CartService
 {
@@ -18,19 +19,34 @@ class CartService
      *
      * @return void
      */
-    public function add(User $user, int $variantId, int $quantity): void
-    {
+    public function add(User $user, int $variantId, int $quantity): void {
         $variant = ProductVariant::findOrFail($variantId);
         $cart    = $user->activeCart();
         $item    = $cart->items()->where('product_variant_id', $variant->id)->first();
 
         if ($item) {
+
+            $newQuantity = $item->quantity + $quantity;
+
+            if ($newQuantity > $variant->stock) {
+                throw new OutOfStockException(
+                    "Only {$variant->stock} items are available."
+                );
+            }
+
             $item->increment('quantity', $quantity);
         } else {
+
+            if ($quantity > $variant->stock) {
+                throw new OutOfStockException(
+                    "Only {$variant->stock} items are available."
+                );
+            }
+
             $cart->items()->create([
                 'product_variant_id' => $variant->id,
-                'quantity'           => $quantity,
-                'unit_price'         => $variant->price,
+                'quantity' => $quantity,
+                'unit_price' => $variant->price,
             ]);
         }
 
@@ -44,8 +60,7 @@ class CartService
      *
      * @return void
      */
-    private function recalculateCart($cart): void
-    {
+    private function recalculateCart($cart): void {
         $subtotal = $cart->items()->sum(DB::raw('quantity * unit_price'));
 
         $cart->update([
@@ -62,13 +77,18 @@ class CartService
      *
      * @return void
      */
-    public function updateQuantity(OrderItem $item, int $quantity): void
-    {
+    public function updateQuantity(OrderItem $item, int $quantity): void {
         if ($quantity <= 0) {
             $item->delete();
             $this->recalculateCart($item->order);
 
             return;
+        }
+        $variant = $item->variant;
+        if ($quantity > $variant->stock) {
+            throw new OutOfStockException(
+                "Only {$variant->stock} items available."
+            );
         }
 
         $item->update(['quantity' => $quantity]);
@@ -82,8 +102,7 @@ class CartService
      *
      * @return void
      */
-    public function removeItem(OrderItem $item): void
-    {
+    public function removeItem(OrderItem $item): void {
         $order = $item->order;
         $item->delete();
 

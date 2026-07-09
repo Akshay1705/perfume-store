@@ -112,4 +112,13 @@ class Order extends Model
             ]
         );
     }
+
+    public function scopeRevenueOrders(Builder $query)
+    {
+        return $query->whereNotIn('status', [
+            OrderStatus::CART->value,
+            OrderStatus::CANCELLED->value,
+            OrderStatus::RETURNED->value,
+        ]);
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\CartEmptyException;
+use App\Exceptions\OutOfStockException;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -29,13 +30,22 @@ return Application::configure(basePath: dirname(__DIR__))
                 'cart' => $e->getMessage(),
             ]);
         });
+        $exceptions->render(function (
+            OutOfStockException $e,
+            Request $request
+        ) {
+            return back()->with(
+                'error',
+                $e->getMessage()
+            );
+        });
 
         $exceptions->render(function (Throwable $e, Request $request) {
             report($e);
 
-            if (config('app.debug')) {
-                return null;
-            }
+            // if (config('app.debug')) {
+            //     return null;
+            // }
 
             return back()->withErrors([
                 'error' => 'Something went wrong. Please try again later.',

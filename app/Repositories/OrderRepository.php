@@ -75,36 +75,23 @@ implements OrderRepositoryInterface
     }
 
     public function totalRevenue(): float{
-        return Order::whereNotIn('status', [
-            OrderStatus::CART->value,
-            OrderStatus::CANCELLED->value,
-            OrderStatus::RETURNED->value,
-        ])->sum('total');
+        return Order::revenueOrders()
+        ->sum('total');
     }
 
     public function todayRevenue(): float{
         return Order::whereDate(
             'placed_at',
             today()
-        )
-            ->whereNotIn('status', [
-                OrderStatus::CART->value,
-                OrderStatus::CANCELLED->value,
-                OrderStatus::RETURNED->value,
-            ])
-            ->sum('total');
+        )->revenueOrders()
+        ->sum('total');
     }
 
     public function todayOrdersCount(): int{
         return Order::whereDate(
             'placed_at',
             today()
-        )
-            ->whereNotIn('status', [
-                OrderStatus::CART->value,
-                OrderStatus::CANCELLED->value,
-                OrderStatus::RETURNED->value,
-            ])
+        )->revenueOrders()
         ->count();
     }
 
@@ -136,11 +123,7 @@ implements OrderRepositoryInterface
             $chart[] = [
                 'day' => $date->format('D'),
                 'revenue' => Order::whereDate('placed_at', $date)
-                    ->whereNotIn('status', [
-                        OrderStatus::CART->value,
-                        OrderStatus::CANCELLED->value,
-                        OrderStatus::RETURNED->value,
-                    ])
+                    ->revenueOrders()
                     ->sum('total'),
             ];
         }

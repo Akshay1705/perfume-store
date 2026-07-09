@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\OrderStatus;
 use App\Exceptions\CartEmptyException;
+use App\Exceptions\OutOfStockException;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,28 @@ class CheckoutService
                 throw new CartEmptyException('Your cart is empty.');
             }
 
+            $cart->load('items.variant.product');
+
+            foreach ($cart->items as $item) {
+
+                if ($item->quantity > $item->variant->stock) {
+
+                    throw new OutOfStockException(
+                        "{$item->variant->product->name} has only {$item->variant->stock} item(s) left in stock."
+                    );
+                }
+            }
+
+            foreach ($cart->items as $item) {
+
+                $item->variant->decrement(
+                    'stock',
+                    $item->quantity
+                );
+            }
+
             $cart->update([
+                // 'address_id' => 99999999,
                 'address_id' => $addressId,
                 'status' => OrderStatus::PLACED->value,
                 'placed_at' => now(),
@@ -34,9 +56,11 @@ class CheckoutService
                 'coupon_name' => $cart->discount?->name,
             ]);
 
+            // throw new \Exception('Testing checkout failure');
+
             // create fresh cart
             $user->orders()->create([
-                'status' => 'cart',
+                'status' => null,
                 'subtotal' => 0,
                 'discount_amount' => 0,
                 'total' => 0,
