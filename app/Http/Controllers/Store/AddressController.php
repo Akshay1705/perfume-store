@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Store;
 
+use App\Exceptions\AddressNotOwnedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Store\AddressRequest;
 use App\Models\Address;
@@ -143,9 +144,10 @@ class AddressController extends Controller
      *
      * @return void
      */
-    private function authorizeAddress(Address $address): void 
+    private function authorizeAddress(Address $address): void
     {
-        $userId = Auth::id();
-        abort_if($address->user_id !== $userId, 403);
+        if ($address->user_id !== Auth::id()) {
+            throw new AddressNotOwnedException();
+        }
     }
 }

@@ -18,7 +18,6 @@ class CheckoutService
         User $user,
         int $addressId
     ): Order {
-
         try{
             return DB::transaction(function () use (
                 $user,

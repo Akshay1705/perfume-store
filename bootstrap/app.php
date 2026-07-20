@@ -1,7 +1,6 @@
 <?php
 
-use App\Exceptions\CartEmptyException;
-use App\Exceptions\OutOfStockException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,7 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ]);
     
     })
+
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            return redirect()->guest(route('login'));
+        });
+
         $exceptions->render(function (Throwable $e, Request $request) {
             report($e);
 
