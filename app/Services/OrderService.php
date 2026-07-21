@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Orders\OrderDeliveredMail;
+use App\Mail\Orders\OrderCancelledMail;
 
 class OrderService
 {
@@ -53,6 +54,10 @@ class OrderService
         if ($status === OrderStatus::DELIVERED->value) {
             Mail::to($order->user->email)
                 ->queue(new OrderDeliveredMail($order));
+        }
+        if ($status === OrderStatus::CANCELLED->value) {
+            Mail::to($order->user->email)
+                ->queue(new OrderCancelledMail($order));
         }
     }
 
