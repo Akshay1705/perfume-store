@@ -7,9 +7,11 @@ use App\Exceptions\CartEmptyException;
 use App\Exceptions\CheckoutException;
 use App\Exceptions\CheckoutFailedException;
 use App\Exceptions\OutOfStockException;
+use App\Mail\OrderPlacedMail;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class CheckoutService
@@ -68,6 +70,11 @@ class CheckoutService
                     'discount_amount' => 0,
                     'total' => 0,
                 ]);
+
+                DB::afterCommit(function () use ($cart) {
+                    Mail::to($cart->user->email)
+                        ->queue(new OrderPlacedMail($cart));
+                });
 
                 return $cart;
             });
