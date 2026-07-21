@@ -30,11 +30,12 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (Throwable $e, Request $request) {
-            report($e);
+            // Let Laravel handle validation errors normally (per-field messages)
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return null;
+            }
 
-            // if (config('app.debug')) {
-            //     return null;
-            // }
+            report($e);
 
             return back()->withErrors([
                 'error' => 'Something went wrong. Please try again later.',
