@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Mail\Orders\OrderShippedMail;
 use App\Models\Order;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use App\Repositories\Contracts\OrderRepositoryInterface;
+use Illuminate\Support\Facades\Mail;
 
 class OrderService
 {
@@ -39,6 +41,14 @@ class OrderService
         }
 
         $this->orders->saveStatus($order, $status);
+
+        if ($status === OrderStatus::SHIPPED->value) {
+
+            $order->refresh();
+
+            Mail::to($order->user->email)
+                ->queue(new OrderShippedMail($order));
+        }
     }
 
     private function restoreStock(Order $order): void
@@ -89,7 +99,7 @@ class OrderService
      * @return void
      */
     public function cancel(Order $order): void {
-        $this->$this->updateStatus($order, OrderStatus::CANCELLED->value);
+        $this->updateStatus($order, OrderStatus::CANCELLED->value);
     }
 
     /**
@@ -100,7 +110,7 @@ class OrderService
      * @return void
      */
     public function markAsProcessing(Order $order): void {
-        $this->$this->updateStatus($order, OrderStatus::PROCESSING->value);
+        $this->updateStatus($order, OrderStatus::PROCESSING->value);
     }
 
     /**
@@ -111,7 +121,7 @@ class OrderService
      * @return void
      */
     public function markAsShipped(Order $order): void {
-        $this->$this->updateStatus($order, OrderStatus::SHIPPED->value);
+        $this->updateStatus($order, OrderStatus::SHIPPED->value);
     }
 
     /**
@@ -122,7 +132,7 @@ class OrderService
      * @return void
      */
     public function markAsDelivered(Order $order): void {
-        $this->$this->updateStatus($order, OrderStatus::DELIVERED->value);
+        $this->updateStatus($order, OrderStatus::DELIVERED->value);
     }
 
     /**
@@ -133,6 +143,6 @@ class OrderService
      * @return void
      */
     public function markAsReturned(Order $order): void {
-        $this->$this->updateStatus($order, OrderStatus::RETURNED->value);
+        $this->updateStatus($order, OrderStatus::RETURNED->value);
     }
 }

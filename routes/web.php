@@ -5,9 +5,9 @@ use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController, OrderController as AdminOrderController, DashboardController};
 use App\Http\Controllers\Store\{HomeController, AddressController, CartController, ProductController as StoreProductController, CheckoutController, OrderController};
+use App\Mail\Orders\OrderPlacedMail as MailOrderPlacedMail;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderPlacedMail;
 use App\Models\Order;
 
 Route::get('/test-order-mail', function () {
@@ -19,7 +19,7 @@ Route::get('/test-order-mail', function () {
         ])->findOrFail(23);
 
         Mail::to('test@example.com')
-            ->queue(new OrderPlacedMail($order));
+            ->queue(new MailOrderPlacedMail($order));
 
         return 'Order confirmation mail queued successfully!';
         // dd('Mail queued');

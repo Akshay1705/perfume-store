@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\Orders;
 
+use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -9,14 +10,13 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Order;
-use Carbon\CarbonInterface;
+use Carbon\Carbon;
 
-class OrderPlacedMail extends Mailable implements ShouldQueue
+class OrderShippedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+    public $estimatedDelivery;
 
-    public CarbonInterface $estimatedDelivery;
     /**
      * Create a new message instance.
      */
@@ -29,9 +29,7 @@ class OrderPlacedMail extends Mailable implements ShouldQueue
             'discount',
         ]);
 
-        $this->estimatedDelivery = ($this->order->placed_at ?? now())
-            ->copy()
-            ->addDays(14);
+        $this->estimatedDelivery = now()->addDays(7);
     }
 
     /**
@@ -40,7 +38,7 @@ class OrderPlacedMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Order Confirmation - Perfume Store',
+            subject: 'Your Order Has Been Shipped - AURA',
         );
     }
 
@@ -50,7 +48,7 @@ class OrderPlacedMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.orders.placed',
+            view: 'emails.orders.shipped',
         );
     }
 
