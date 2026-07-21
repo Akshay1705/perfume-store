@@ -11,6 +11,7 @@ use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Orders\OrderDeliveredMail;
 use App\Mail\Orders\OrderCancelledMail;
+use App\Mail\Orders\OrderReturnedMail;
 
 class OrderService
 {
@@ -58,6 +59,10 @@ class OrderService
         if ($status === OrderStatus::CANCELLED->value) {
             Mail::to($order->user->email)
                 ->queue(new OrderCancelledMail($order));
+        }
+        if ($status === OrderStatus::RETURNED->value) {
+            Mail::to($order->user->email)
+                ->queue(new OrderReturnedMail($order));
         }
     }
 
