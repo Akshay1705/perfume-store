@@ -7,7 +7,7 @@ use App\Exceptions\CartEmptyException;
 use App\Exceptions\CheckoutException;
 use App\Exceptions\CheckoutFailedException;
 use App\Exceptions\OutOfStockException;
-use App\Mail\OrderPlacedMail;
+use App\Mail\Orders\OrderPlacedMail;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
