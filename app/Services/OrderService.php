@@ -9,6 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\Orders\OrderDeliveredMail;
 
 class OrderService
 {
@@ -42,12 +43,16 @@ class OrderService
 
         $this->orders->saveStatus($order, $status);
 
+        $order->refresh();
+
         if ($status === OrderStatus::SHIPPED->value) {
-
-            $order->refresh();
-
             Mail::to($order->user->email)
                 ->queue(new OrderShippedMail($order));
+        }
+
+        if ($status === OrderStatus::DELIVERED->value) {
+            Mail::to($order->user->email)
+                ->queue(new OrderDeliveredMail($order));
         }
     }
 
