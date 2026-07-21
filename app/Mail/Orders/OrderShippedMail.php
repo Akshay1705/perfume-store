@@ -10,12 +10,12 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 
 class OrderShippedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
-    public $estimatedDelivery;
+    public CarbonInterface $estimatedDelivery;
 
     /**
      * Create a new message instance.
