@@ -5,7 +5,7 @@ import { Head, Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
 
 export default function Index({ cart, addresses = [] }) {
     // Safely default state selection hook mapping sequence
@@ -31,31 +31,31 @@ export default function Index({ cart, addresses = [] }) {
 
     // console.log(form.errors);
 
-    // const placeOrder = () => {
-    //     form.setData("address_id", selectedAddress);
-
-    //     form.post(route("checkout.place-order"));
-    // };
-
-    const placeOrder = async () => {
+    const placeOrder = () => {
         form.setData("address_id", selectedAddress);
 
-        try {
-            const response = await axios.post(route("checkout.place-order"), {
-                address_id: selectedAddress,
-            });
-
-            window.location.href = response.data.checkout_url;
-        } catch (error) {
-            if (error.response?.data?.errors) {
-                Object.values(error.response.data.errors)
-                    .flat()
-                    .forEach((message) => toast.error(message));
-            } else {
-                toast.error("Something went wrong.");
-            }
-        }
+        form.post(route("checkout.place-order"));
     };
+
+    // const placeOrder = async () => {
+    //     form.setData("address_id", selectedAddress);
+
+    //     try {
+    //         const response = await axios.post(route("checkout.place-order"), {
+    //             address_id: selectedAddress,
+    //         });
+
+    //         window.location.href = response.data.checkout_url;
+    //     } catch (error) {
+    //         if (error.response?.data?.errors) {
+    //             Object.values(error.response.data.errors)
+    //                 .flat()
+    //                 .forEach((message) => toast.error(message));
+    //         } else {
+    //             toast.error("Something went wrong.");
+    //         }
+    //     }
+    // };
 
     const items = cart?.items || [];
 

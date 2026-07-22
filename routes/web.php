@@ -5,14 +5,19 @@ use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\{CategoryController, BrandController, ProductController, DiscountController, VariantImageController, OrderController as AdminOrderController, DashboardController};
 use App\Http\Controllers\Store\{HomeController, AddressController, CartController, ProductController as StoreProductController, CheckoutController, OrderController};
+use App\Http\Controllers\StripeWebhookController;
 use App\Mail\Orders\OrderPlacedMail as MailOrderPlacedMail;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Order;
 use App\Services\StripeService;
 
-Route::get('/stripe-test', function (StripeService $stripeService) {
+Route::post(
+    '/stripe/webhook',
+    StripeWebhookController::class
+)->name('stripe.webhook');
 
+Route::get('/stripe-test', function (StripeService $stripeService) {
     return $stripeService->testConnection();
 });
 

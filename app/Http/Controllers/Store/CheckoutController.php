@@ -13,7 +13,7 @@ use App\Services\CheckoutService;
 use App\Http\Requests\Store\PlaceOrderRequest;
 use App\Models\Order;
 use App\Models\User;
-use App\Services\StripeService;
+// use App\Services\StripeService;
 
 class CheckoutController extends BaseController
 {
@@ -38,30 +38,30 @@ class CheckoutController extends BaseController
         );
     }
 
-    public function placeOrder(PlaceOrderRequest $request, CheckoutService $service, StripeService $stripeService)
+    public function placeOrder(PlaceOrderRequest $request, CheckoutService $service)
     {
         try{
             /** @var \App\Models\User $user */
             $user = Auth::user();
-            // $order = $service->placeOrder($user, $request->address_id);
+            $order = $service->placeOrder($user, $request->address_id);
 
-            // return redirect()
-            //     ->route(
-            //         'checkout.success',
-            //         $order->id,
-            //     );
+            return redirect()
+                ->route(
+                    'checkout.success',
+                    $order->id,
+                );
 
-            $cart = $user->activeCart();
+            // $cart = $user->activeCart();
 
-            $url = $stripeService->createCheckoutSession(
-                $cart,
-                $request->address_id
-            );
+            // $url = $stripeService->createCheckoutSession(
+            //     $cart,
+            //     $request->address_id
+            // );
 
-            // return redirect()->away($url);
-            return response()->json([
-                'checkout_url' => $url,
-            ]);
+            // // return redirect()->away($url);
+            // return response()->json([
+            //     'checkout_url' => $url,
+            // ]);
 
         } catch (CheckoutException $e) {
 
