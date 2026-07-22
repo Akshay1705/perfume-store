@@ -13,9 +13,13 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
+use App\Services\OrderSnapshotService;
 
 class CheckoutService
 {
+    public function __construct(
+        private OrderSnapshotService $snapshotService
+    ) {}
     public function placeOrder(
         User $user,
         int $addressId
@@ -51,6 +55,9 @@ class CheckoutService
                         $item->quantity
                     );
                 }
+
+                // Capture product snapshot
+                $this->snapshotService->capture($cart);
 
                 $cart->update([
                     // 'address_id' => 99999999,

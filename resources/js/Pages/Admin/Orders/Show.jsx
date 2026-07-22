@@ -51,14 +51,13 @@ export default function Show({ order, statuses }) {
 
                         <p className="text-slate-400 text-sm mt-1">
                             Placed on{" "}
-                            {new Date(order.placed_at ?? order.created_at).toLocaleDateString(
-                                "en-IN",
-                                {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                },
-                            )}{" "}
+                            {new Date(
+                                order.placed_at ?? order.created_at,
+                            ).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                            })}{" "}
                             · Manage details and fulfillment
                         </p>
 
@@ -176,11 +175,14 @@ export default function Show({ order, statuses }) {
                                     />
                                     <div>
                                         <p className="text-sm font-semibold text-slate-100">
-                                            {item.variant?.product?.name}
+                                            {item.product_name ??
+                                                item.variant?.product?.name}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            Volume: {item.variant?.volume} ·
-                                            Qty: {item.quantity}
+                                            Volume:{" "}
+                                            {item.variant_name ??
+                                                item.variant?.volume}
+                                            · Qty: {item.quantity}
                                         </p>
                                     </div>
                                 </div>

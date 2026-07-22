@@ -12,6 +12,12 @@ class OrderItem extends Model
         'product_variant_id',
         'quantity',
         'unit_price',
+        // Snapshot fields
+        'product_name',
+        'brand_name',
+        'variant_name',
+        'sku',
+        'image',
     ];
 
     protected $casts = [
