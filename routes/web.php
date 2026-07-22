@@ -9,6 +9,20 @@ use App\Mail\Orders\OrderPlacedMail as MailOrderPlacedMail;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Order;
+use App\Services\StripeService;
+
+Route::get('/stripe-test', function (StripeService $stripeService) {
+
+    return $stripeService->testConnection();
+});
+
+Route::get('/stripe/success', function () {
+    return 'Payment Success';
+})->name('stripe.success');
+
+Route::get('/stripe/cancel', function () {
+    return 'Payment Cancelled';
+})->name('stripe.cancel');
 
 Route::get('/test-order-mail', function () {
     try {
