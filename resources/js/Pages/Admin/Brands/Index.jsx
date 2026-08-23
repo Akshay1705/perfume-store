@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
-export default function Index({ brands }) {
+export default function Index({ brands, status, activeCount, trashedCount }) {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -67,9 +67,6 @@ export default function Index({ brands }) {
         });
     };
 
-    const activeBrands = brands.filter((b) => !b.deleted_at);
-    const trashedBrands = brands.filter((b) => b.deleted_at);
-
     return (
         <AdminLayout>
             {/* Header Section */}
@@ -80,13 +77,33 @@ export default function Index({ brands }) {
                             <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                                 Brands
                             </h1>
-                            <span className="px-3 py-1 rounded-full bg-purple-500/15 text-purple-400 text-sm font-semibold border border-purple-500/30 whitespace-nowrap">
-                                {activeBrands.length} active
-                            </span>
-                            {trashedBrands.length > 0 && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30 whitespace-nowrap">
-                                    {trashedBrands.length} trashed
-                                </span>
+                            <button
+                                onClick={() =>
+                                    router.get(route("brands.index"))
+                                }
+                                className={`px-3 py-1 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
+                                    status === "active"
+                                        ? "bg-purple-500/15 text-purple-400 border-purple-500/30"
+                                        : "bg-slate-700/30 text-slate-400 border-slate-600 hover:bg-slate-700/50"
+                                }`}
+                            >
+                                {activeCount} active
+                            </button>
+                            {trashedCount > 0 && (
+                                <button
+                                    onClick={() =>
+                                        router.get(route("brands.index"), {
+                                            status: "trashed",
+                                        })
+                                    }
+                                    className={`px-3 py-1 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
+                                        status === "trashed"
+                                            ? "bg-red-500/15 text-red-400 border-red-500/30"
+                                            : "bg-slate-700/30 text-slate-400 border-slate-600 hover:bg-slate-700/50"
+                                    }`}
+                                >
+                                    {trashedCount} trashed
+                                </button>
                             )}
                         </div>
                         <p className="text-slate-400 text-sm">
@@ -94,13 +111,15 @@ export default function Index({ brands }) {
                         </p>
                     </div>
 
-                    <Link
-                        href={route("brands.create")}
-                        className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-0.5"
-                    >
-                        <Plus size={18} />
-                        Create Brand
-                    </Link>
+                    {status === "active" && (
+                        <Link
+                            href={route("brands.create")}
+                            className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        >
+                            <Plus size={18} />
+                            Create Brand
+                        </Link>
+                    )}
                 </div>
             </div>
 
@@ -109,10 +128,15 @@ export default function Index({ brands }) {
                 <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-12 text-center backdrop-blur-sm">
                     <div className="text-5xl mb-3">🏷️</div>
                     <h3 className="text-lg font-semibold text-slate-200 mb-2">
-                        No brands yet
+                        {status === "trashed"
+                            ? "Trash is empty"
+                            : "No brands yet"}
                     </h3>
+
                     <p className="text-slate-400 mb-6">
-                        Start by creating your first brand
+                        {status === "trashed"
+                            ? "No deleted brands found."
+                            : "Start by creating your first brand."}
                     </p>
                     <Link
                         href={route("brands.create")}
@@ -150,7 +174,7 @@ export default function Index({ brands }) {
                                     <tr
                                         key={brand.id}
                                         className={`border-b border-slate-700/30 transition-colors duration-200 group ${
-                                            brand.deleted_at
+                                            status === "trashed"
                                                 ? "opacity-60 bg-red-950/10"
                                                 : "hover:bg-slate-800/40"
                                         }`}
@@ -178,7 +202,7 @@ export default function Index({ brands }) {
 
                                         {/* Status Cell */}
                                         <td className="px-6 py-4">
-                                            {brand.deleted_at ? (
+                                            {status === "trashed" ? (
                                                 <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-xs font-semibold border border-red-500/30">
                                                     Trashed
                                                 </span>
@@ -192,7 +216,7 @@ export default function Index({ brands }) {
                                         {/* Actions Cell */}
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
-                                                {brand.deleted_at ? (
+                                                {status === "trashed" ? (
                                                     <>
                                                         <button
                                                             onClick={() =>
@@ -254,8 +278,8 @@ export default function Index({ brands }) {
 
                     {/* Table Footer */}
                     <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        Showing {activeBrands.length} active,{" "}
-                        {trashedBrands.length} trashed — {brands.length} total
+                        Showing {brands.length}{" "}
+                        {status === "active" ? "active" : "trashed"} brand(s)
                     </div>
                 </div>
             )}

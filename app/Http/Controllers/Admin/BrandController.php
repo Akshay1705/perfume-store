@@ -9,6 +9,7 @@ use App\Services\BrandService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
@@ -17,16 +18,26 @@ class BrandController extends Controller
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $brands = Brand::withTrashed()->latest()->get();
+        $status = $request->get('status', 'active');
 
-        return Inertia::render(
-            'Admin/Brands/Index',
-            [
-                'brands' => $brands,
-            ]
-        );
+        $query = Brand::query();
+
+        if ($status === 'trashed') {
+            $query->onlyTrashed();
+        }
+
+        $brands = $query->latest()->get();
+
+        return Inertia::render('Admin/Brands/Index', [
+            'brands' => $brands,
+            'status' => $status,
+
+            // counts for the pills
+            'activeCount' => Brand::count(),
+            'trashedCount' => Brand::onlyTrashed()->count(),
+        ]);
     }
 
     /**

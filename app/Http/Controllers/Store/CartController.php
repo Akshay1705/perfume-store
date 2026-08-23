@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Store\AddToCartRequest;
-use App\Models\OrderItem;
-use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\User;
+use App\Models\OrderItem;
+use App\Services\CartService;
 use App\Services\CouponService;
+use App\Http\Requests\Store\AddToCartRequest;
 use App\Http\Requests\Store\ApplyDiscountRequest;
 
 class CartController extends Controller

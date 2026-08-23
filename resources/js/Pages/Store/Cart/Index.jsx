@@ -21,7 +21,7 @@ export default function Index({ cart }) {
 
     const updateQuantity = (id, newQuantity, stock) => {
         if (newQuantity < 1) return;
-        if (newQuantity > stock) return;
+        if (newQuantity > (stock ?? 0)) return;
         router.patch(
             route("cart.items.update", id),
             {
@@ -192,13 +192,14 @@ export default function Index({ cart }) {
                                                             }
                                                             disabled={
                                                                 item.quantity >=
-                                                                item.variant
-                                                                    .stock
+                                                                (item.variant
+                                                                    ?.stock ??
+                                                                    0)
                                                             }
                                                             className={`px-3 h-full text-xs font-light transition-colors ${
                                                                 item.quantity >=
-                                                                item.variant
-                                                                    .stock
+                                                                (item.variant?.stock ??
+                                                                    0)
                                                                     ? "cursor-not-allowed text-stone-300"
                                                                     : "text-stone-500 hover:text-stone-900 hover:bg-stone-100/80"
                                                             }`}
@@ -207,10 +208,13 @@ export default function Index({ cart }) {
                                                         </button>
                                                     </div>
                                                     {item.quantity >=
-                                                        item.variant.stock && (
-                                                        <p className="mt-2 text-xs text-red-600">
+                                                        (item.variant?.stock ??
+                                                            0) && (
+                                                        <p>
                                                             Only{" "}
-                                                            {item.variant.stock}{" "}
+                                                            {item.variant
+                                                                ?.stock ??
+                                                                0}{" "}
                                                             item(s) available.
                                                         </p>
                                                     )}

@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
-export default function Index({ categories }) {
+export default function Index({ categories, status, activeCount, trashedCount }) {
     const { flash } = usePage().props;
 
     useEffect(() => {
@@ -69,10 +69,6 @@ export default function Index({ categories }) {
         });
     };
 
-    // Separate active and trashed for count display
-    const activeCategories = categories.filter((c) => !c.deleted_at);
-    const trashedCategories = categories.filter((c) => c.deleted_at);
-
     return (
         <AdminLayout>
             {/* Header Section */}
@@ -83,13 +79,33 @@ export default function Index({ categories }) {
                             <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                                 Categories
                             </h1>
-                            <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-sm font-semibold border border-amber-500/30 whitespace-nowrap">
-                                {activeCategories.length} active
-                            </span>
-                            {trashedCategories.length > 0 && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30 whitespace-nowrap">
-                                    {trashedCategories.length} trashed
-                                </span>
+                            <button
+                                onClick={() =>
+                                    router.get(route("categories.index"))
+                                }
+                                className={`px-3 py-1 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
+                                    status === "active"
+                                        ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                                        : "bg-slate-700/30 text-slate-400 border-slate-600 hover:bg-slate-700/50"
+                                }`}
+                            >
+                                {activeCount} active
+                            </button>
+                            {trashedCount > 0 && (
+                                <button
+                                    onClick={() =>
+                                        router.get(route("categories.index"), {
+                                            status: "trashed",
+                                        })
+                                    }
+                                    className={`px-3 py-1 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
+                                        status === "trashed"
+                                            ? "bg-red-500/15 text-red-400 border-red-500/30"
+                                            : "bg-slate-700/30 text-slate-400 border-slate-600 hover:bg-slate-700/50"
+                                    }`}
+                                >
+                                    {trashedCount} trashed
+                                </button>
                             )}
                         </div>
                         <p className="text-slate-400 text-sm">
@@ -97,13 +113,15 @@ export default function Index({ categories }) {
                         </p>
                     </div>
 
-                    <Link
-                        href={route("categories.create")}
-                        className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300 hover:-translate-y-0.5"
-                    >
-                        <Plus size={18} />
-                        Create Category
-                    </Link>
+                    {status === "active" && (
+                        <Link
+                            href={route("categories.create")}
+                            className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        >
+                            <Plus size={18} />
+                            Create Category
+                        </Link>
+                    )}
                 </div>
             </div>
 
@@ -112,10 +130,15 @@ export default function Index({ categories }) {
                 <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-12 text-center backdrop-blur-sm">
                     <div className="text-5xl mb-3">📂</div>
                     <h3 className="text-lg font-semibold text-slate-200 mb-2">
-                        No categories yet
+                        {status === "trashed"
+                            ? "Trash is empty"
+                            : "No categories yet"}
                     </h3>
+
                     <p className="text-slate-400 mb-6">
-                        Start by creating your first category
+                        {status === "trashed"
+                            ? "No deleted categories found."
+                            : "Start by creating your first category."}
                     </p>
                     <Link
                         href={route("categories.create")}
@@ -153,7 +176,7 @@ export default function Index({ categories }) {
                                     <tr
                                         key={category.id}
                                         className={`border-b border-slate-700/30 transition-colors duration-200 group ${
-                                            category.deleted_at
+                                            status === "trashed"
                                                 ? "opacity-60 bg-red-950/10"
                                                 : "hover:bg-slate-800/40"
                                         }`}
@@ -181,7 +204,7 @@ export default function Index({ categories }) {
 
                                         {/* Status Cell */}
                                         <td className="px-6 py-4">
-                                            {category.deleted_at ? (
+                                            {status === "trashed" ? (
                                                 <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-xs font-semibold border border-red-500/30">
                                                     Trashed
                                                 </span>
@@ -195,7 +218,7 @@ export default function Index({ categories }) {
                                         {/* Actions Cell */}
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
-                                                {category.deleted_at ? (
+                                                {status === "trashed" ? (
                                                     <>
                                                         {/* Restore Button */}
                                                         <button
@@ -263,9 +286,9 @@ export default function Index({ categories }) {
 
                     {/* Table Footer */}
                     <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-3 text-sm text-slate-400">
-                        Showing {activeCategories.length} active,{" "}
-                        {trashedCategories.length} trashed — {categories.length}{" "}
-                        total
+                        Showing {categories.length}{" "}
+                        {status === "active" ? "active" : "trashed"} categor
+                        {categories.length === 1 ? "y" : "ies"}
                     </div>
                 </div>
             )}

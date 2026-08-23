@@ -263,7 +263,7 @@ export default function Dashboard({stats, recentOrders, revenueChart, statusChar
                             </h2>
                         </div>
                         <div className="p-5">
-                            <div style={{ width: "100%", height: 200 }}>
+                            <div className="w-full h-[220px]">
                                 <ResponsiveContainer
                                     width="100%"
                                     height="100%"

@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Services\CategoryService;
 use App\Http\Requests\Admin\CategoryRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -17,14 +18,25 @@ class CategoryController extends Controller
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $categories = Category::withTrashed()->latest()->get();
+        $status = $request->get('status', 'active');
+
+        $query = Category::query();
+
+        if ($status === 'trashed') {
+            $query->onlyTrashed();
+        }
+
+        $categories = $query->latest()->get();
 
         return Inertia::render(
             'Admin/Categories/Index',
             [
-                'categories' => $categories,
+                'categories'    => $categories,
+                'status'        => $status,
+                'activeCount'   => Category::count(),
+                'trashedCount'  => Category::onlyTrashed()->count(),
             ]
         );
     }
