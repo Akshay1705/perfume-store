@@ -38,74 +38,51 @@ implements ProductRepositoryInterface
         ])->findOrFail($id);
     }
 
-    public function getFilteredProducts(array $filters): LengthAwarePaginator {
-        return Product::query()
+    public function getFilteredProducts(array $filters): LengthAwarePaginator
+    {
+        $status = $filters['status'] ?? null;
+
+        $query = Product::query()
             ->with([
                 'category',
                 'brand',
-                'variants' => fn($q) =>
-                $q->with('images')
-                    ->orderBy('id'),
-            ])
+                'variants' => fn($q) => $q->with('images')->orderBy('id'),
+            ]);
+
+        // If viewing deleted products, scope to trashed only
+        if ($status === 'deleted') {
+            $query->onlyTrashed();
+        }
+
+        return $query
             ->when(
                 $filters['search'] ?? null,
-                fn($query, $search) =>
-                $query->where(function ($q) use ($search) {
+                fn($q, $search) => $q->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                        ->orWhere(
-                            'slug',
-                            'like',
-                            "%{$search}%"
-                        );
+                        ->orWhere('slug', 'like', "%{$search}%");
                 })
             )
             ->when(
                 $filters['category'] ?? null,
-                fn($query, $category) =>
-                $query->where(
-                    'category_id',
-                    $category
-                )
+                fn($q, $category) => $q->where('category_id', $category)
             )
             ->when(
                 $filters['brand'] ?? null,
-                fn($query, $brand) =>
-                $query->where(
-                    'brand_id',
-                    $brand
-                )
+                fn($q, $brand) => $q->where('brand_id', $brand)
             )
             ->when(
                 $filters['gender'] ?? null,
-                fn($query, $gender) =>
-                $query->where(
-                    'gender',
-                    $gender
-                )
+                fn($q, $gender) => $q->where('gender', $gender)
             )
             ->when(
-                $filters['status'] ?? null,
-                function ($query, $status) {
-
-                    if ($status === 'active') {
-                        $query->where(
-                            'is_active',
-                            true
-                        );
-                    }
-
-                    if ($status === 'inactive') {
-                        $query->where(
-                            'is_active',
-                            false
-                        );
-                    }
+                $status && $status !== 'deleted',
+                function ($q) use ($status) {
+                    if ($status === 'active') $q->where('is_active', true);
+                    if ($status === 'inactive') $q->where('is_active', false);
                 }
             )
             ->latest()
-            ->paginate(
-                $filters['per_page'] ?? 10
-            )
+            ->paginate($filters['per_page'] ?? 10)
             ->withQueryString();
     }
 

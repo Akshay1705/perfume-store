@@ -21,21 +21,20 @@ class CheckoutController extends BaseController
     {
         /** @var User $user */
         $user = Auth::user();
-        $cart = $user->activeCart()
-            ->load([
-                'items.variant.product',
-                'items.variant.primaryImage',
-                'discount',
-            ]);
+
+        $cart = $user->activeCart()->load([
+            'items.variant' => fn($q) => $q->withTrashed(),
+            'items.variant.product' => fn($q) => $q->withTrashed(),
+            'items.variant.primaryImage',
+            'discount',
+        ]);
+
         $addresses = $user->addresses;
 
-        return Inertia::render(
-            'Store/Checkout/Index',
-            [
-                'cart' => $cart,
-                'addresses' => $addresses,
-            ]
-        );
+        return Inertia::render('Store/Checkout/Index', [
+            'cart'      => $cart,
+            'addresses' => $addresses,
+        ]);
     }
 
     public function placeOrder(PlaceOrderRequest $request, CheckoutService $service)

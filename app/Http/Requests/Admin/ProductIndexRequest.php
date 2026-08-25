@@ -17,7 +17,7 @@ class ProductIndexRequest extends FormRequest
             'search' => ['nullable', 'string', 'max:255'],
             'category' => ['nullable', 'integer', 'exists:categories,id'],
             'brand' => ['nullable', 'integer', 'exists:brands,id'],
-            'status' => ['nullable', 'in:active,inactive'],
+            'status' => ['nullable', 'in:active,inactive,deleted'],
             'gender' => ['nullable', 'in:men,women,unisex'],
             'per_page' => ['nullable', 'integer', 'in:10,15,25,50'],
         ];

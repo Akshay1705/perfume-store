@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router, usePage } from "@inertiajs/react";
-import { Edit, Trash2, Plus, ChevronRight, ChevronDown } from "lucide-react";
+import {
+    Edit,
+    Trash2,
+    Plus,
+    ChevronRight,
+    ChevronDown,
+    RotateCcw,
+} from "lucide-react";
 import { useState } from "react";
 import AppSelect from "@/Components/ui/AppSelect";
 import { useEffect } from "react";
@@ -10,21 +17,27 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import React from "react";
 
-
-export default function Index({products,totalCount,filters,categories,brands,}) 
-{
+export default function Index({
+    products,
+    totalCount,
+    filters,
+    categories,
+    brands,
+}) {
     const [expandedProducts, setExpandedProducts] = useState([]);
-    
     const { flash } = usePage().props;
+
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
+    // --- Handlers ---
+
     const handleDelete = (id) => {
         Swal.fire({
             title: "Delete this product?",
-            text: "This action cannot be undone.",
+            text: "It will be soft-deleted and can be restored later.",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#e3342f",
@@ -39,6 +52,42 @@ export default function Index({products,totalCount,filters,categories,brands,})
         });
     };
 
+    const handleRestore = (id) => {
+        Swal.fire({
+            title: "Restore this product?",
+            text: "It will become visible in the store again.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#10b981",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, restore it!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.post(route("products.restore", id));
+            }
+        });
+    };
+
+    const handleForceDelete = (id) => {
+        Swal.fire({
+            title: "Permanently delete?",
+            text: "This cannot be undone. Products with existing orders cannot be force-deleted.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, delete forever!",
+            background: "#1e293b",
+            color: "#f1f5f9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("products.forceDelete", id));
+            }
+        });
+    };
+
     const toggleProduct = (productId) => {
         setExpandedProducts((prev) =>
             prev.includes(productId)
@@ -47,28 +96,28 @@ export default function Index({products,totalCount,filters,categories,brands,})
         );
     };
 
-    const allVariants = products.data.flatMap(
-        (product) => product.variants || [],
-    );
+    // --- Stats (only count non-deleted variants) ---
+    const allVariants = products.data
+        .filter((p) => !p.deleted_at)
+        .flatMap((product) => product.variants || []);
 
     const inStockCount = allVariants.filter(
-        (variant) => variant.is_active && Number(variant.stock) > 0,
+        (v) => v.is_active && Number(v.stock) > 0,
     ).length;
 
     const lowStockCount = allVariants.filter(
-        (variant) =>
-            variant.is_active &&
-            Number(variant.stock) > 0 &&
-            Number(variant.stock) < 20,
+        (v) => v.is_active && Number(v.stock) > 0 && Number(v.stock) < 20,
     ).length;
 
     const outOfStockCount = allVariants.filter(
-        (variant) => variant.is_active && Number(variant.stock) === 0,
+        (v) => v.is_active && Number(v.stock) === 0,
     ).length;
+
+    const isViewingDeleted = filters.status === "deleted";
 
     return (
         <AdminLayout>
-            {/* Header Section */}
+            {/* Header */}
             <div className="mb-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
@@ -79,52 +128,62 @@ export default function Index({products,totalCount,filters,categories,brands,})
                             <span className="px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-400 text-sm font-semibold border border-cyan-500/30 whitespace-nowrap">
                                 {totalCount} total
                             </span>
+                            {isViewingDeleted && (
+                                <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold border border-red-500/30 whitespace-nowrap">
+                                    Viewing Deleted
+                                </span>
+                            )}
                         </div>
                         <p className="text-slate-400 text-sm">
                             Manage your product catalog
                         </p>
                     </div>
 
-                    <Link
-                        href={route("products.create")}
-                        className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5"
-                    >
-                        <Plus size={18} />
-                        Create Product
-                    </Link>
+                    {!isViewingDeleted && (
+                        <Link
+                            href={route("products.create")}
+                            className="group flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5"
+                        >
+                            <Plus size={18} />
+                            Create Product
+                        </Link>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
-                            In Stock
-                        </p>
-                        <p className="text-2xl sm:text-3xl font-bold text-green-400 mt-1">
-                            {inStockCount}
-                        </p>
+                {/* Stats — hidden when viewing deleted since they're meaningless there */}
+                {!isViewingDeleted && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                            <p className="text-slate-400 text-xs sm:text-sm font-medium">
+                                In Stock
+                            </p>
+                            <p className="text-2xl sm:text-3xl font-bold text-green-400 mt-1">
+                                {inStockCount}
+                            </p>
+                        </div>
+                        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
+                            <p className="text-slate-400 text-xs sm:text-sm font-medium">
+                                Low Stock
+                            </p>
+                            <p className="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1">
+                                {lowStockCount}
+                            </p>
+                        </div>
+                        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm col-span-2 sm:col-span-1">
+                            <p className="text-slate-400 text-xs sm:text-sm font-medium">
+                                Out of Stock
+                            </p>
+                            <p className="text-2xl sm:text-3xl font-bold text-red-400 mt-1">
+                                {outOfStockCount}
+                            </p>
+                        </div>
                     </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm">
-                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
-                            Low Stock
-                        </p>
-                        <p className="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1">
-                            {lowStockCount}
-                        </p>
-                    </div>
-                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 sm:p-4 backdrop-blur-sm col-span-2 sm:col-span-1">
-                        <p className="text-slate-400 text-xs sm:text-sm font-medium">
-                            Out of Stock
-                        </p>
-                        <p className="text-2xl sm:text-3xl font-bold text-red-400 mt-1">
-                            {outOfStockCount}
-                        </p>
-                    </div>
-                </div>
+                )}
             </div>
 
+            {/* Filters */}
             <div className="bg-slate-800/20 border border-slate-700/50 rounded-lg p-4 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    {/* Search */}
                     <input
                         type="text"
                         placeholder="Search products..."
@@ -132,20 +191,13 @@ export default function Index({products,totalCount,filters,categories,brands,})
                         onChange={(e) =>
                             router.get(
                                 route("products.index"),
-                                {
-                                    ...filters,
-                                    search: e.target.value,
-                                },
-                                {
-                                    preserveState: true,
-                                    replace: true,
-                                },
+                                { ...filters, search: e.target.value },
+                                { preserveState: true, replace: true },
                             )
                         }
                         className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-100"
                     />
 
-                    {/* Category */}
                     <AppSelect
                         value={filters.category || ""}
                         onChange={(val) =>
@@ -165,7 +217,6 @@ export default function Index({products,totalCount,filters,categories,brands,})
                         ]}
                     />
 
-                    {/* Brand */}
                     <AppSelect
                         value={filters.brand || ""}
                         onChange={(val) =>
@@ -190,13 +241,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                         onChange={(val) =>
                             router.get(
                                 route("products.index"),
-                                {
-                                    search: filters.search,
-                                    category: filters.category,
-                                    brand: filters.brand,
-                                    status: filters.status,
-                                    gender: val,
-                                },
+                                { ...filters, gender: val },
                                 { preserveState: true, replace: true },
                             )
                         }
@@ -209,7 +254,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                         ]}
                     />
 
-                    {/* Status */}
+                    {/* Status — now includes Deleted */}
                     <AppSelect
                         value={filters.status || ""}
                         onChange={(val) =>
@@ -220,11 +265,11 @@ export default function Index({products,totalCount,filters,categories,brands,})
                             )
                         }
                         placeholder="All Status"
-                        className="w-full"
                         options={[
                             { value: "", label: "All Status" },
                             { value: "active", label: "Active" },
                             { value: "inactive", label: "Inactive" },
+                            { value: "deleted", label: "🗑 Deleted" },
                         ]}
                     />
                 </div>
@@ -249,29 +294,36 @@ export default function Index({products,totalCount,filters,categories,brands,})
                 </button>
             )}
 
-            {/* Table Section */}
+            {/* Table */}
             {products.data.length === 0 ? (
                 <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-12 text-center backdrop-blur-sm">
-                    <div className="text-5xl mb-3">📦</div>
+                    <div className="text-5xl mb-3">
+                        {isViewingDeleted ? "🗑️" : "📦"}
+                    </div>
                     <h3 className="text-lg font-semibold text-slate-200 mb-2">
-                        No products yet
+                        {isViewingDeleted
+                            ? "No deleted products"
+                            : "No products yet"}
                     </h3>
                     <p className="text-slate-400 mb-6">
-                        Start by creating your first product
+                        {isViewingDeleted
+                            ? "Nothing in the trash."
+                            : "Start by creating your first product"}
                     </p>
-                    <Link
-                        href={route("products.create")}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500 text-white font-semibold hover:bg-cyan-400 transition-all"
-                    >
-                        <Plus size={16} />
-                        Create First Product
-                    </Link>
+                    {!isViewingDeleted && (
+                        <Link
+                            href={route("products.create")}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500 text-white font-semibold hover:bg-cyan-400 transition-all"
+                        >
+                            <Plus size={16} />
+                            Create First Product
+                        </Link>
+                    )}
                 </div>
             ) : (
                 <div className="bg-slate-800/20 border border-slate-700/50 rounded-lg overflow-hidden backdrop-blur-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            {/* Table Header */}
                             <thead>
                                 <tr className="border-b border-slate-700/50 bg-slate-800/40">
                                     <th className="w-12 text-left px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wide"></th>
@@ -308,18 +360,25 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                 </tr>
                             </thead>
 
-                            {/* Table Body */}
                             <tbody>
                                 {products.data.map((product) => {
+                                    const isDeleted = !!product.deleted_at;
                                     const totalStock =
                                         product.variants?.reduce(
-                                            (sum, variant) =>
-                                                sum + Number(variant.stock),
+                                            (sum, v) => sum + Number(v.stock),
                                             0,
                                         ) || 0;
+
                                     return (
                                         <React.Fragment key={product.id}>
-                                            <tr className="border-b border-slate-700/30 hover:bg-slate-800/40 transition-colors duration-200 group">
+                                            <tr
+                                                className={`border-b border-slate-700/30 transition-colors duration-200 group ${
+                                                    isDeleted
+                                                        ? "opacity-50 bg-red-950/20"
+                                                        : "hover:bg-slate-800/40"
+                                                }`}
+                                            >
+                                                {/* Expand toggle */}
                                                 <td className="px-4 py-4">
                                                     {product.variants?.length >
                                                         1 && (
@@ -345,11 +404,11 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                         </button>
                                                     )}
                                                 </td>
-                                                {/* Image Cell */}
+
+                                                {/* Image */}
                                                 <td className="px-6 py-4">
                                                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-700/40 flex items-center justify-center border border-slate-700/50">
                                                         {(() => {
-                                                            // Try first variant's primary image, then any image, then fallback
                                                             const firstVariant =
                                                                 product
                                                                     .variants?.[0];
@@ -360,7 +419,6 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                 ) ??
                                                                 firstVariant
                                                                     ?.images?.[0];
-
                                                             return primaryImg?.url ? (
                                                                 <img
                                                                     src={
@@ -388,29 +446,31 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                     </div>
                                                 </td>
 
-                                                {/* Product Name Cell */}
+                                                {/* Product name */}
                                                 <td className="px-6 py-4">
-                                                    <div>
-                                                        <p className="font-semibold text-slate-100">
-                                                            {product.name}
+                                                    <p className="font-semibold text-slate-100">
+                                                        {product.name}
+                                                    </p>
+                                                    {isDeleted && (
+                                                        <p className="text-xs text-red-400 mt-0.5">
+                                                            Deleted
                                                         </p>
-                                                    </div>
+                                                    )}
                                                 </td>
 
-                                                {/* Category Cell */}
+                                                {/* Category */}
                                                 <td className="px-6 py-4 text-slate-300">
                                                     {product.category?.name ||
                                                         "-"}
                                                 </td>
 
-                                                {/* Brand Cell */}
+                                                {/* Brand */}
                                                 <td className="px-6 py-4 text-slate-300">
                                                     {product.brand?.name || "-"}
                                                 </td>
 
-                                                {/* Volume Cell */}
+                                                {/* Volume */}
                                                 <td className="px-6 py-4 text-center">
-                                                    {/* ADDED: whitespace-nowrap to keep text on one line */}
                                                     <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium whitespace-nowrap">
                                                         {product.variants
                                                             ?.map(
@@ -420,7 +480,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                     </span>
                                                 </td>
 
-                                                {/* Gender Cell */}
+                                                {/* Gender */}
                                                 <td className="px-6 py-4 text-center">
                                                     <span
                                                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -437,7 +497,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                     </span>
                                                 </td>
 
-                                                {/* Price Cell */}
+                                                {/* Price */}
                                                 <td className="px-6 py-4 text-right whitespace-nowrap">
                                                     <span className="font-semibold text-cyan-400">
                                                         ₹
@@ -454,7 +514,7 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                     </span>
                                                 </td>
 
-                                                {/* Stock Cell */}
+                                                {/* Stock */}
                                                 <td className="px-6 py-4 text-center">
                                                     <span
                                                         className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
@@ -469,50 +529,103 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                     </span>
                                                 </td>
 
-                                                {/* Status Cell */}
+                                                {/* Status */}
                                                 <td className="px-6 py-4 text-center">
-                                                    <span
-                                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                            product.is_active
-                                                                ? "bg-green-500/20 text-green-400"
-                                                                : "bg-slate-600/30 text-slate-400"
-                                                        }`}
-                                                    >
-                                                        {product.is_active
-                                                            ? "Active"
-                                                            : "Inactive"}
-                                                    </span>
+                                                    {isDeleted ? (
+                                                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-400">
+                                                            Deleted
+                                                        </span>
+                                                    ) : (
+                                                        <span
+                                                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                                product.is_active
+                                                                    ? "bg-green-500/20 text-green-400"
+                                                                    : "bg-slate-600/30 text-slate-400"
+                                                            }`}
+                                                        >
+                                                            {product.is_active
+                                                                ? "Active"
+                                                                : "Inactive"}
+                                                        </span>
+                                                    )}
                                                 </td>
 
-                                                {/* Actions Cell */}
+                                                {/* Actions */}
                                                 <td className="px-6 py-4 text-right">
-                                                    <div className="flex justify-end gap-2 opacity-100 group-hover:opacity-100">
-                                                        <Link
-                                                            href={route(
-                                                                "products.edit",
-                                                                product.id,
-                                                            )}
-                                                            className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-200"
-                                                            title="Edit"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </Link>
-
-                                                        <button
-                                                            onClick={() =>
-                                                                handleDelete(
-                                                                    product.id,
-                                                                )
-                                                            }
-                                                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                                    <div className="flex justify-end gap-2">
+                                                        {isDeleted ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleRestore(
+                                                                            product.id,
+                                                                        )
+                                                                    }
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 text-xs font-medium transition-all"
+                                                                    title="Restore"
+                                                                >
+                                                                    <RotateCcw
+                                                                        size={
+                                                                            13
+                                                                        }
+                                                                    />
+                                                                    Restore
+                                                                </button>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleForceDelete(
+                                                                            product.id,
+                                                                        )
+                                                                    }
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 text-xs font-medium transition-all"
+                                                                    title="Delete Forever"
+                                                                >
+                                                                    <Trash2
+                                                                        size={
+                                                                            13
+                                                                        }
+                                                                    />
+                                                                    Forever
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Link
+                                                                    href={route(
+                                                                        "products.edit",
+                                                                        product.id,
+                                                                    )}
+                                                                    className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-200"
+                                                                    title="Edit"
+                                                                >
+                                                                    <Edit
+                                                                        size={
+                                                                            16
+                                                                        }
+                                                                    />
+                                                                </Link>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            product.id,
+                                                                        )
+                                                                    }
+                                                                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 transition-all duration-200"
+                                                                    title="Delete"
+                                                                >
+                                                                    <Trash2
+                                                                        size={
+                                                                            16
+                                                                        }
+                                                                    />
+                                                                </button>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
-                                            {/* Variants Row */}
+
+                                            {/* Variants expanded row — unchanged */}
                                             {expandedProducts.includes(
                                                 product.id,
                                             ) &&
@@ -541,7 +654,6 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                             </th>
                                                                         </tr>
                                                                     </thead>
-
                                                                     <tbody>
                                                                         {product.variants.map(
                                                                             (
@@ -558,20 +670,17 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                                             variant.sku
                                                                                         }
                                                                                     </td>
-
                                                                                     <td className="py-2 text-cyan-400">
                                                                                         {
                                                                                             variant.volume
                                                                                         }
                                                                                     </td>
-
                                                                                     <td className="py-2 text-slate-300">
                                                                                         ₹
                                                                                         {
                                                                                             variant.price
                                                                                         }
                                                                                     </td>
-
                                                                                     <td className="py-2">
                                                                                         <span
                                                                                             className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
@@ -589,7 +698,6 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                                                                             }
                                                                                         </span>
                                                                                     </td>
-
                                                                                     <td className="py-2">
                                                                                         <span
                                                                                             className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
@@ -619,10 +727,9 @@ export default function Index({products,totalCount,filters,categories,brands,})
                         </table>
                     </div>
 
-                    {/* Table Footer */}
+                    {/* Footer — unchanged */}
                     <div className="bg-slate-800/40 border-t border-slate-700/50 px-6 py-4">
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            {/* Showing count */}
                             <p className="text-sm text-slate-400">
                                 Showing{" "}
                                 <span className="text-slate-200 font-medium">
@@ -634,19 +741,16 @@ export default function Index({products,totalCount,filters,categories,brands,})
                                 </span>{" "}
                                 products
                             </p>
-
-                            {/* Pagination */}
                             <div className="flex items-center gap-1">
                                 {products.links.map((link, index) => (
                                     <button
                                         key={index}
                                         disabled={!link.url}
                                         onClick={() => {
-                                            if (link.url) {
+                                            if (link.url)
                                                 router.visit(link.url, {
                                                     preserveState: true,
                                                 });
-                                            }
                                         }}
                                         className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium border transition-all duration-200 ${
                                             link.active

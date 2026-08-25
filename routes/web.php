@@ -98,8 +98,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
     Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.forceDelete');
 
-    // Products & Discounts
+    // Products Management
     Route::resource('products', ProductController::class);
+    Route::post('products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
+    Route::delete('products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.forceDelete');
+
+    // Discounts Management
     Route::resource('discounts', DiscountController::class);
 
     //order export

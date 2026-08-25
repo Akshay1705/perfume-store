@@ -13,6 +13,7 @@ use App\Services\ProductService;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Http\Requests\Admin\ProductIndexRequest;
 use App\Repositories\Contracts\ProductRepositoryInterface;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -129,6 +130,30 @@ class ProductController extends Controller
                 'success',
                 'Product updated successfully.',
             );
+    }
+
+    public function restore(int $id, ProductService $service): RedirectResponse
+    {
+        $service->restore($id);
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product restored successfully.');
+    }
+
+    public function forceDelete(int $id, ProductService $service): RedirectResponse
+    {
+        try {
+            $service->forceDelete($id);
+
+            return redirect()
+                ->route('products.index')
+                ->with('success', 'Product permanently deleted.');
+        } catch (ValidationException $e) {
+            return redirect()
+                ->route('products.index')
+                ->with('error', $e->validator->errors()->first('product'));
+        }
     }
 
     /**

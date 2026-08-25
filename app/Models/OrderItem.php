@@ -24,6 +24,8 @@ class OrderItem extends Model
         'unit_price' => 'decimal:2',
     ];
 
+    protected $appends = ['is_available', 'unavailable_reason'];
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -35,5 +37,35 @@ class OrderItem extends Model
             ProductVariant::class,
             'product_variant_id' 
         );
+    }
+
+    public function getIsAvailableAttribute(): bool
+    {
+        return $this->unavailable_reason === null;
+    }
+
+    public function getUnavailableReasonAttribute(): ?string
+    {
+        $variant = $this->variant;
+
+        if (!$variant || $variant->trashed()) {
+            return 'deleted';
+        }
+
+        if (!$variant->is_active) {
+            return 'inactive';
+        }
+
+        $product = $variant->product;
+
+        if (!$product || $product->trashed()) {
+            return 'deleted';
+        }
+
+        if ($variant->stock < $this->quantity) {
+            return 'out_of_stock';
+        }
+
+        return null;
     }
 }

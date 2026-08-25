@@ -24,18 +24,16 @@ class CartController extends Controller
         $cart = $user->orders()
             ->where('status', 'cart')
             ->with([
-                'items.variant.product',
+                'items.variant' => fn($q) => $q->withTrashed(),
+                'items.variant.product' => fn($q) => $q->withTrashed(),
                 'items.variant.primaryImage',
-                'discount'
+                'discount',
             ])
             ->first();
 
-        return Inertia::render(
-            'Store/Cart/Index',
-            [
-                'cart' => $cart,
-            ]
-        );
+        return Inertia::render('Store/Cart/Index', [
+            'cart' => $cart,
+        ]);
     }
 
     public function add(AddToCartRequest $request, CartService $service, CouponService $couponService)

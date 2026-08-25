@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Repositories\Contracts\ProductRepositoryInterface;
+use Illuminate\Validation\ValidationException;
 
 class ProductService
 {
@@ -106,6 +107,35 @@ class ProductService
         return $product;
     }
 
+    public function restore(int $id): void
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        $product->variants()->withTrashed()->restore();
+        $product->restore();
+    }
+
+    public function forceDelete(int $id): void
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+
+        // Guard: refuse force-delete if any variant is still referenced by a real order
+        $hasOrders = $product->variants()
+            ->withTrashed()
+            ->whereHas('orderItems', function ($q) {
+                $q->whereHas('order', fn($q) => $q->where('status', '!=', 'cart'));
+            })
+            ->exists();
+
+        if ($hasOrders) {
+            throw ValidationException::withMessages([
+                'product' => 'Cannot permanently delete a product that has associated orders. Soft delete only.',
+            ]);
+        }
+
+        $product->variants()->withTrashed()->forceDelete();
+        $product->forceDelete();
+    }
+
     /**
      * Delete the given product.
      *
@@ -115,6 +145,7 @@ class ProductService
      */
     public function delete(Product $product): void
     {
+        $product->variants()->delete(); // soft-deletes variants too
         $this->products->delete($product);
     }
 

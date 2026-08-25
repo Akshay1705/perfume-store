@@ -7,6 +7,7 @@ export default function Index({ cart }) {
     // Structural state calculations safety check
     const items = cart?.items || [];
     const hasItems = items.length > 0;
+    const hasUnavailableItems = items.some((item) => !item.is_available);
 
     const form = useForm({
         code: "",
@@ -102,9 +103,12 @@ export default function Index({ cart }) {
                                     {items.map((item) => (
                                         <div
                                             key={item.id}
-                                            className="border border-stone-200/80 p-6 rounded-none bg-white flex flex-col sm:flex-row gap-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.01)]"
+                                            className={`border border-stone-200/80 p-6 rounded-none bg-white flex flex-col sm:flex-row gap-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.01)] ${
+                                                !item.is_available
+                                                    ? "opacity-60"
+                                                    : ""
+                                            }`}
                                         >
-                                            {/* Product Picture Framing Canvas */}
                                             <div className="w-24 h-28 sm:w-28 sm:h-32 bg-stone-50 shrink-0 border border-stone-100 overflow-hidden rounded-none">
                                                 <img
                                                     src={
@@ -118,29 +122,27 @@ export default function Index({ cart }) {
                                                     }
                                                     alt={
                                                         item.variant?.product
-                                                            ?.name || "Product"
+                                                            ?.name ||
+                                                        item.product_name ||
+                                                        "Product"
                                                     }
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
 
-                                            {/* Product Content Specifications Matrix */}
                                             <div className="flex-1 flex flex-col justify-between py-0.5">
                                                 <div className="flex justify-between items-start gap-4">
                                                     <div>
                                                         <h3 className="text-xs font-serif tracking-widest text-stone-900 uppercase font-semibold leading-relaxed">
-                                                            {
-                                                                item.variant
-                                                                    ?.product
-                                                                    ?.name
-                                                            }
+                                                            {item.variant
+                                                                ?.product
+                                                                ?.name ||
+                                                                "Unknown Product"}
                                                         </h3>
                                                         <p className="text-[11px] text-stone-400 font-light tracking-wide mt-1 font-mono">
                                                             Volume:{" "}
                                                             {item.variant
                                                                 ?.volume ||
-                                                                item.variant
-                                                                    ?.name ||
                                                                 "N/A"}
                                                         </p>
                                                     </div>
@@ -155,71 +157,77 @@ export default function Index({ cart }) {
                                                     </p>
                                                 </div>
 
-                                                {/* Action Control Infrastructure strip */}
                                                 <div className="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-stone-100">
-                                                    {/* Core Increment/Decrement Module */}
-                                                    <div className="flex items-center border border-stone-200 bg-stone-50/50 rounded-none h-8 select-none">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                updateQuantity(
-                                                                    item.id,
-                                                                    item.quantity -
-                                                                        1,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                item.quantity <=
-                                                                1
-                                                            }
-                                                            className="px-3 h-full text-xs text-stone-500 hover:text-stone-900 font-light hover:bg-stone-100/80 transition-colors disabled:opacity-30 disabled:pointer-events-none"
-                                                        >
-                                                            —
-                                                        </button>
-
-                                                        <span className="w-8 text-center text-[11px] font-mono font-medium text-stone-900">
-                                                            {item.quantity}
-                                                        </span>
-
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                updateQuantity(
-                                                                    item.id,
-                                                                    item.quantity +
-                                                                        1,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                item.quantity >=
-                                                                (item.variant
-                                                                    ?.stock ??
-                                                                    0)
-                                                            }
-                                                            className={`px-3 h-full text-xs font-light transition-colors ${
-                                                                item.quantity >=
-                                                                (item.variant?.stock ??
-                                                                    0)
-                                                                    ? "cursor-not-allowed text-stone-300"
-                                                                    : "text-stone-500 hover:text-stone-900 hover:bg-stone-100/80"
-                                                            }`}
-                                                        >
-                                                            +
-                                                        </button>
-                                                    </div>
-                                                    {item.quantity >=
-                                                        (item.variant?.stock ??
-                                                            0) && (
-                                                        <p>
-                                                            Only{" "}
-                                                            {item.variant
-                                                                ?.stock ??
-                                                                0}{" "}
-                                                            item(s) available.
+                                                    {!item.is_available ? (
+                                                        <p className="text-[11px] text-rose-600 uppercase tracking-widest font-medium">
+                                                            {item.unavailable_reason ===
+                                                                "out_of_stock" &&
+                                                                "Out of stock"}
+                                                            {item.unavailable_reason ===
+                                                                "inactive" &&
+                                                                "Currently unavailable"}
+                                                            {item.unavailable_reason ===
+                                                                "deleted" &&
+                                                                "No longer available"}
                                                         </p>
+                                                    ) : (
+                                                        <div className="flex items-center border border-stone-200 bg-stone-50/50 rounded-none h-8 select-none">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    updateQuantity(
+                                                                        item.id,
+                                                                        item.quantity -
+                                                                            1,
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    item.quantity <=
+                                                                    1
+                                                                }
+                                                                className="px-3 h-full text-xs text-stone-500 hover:text-stone-900 font-light hover:bg-stone-100/80 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                                                            >
+                                                                —
+                                                            </button>
+
+                                                            <span className="w-8 text-center text-[11px] font-mono font-medium text-stone-900">
+                                                                {item.quantity}
+                                                            </span>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    updateQuantity(
+                                                                        item.id,
+                                                                        item.quantity +
+                                                                            1,
+                                                                        item
+                                                                            .variant
+                                                                            ?.stock,
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    item.quantity >=
+                                                                    (item
+                                                                        .variant
+                                                                        ?.stock ??
+                                                                        0)
+                                                                }
+                                                                className={`px-3 h-full text-xs font-light transition-colors ${
+                                                                    item.quantity >=
+                                                                    (item
+                                                                        .variant
+                                                                        ?.stock ??
+                                                                        0)
+                                                                        ? "cursor-not-allowed text-stone-300"
+                                                                        : "text-stone-500 hover:text-stone-900 hover:bg-stone-100/80"
+                                                                }`}
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
                                                     )}
 
-                                                    {/* Textual Destructive Action Trigger */}
                                                     <button
                                                         type="button"
                                                         onClick={() =>
@@ -349,11 +357,25 @@ export default function Index({ cart }) {
                                     </div>
 
                                     <Link
-                                        href={route("checkout.index")}
+                                        href={
+                                            hasUnavailableItems
+                                                ? "#"
+                                                : route("checkout.index")
+                                        }
                                         as="button"
-                                        className="mt-4 w-full bg-stone-950 text-white text-[11px] tracking-[0.25em] font-medium uppercase py-4 rounded-none hover:bg-stone-800 active:bg-stone-900 transition-colors shadow-none text-center duration-300 block select-none focus:outline-none"
+                                        onClick={(e) =>
+                                            hasUnavailableItems &&
+                                            e.preventDefault()
+                                        }
+                                        className={`mt-4 w-full text-white text-[11px] tracking-[0.25em] font-medium uppercase py-4 rounded-none transition-colors shadow-none text-center duration-300 block select-none focus:outline-none ${
+                                            hasUnavailableItems
+                                                ? "bg-stone-300 cursor-not-allowed"
+                                                : "bg-stone-950 hover:bg-stone-800 active:bg-stone-900"
+                                        }`}
                                     >
-                                        Proceed to Checkout
+                                        {hasUnavailableItems
+                                            ? "Remove unavailable items to continue"
+                                            : "Proceed to Checkout"}
                                     </Link>
                                 </div>
                             </div>

@@ -131,6 +131,9 @@ class CouponService
             if (!$item->variant || !$item->variant->product) {
                 continue;
             }
+            if (!$item->is_available) {
+                continue;
+            }
             $product = $item->variant->product;
 
             switch ($discount->target_type) {
